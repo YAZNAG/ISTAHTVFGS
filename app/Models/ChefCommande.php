@@ -41,4 +41,9 @@ class ChefCommande extends Model
         return $this->hasMany(ChefCommandeItem::class, 'chef_commande_id', 'id');
     }
 
+    public function articles()
+    {
+        return $this->hasManyThrough(Article::class, ChefCommandeItem::class, 'chef_commande_id', 'id', 'id', 'article_id');
+    }
+
 }

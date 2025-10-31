@@ -1,37 +1,41 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { Modal } from '@inertiaui/modal-vue';
-import { useForm } from '@inertiajs/vue3';
-import Dump from '@/Components/Dump.vue';
+import { ref, computed } from 'vue'
+import { Modal } from '@inertiaui/modal-vue'
+import { useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
-  articles: Array,
-  demandeurs: Array
+  chefCommande: Object, // existing chefCommande with items + articles
+  articles: Array
 })
-const search = ref('');
-const createCommandeModal = ref(null)
+
+const search = ref('')
 const dropdownOpen = ref(false)
+const editCommandeModal = ref(null)
 
-
+// Initialize form with existing data
 const form = useForm({
-  articles: [],
-  note: ''
-});
+  articles: props.chefCommande.items.map(item => ({
+    article_id: item.article.id,
+    designation: item.article.designation,
+    quantite_commandee: item.quantite
+  })),
+  note: props.chefCommande.note || ''
+})
 
-// Filter articles not yet added
+// Filter available articles
 const filteredArticles = computed(() => {
   return props.articles
     .filter(a => !form.articles.find(fa => fa.article_id === a.id))
     .filter(a => !search.value || a.designation.toLowerCase().includes(search.value.toLowerCase()))
 })
 
+// Select a new article to add
 function selectArticle(article) {
-  article = {
+  form.articles.push({
     article_id: article.id,
-    designation: article.designation
-  }
-
-  form.articles.push({ ...article, quantite_commandee: 1 })
+    designation: article.designation,
+    quantite_commandee: 1
+  })
   search.value = ''
   dropdownOpen.value = false
 }
@@ -40,40 +44,35 @@ function removeArticle(index) {
   form.articles.splice(index, 1)
 }
 
+// Submit the update
 function submit(type) {
-
-  form.post(route('chef-commandes.store', {type}), {
+  form.put(route('chef-commandes.update', props.chefCommande.id), {
+    preserveScroll: true,
     onSuccess: () => {
-      form.reset();
-      dropdownOpen.value = false;
-      createCommandeModal.value.close();
+      editCommandeModal.value.close()
     },
   })
-
 }
 
-const articleErrors = computed(() => {
-  return Object.entries(form.errors)
-    .filter(([key]) => key.startsWith('articles.')) // only article errors
-    .map(([_, message]) => message) // get just the messages
-})
-
-
 function closeIdle() {
-  setTimeout(() => dropdownOpen.value = false, 300);
+  setTimeout(() => dropdownOpen.value = false, 300)
 }
 </script>
 
 <template>
-  <Modal ref="createCommandeModal">
+  <Modal ref="editCommandeModal">
     <!-- Header -->
     <div class="mb-4">
-      <h2 class="text-lg font-semibold">Nouveau Commande</h2>
+      <h2 class="text-lg font-semibold">Modifier Commande #{{ chefCommande.numero }}</h2>
+      <p class="text-gray-500 text-sm">
+        Créée le {{ chefCommande.created_at }}
+      </p>
     </div>
 
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
+        <!-- Articles -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Articles Commandés
@@ -85,7 +84,7 @@ function closeIdle() {
               v-model="search"
               placeholder="Rechercher un article..."
               @focus="dropdownOpen = true"
-              @blur="closeIdle" 
+              @blur="closeIdle"
               class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
 
@@ -93,11 +92,6 @@ function closeIdle() {
               {{ form.errors.articles }}
             </div>
 
-            <ul class="bg-red-300 text-red-900 border-red-500 border-1 rounded p-2 text-sm mt-2" v-if="articleErrors.length">
-              <li v-for="error in articleErrors" :key="error">
-                {{ error }}
-              </li>
-            </ul>
 
             <!-- Dropdown -->
             <ul
@@ -109,14 +103,14 @@ function closeIdle() {
                 v-for="article in filteredArticles"
                 :key="article.id"
                 @click="selectArticle(article)"
-                class="px-3 py-2 hover:bg-indigo-200 cursor-pointer"
+                class="px-3 py-2 hover:bg-indigo-100 cursor-pointer"
               >
                 {{ article.designation }}
               </li>
             </ul>
           </div>
 
-          <!-- Selected Articles Table -->
+          <!-- Selected Articles -->
           <table class="w-full border border-gray-200 text-sm rounded-lg overflow-hidden">
             <thead class="bg-gray-50 text-gray-700">
               <tr>
@@ -126,7 +120,7 @@ function closeIdle() {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in form.articles" :key="item.id" class="border-t">
+              <tr v-for="(item, index) in form.articles" :key="index" class="border-t">
                 <td class="p-2">{{ item.designation }}</td>
                 <td class="p-2 text-center">
                   <input
@@ -146,6 +140,7 @@ function closeIdle() {
                   </button>
                 </td>
               </tr>
+
               <tr v-if="form.articles.length === 0">
                 <td colspan="3" class="text-center text-gray-400 p-3">
                   Aucun article ajouté
@@ -155,8 +150,7 @@ function closeIdle() {
           </table>
         </div>
 
-
-        <!-- Motif -->
+        <!-- Note -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Note <span class="text-xs">(Optionnel)</span>
@@ -165,41 +159,28 @@ function closeIdle() {
             v-model="form.note"
             class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
             rows="2"
-            placeholder=""
           ></textarea>
         </div>
-
       </form>
     </div>
 
     <!-- Footer -->
-    <div>
-      <div class="flex justify-end space-x-3 pt-2">
-        <button
-          type="button"
-          @click="createCommandeModal.close()"
-          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-        >
-          Annuler
-        </button>
-        <button
-          type="button"
-          @click="submit('draft')"
-          :disabled="form.processing"
-          class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-        >
-          Enregistrer
-        </button>
-        <button
-          type="button"
-          @click="submit('submit')"
-          :disabled="form.processing"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
-          Submettre
-        </button>
-      </div>
+    <div class="flex justify-end space-x-3 pt-3">
+      <button
+        type="button"
+        @click="editCommandeModal.close()"
+        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        @click="submit"
+        :disabled="form.processing"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+      >
+        Mettre à jour
+      </button>
     </div>
   </Modal>
 </template>
-

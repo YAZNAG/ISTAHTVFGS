@@ -231,7 +231,12 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('/chef-commandes', [ChefCommandeController::class, 'index'])->name('chef-commandes.index');
     Route::get('/chef-commandes/create', [ChefCommandeController::class, 'create'])->name('chef-commandes.create');
     Route::post('/chef-commandes', [ChefCommandeController::class, 'store'])->name('chef-commandes.store');
-    
+    Route::get('/chef-commandes/{chefCommande}', [ChefCommandeController::class, 'show'])->name('chef-commandes.show');
+    Route::get('/chef-commandes/{chefCommande}/edit', [ChefCommandeController::class, 'edit'])->name('chef-commandes.edit');
+    Route::put('/chef-commandes/{chefCommande}', [ChefCommandeController::class, 'update'])->name('chef-commandes.update');
+    Route::delete('/chef-commandes/{chefCommande}', [ChefCommandeController::class, 'destroy'])->name('chef-commandes.destroy');
+    Route::patch('/chef-commandes/{chefCommande}/submit', [ChefCommandeController::class, 'submit'])->name('chef-commandes.submit');
+    Route::patch('/chef-commandes/{chefCommande}/cancel', [ChefCommandeController::class, 'cancel'])->name('chef-commandes.cancel');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
