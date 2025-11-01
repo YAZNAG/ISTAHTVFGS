@@ -21,7 +21,7 @@ class ShowChefCommandeResource extends JsonResource
             'articles_count' => count($this->items),
             'created_at' => $this->created_at->toDateString(),
             'note' => $this->note,
-            'annule' => $this->annule_at?->toDateString(),
+            'validation_date' => $this->validation_date?->toDateString(),
             'validation_note' => $this->validation_note,
             'items' => $this->items->map(function ($item) {
                 return [

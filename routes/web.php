@@ -237,6 +237,10 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::delete('/chef-commandes/{chefCommande}', [ChefCommandeController::class, 'destroy'])->name('chef-commandes.destroy');
     Route::patch('/chef-commandes/{chefCommande}/submit', [ChefCommandeController::class, 'submit'])->name('chef-commandes.submit');
     Route::patch('/chef-commandes/{chefCommande}/cancel', [ChefCommandeController::class, 'cancel'])->name('chef-commandes.cancel');
+    Route::get('/chef-commandes/{chefCommande}/approve', [ChefCommandeController::class, 'showApprove'])->name('chef-commandes.showApprove');
+    Route::put('/chef-commandes/{chefCommande}/approve', [ChefCommandeController::class, 'approve'])->name('chef-commandes.approve');
+    Route::put('/chef-commandes/{chefCommande}/reject', [ChefCommandeController::class, 'reject'])->name('chef-commandes.reject');
+    
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 

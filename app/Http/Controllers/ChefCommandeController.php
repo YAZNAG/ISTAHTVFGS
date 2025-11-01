@@ -27,7 +27,7 @@ class ChefCommandeController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('numero', 'like', "%{$search}%")
-                    ->orWhere('objet', 'like', "%{$search}%");
+                    ;
                 });
             })
             ->when(!$user->isAdmin(), fn($query) => $query->where('user_id', $user->id))
@@ -139,4 +139,50 @@ class ChefCommandeController extends Controller
 
         return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
     }
+
+
+    public function showApprove(ChefCommande $chefCommande) {
+        // $this->authorize('approve', $demande);
+
+        return Inertia::modal('ChefCommande/ApproveModal', [
+            'chefCommande' => ShowChefCommandeResource::make($chefCommande)
+        ])->baseRoute('chef-commandes.index');
+    } 
+
+    public function approve(Request $request, ChefCommande $chefCommande) {
+        // $this->authorize('approve', $demande);
+
+        $request->validate([
+            'validation_note' => 'nullable|string|max:500',
+        ]);
+
+
+        
+        $chefCommande->update([
+            'statut' => ChefCommande::STATUS_EN_ATTENTE_LIVRAISON,
+            'validation_note' => $request->input('validation_note'),
+            'validation_date' => now(),
+        ]);
+
+          
+        
+        return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
+    } 
+
+
+    public function reject(Request $request, ChefCommande $chefCommande) {
+        // $this->authorize('approve', $chefCommande);
+
+         $request->validate([
+            'validation_note' => 'nullable|string|max:500',
+        ]);
+
+        $chefCommande->update([
+            'statut' => ChefCommande::STATUS_REJET,
+            'validation_note' => $request->input('validation_note'),
+            'validation_date' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
+    } 
 }

@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('numero');
             $table->string('statut');
             $table->foreignId('user_id')->constrained();
-            $table->timestamp('annule_at')->nullable();
             $table->text('note')->nullable();
+            $table->timestamp('validation_date')->nullable();
             $table->text('validation_note')->nullable();
             $table->timestamps();
         });

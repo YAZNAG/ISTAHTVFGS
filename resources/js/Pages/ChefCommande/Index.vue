@@ -247,6 +247,15 @@ const commandeStatus = [
                     </ModalLink>
 
                     <ModalLink
+                      :href="route('chef-commandes.showApprove', commande.id)"
+                      class="text-orange-600 hover:text-orange-900 p-1"
+                      title="Approuver la commande"
+                      v-if="commande.statut === 'en_attente_validation'"
+                    >
+                      <QuestionMarkCircleIcon class="h-5 w-5" />
+                    </ModalLink>
+                    
+                    <ModalLink
                       :href="route('chef-commandes.edit', commande.id)"
                       class="text-green-600 hover:text-green-900 p-1"
                       title="Modifier"

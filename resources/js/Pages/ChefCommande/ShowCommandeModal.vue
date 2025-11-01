@@ -1,30 +1,19 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Modal } from '@inertiaui/modal-vue';
-import { getBonCommandeStatutInfo } from '@/Utils/labels.js'; 
+import { getChefCommandeStatutInfo } from '@/Utils/labels.js'; 
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { CubeIcon } from '@heroicons/vue/24/outline';
+import Dump from '@/Components/Dump.vue';
 
 const props = defineProps({
-    chefCommande: Object // passed from controller with items relation
+    chefCommande: Object 
 });
 
 const showCommandeModal = ref(null)
 
-
-// Format date in French
-function formatDate(date) {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-}
-
 // Example: if you have a helper to style statut
-const statutInfo = getBonCommandeStatutInfo(props.chefCommande.statut);
+const statutInfo = getChefCommandeStatutInfo(props.chefCommande.statut);
 </script>
 
 <template>
@@ -76,9 +65,14 @@ const statutInfo = getBonCommandeStatutInfo(props.chefCommande.statut);
                         <p class="text-gray-800 font-medium">{{ chefCommande.validation_note }}</p>
                     </div>
 
-                    <div v-if="chefCommande.annule">
+                    <div v-if="chefCommande.statut === 'rejet'">
                         <p class="text-sm text-gray-500">Refusé le</p>
-                        <p class="text-red-600 font-medium">{{ chefCommande.annule }}</p>
+                        <p class="text-red-600 font-medium">{{ chefCommande.validation_date }}</p>
+                    </div>
+
+                    <div v-if="chefCommande.statut === 'en_attente_livraison'">
+                        <p class="text-sm text-gray-500">Validé le</p>
+                        <p class="text-green-600 font-medium">{{ chefCommande.validation_date }}</p>
                     </div>
                 </div>
             </div>
