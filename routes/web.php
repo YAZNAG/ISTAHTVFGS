@@ -7,6 +7,7 @@ use Inertia\Inertia;
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\BonCommandeController;
+use App\Http\Controllers\BonLivraisonController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
 use App\Http\Controllers\CardexController;
@@ -241,6 +242,10 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/chef-commandes/{chefCommande}/approve', [ChefCommandeController::class, 'approve'])->name('chef-commandes.approve');
     Route::put('/chef-commandes/{chefCommande}/reject', [ChefCommandeController::class, 'reject'])->name('chef-commandes.reject');
     
+    #### Bon Livraison ####
+    Route::get('/bon-livraisons', [BonLivraisonController::class, 'index'])->name('bon-livraisons.index');
+    Route::get('/bon-livraisons/create', [BonLivraisonController::class, 'create'])->name('bon-livraisons.create');
+
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
