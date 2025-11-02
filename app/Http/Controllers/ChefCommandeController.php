@@ -55,7 +55,7 @@ class ChefCommandeController extends Controller
     public function create()
     {
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
-            'articles' => Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']),
+            'articles' => Article::all(['id', 'designation', 'unite_mesure']),
             'categories' => Categorie::all(['id', 'nom']),
         ])->baseRoute('chef-commandes.index');
     }
@@ -66,7 +66,6 @@ class ChefCommandeController extends Controller
         #FIX: it creates multiple chef commandes
         $chefCommande = ChefCommande::create([
             'numero' => ChefCommande::genererNumero(),
-            'categorie_id' => $request->categorie_id,
             'note' => $request->note,
             'statut' => $request->type == 'submit' ? ChefCommande::STATUS_EN_ATTENTE_VALIDATION : ChefCommande::STATUS_CREE,
             'user_id' => auth()->user()->id,
@@ -149,7 +148,7 @@ class ChefCommandeController extends Controller
         // $this->authorize('approve', $demande);
         $marches = BonCommande::select(['id', 'reference'])
             ->where('statut', BonCommande::STATUT_ATTENTE_LIVRAISON)
-            ->where('categorie_id', $chefCommande->categorie_id)->get();
+            ->get();
 
         return Inertia::modal('ChefCommande/ApproveModal', [
             'chefCommande' => ShowChefCommandeResource::make($chefCommande),

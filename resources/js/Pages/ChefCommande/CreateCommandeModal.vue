@@ -8,7 +8,6 @@ import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
   articles: Array,
-  categories: Array
 })
 const search = ref('');
 const createCommandeModal = ref(null)
@@ -16,18 +15,14 @@ const dropdownOpen = ref(false)
 
 
 const form = useForm({
-  categorie_id: '',
   articles: [],
   note: ''
 });
 
-const articles = computed(() => {
-  return props.articles.filter(a => a.categorie_id === form.categorie_id)
-})
 
 // Filter articles not yet added
 const filteredArticles = computed(() => {
-  return articles.value
+  return props.articles
     .filter(a => !form.articles.find(fa => fa.article_id === a.id))
     .filter(a => !search.value || a.designation.toLowerCase().includes(search.value.toLowerCase()))
 })
@@ -71,10 +66,6 @@ function closeIdle() {
   setTimeout(() => dropdownOpen.value = false, 300);
 }
 
-function onCategorieChange(event)
-{
-  form.articles = [];
-}
 </script>
 
 <template>
@@ -87,18 +78,6 @@ function onCategorieChange(event)
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Categorie
-          </label>
-          <select v-model="form.categorie_id" @change="onCategorieChange" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="">Selectionner une categorie</option>
-            <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
-              {{ categorie.nom }}
-            </option>
-          </select>
-          <InputError :message="form.errors.categorie_id" />
-        </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -107,7 +86,6 @@ function onCategorieChange(event)
 
           <div class="relative mb-2">
             <input
-              :disabled="!form.categorie_id"
               type="text"
               v-model="search"
               placeholder="Rechercher un article..."

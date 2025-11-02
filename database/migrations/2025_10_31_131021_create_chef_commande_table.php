@@ -18,7 +18,6 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->timestamp('validation_date')->nullable();
             $table->text('validation_note')->nullable();
-            $table->foreignId('categorie_id')->constrained('categories');
             $table->foreignId('bon_commande_id')->nullable()->constrained('bon_commandes');
             $table->foreignId('user_id')->constrained();
             $table->timestamps();

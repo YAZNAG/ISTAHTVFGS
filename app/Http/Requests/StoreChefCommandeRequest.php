@@ -23,7 +23,6 @@ class StoreChefCommandeRequest extends FormRequest
     {
         return [
             'note' => 'nullable|string|max:255',
-            'categorie_id' => 'required|exists:categories,id',
             'articles' => 'required|array|min:1',
             'articles.*.article_id' => 'required|exists:articles,id',
             'articles.*.quantite_commandee' => 'required|numeric|min:1',
