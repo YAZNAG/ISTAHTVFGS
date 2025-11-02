@@ -20,6 +20,8 @@ class ChefCommande extends Model
         'numero',
         'note',
         'statut',
+        'categorie_id',
+        'bon_commande_id',
         'user_id',
         'validation_date',
         'validation_note',

@@ -11,9 +11,11 @@ import {
 } from '@heroicons/vue/24/outline';
 import Dump from '@/Components/Dump.vue';
 import { getChefCommandeStatutInfo } from '@/Utils/labels.js';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
-    chefCommande: Object // passed from controller with relations: articles
+    chefCommande: Object, // passed from controller with relations: articles
+    marches: Array
 });
 
 const approveModalRef = ref(null);
@@ -21,6 +23,7 @@ const approveModalRef = ref(null);
 
 const approveForm = useForm({
     validation_note: '',
+    marche_id: '',
 });
 
 const approve = () => {
@@ -149,7 +152,17 @@ const statutInfo = getChefCommandeStatutInfo(props.chefCommande.statut);
             </div>
 
             <!-- Form -->
-            <form class="mt-8">
+            <form class="mt-8 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Marché
+                    </label>
+                    <select v-model="approveForm.marche_id" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Selectionner un marché</option>
+                        <option v-for="marche in marches" :key="marche.id" :value="marche.id">{{ marche.reference }}</option>
+                    </select>
+                    <InputError :message="approveForm.errors.marche_id" />
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Commentaire <span class="text-xs">(Optionnel)</span>

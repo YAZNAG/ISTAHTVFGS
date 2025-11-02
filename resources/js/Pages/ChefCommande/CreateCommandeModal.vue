@@ -3,10 +3,12 @@ import { ref, reactive, computed } from 'vue'
 import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
 import Dump from '@/Components/Dump.vue';
+import { FolderMinusIcon, XCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
   articles: Array,
-  demandeurs: Array
+  categories: Array
 })
 const search = ref('');
 const createCommandeModal = ref(null)
@@ -14,13 +16,18 @@ const dropdownOpen = ref(false)
 
 
 const form = useForm({
+  categorie_id: '',
   articles: [],
   note: ''
 });
 
+const articles = computed(() => {
+  return props.articles.filter(a => a.categorie_id === form.categorie_id)
+})
+
 // Filter articles not yet added
 const filteredArticles = computed(() => {
-  return props.articles
+  return articles.value
     .filter(a => !form.articles.find(fa => fa.article_id === a.id))
     .filter(a => !search.value || a.designation.toLowerCase().includes(search.value.toLowerCase()))
 })
@@ -28,7 +35,8 @@ const filteredArticles = computed(() => {
 function selectArticle(article) {
   article = {
     article_id: article.id,
-    designation: article.designation
+    designation: article.designation,
+    unite_mesure: article.unite_mesure
   }
 
   form.articles.push({ ...article, quantite_commandee: 1 })
@@ -62,6 +70,11 @@ const articleErrors = computed(() => {
 function closeIdle() {
   setTimeout(() => dropdownOpen.value = false, 300);
 }
+
+function onCategorieChange(event)
+{
+  form.articles = [];
+}
 </script>
 
 <template>
@@ -75,12 +88,26 @@ function closeIdle() {
     <div>
       <form @submit.prevent="submit" class="space-y-4">
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Categorie
+          </label>
+          <select v-model="form.categorie_id" @change="onCategorieChange" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="">Selectionner une categorie</option>
+            <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
+              {{ categorie.nom }}
+            </option>
+          </select>
+          <InputError :message="form.errors.categorie_id" />
+        </div>
+
+        <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Articles Commandés
           </label>
 
           <div class="relative mb-2">
             <input
+              :disabled="!form.categorie_id"
               type="text"
               v-model="search"
               placeholder="Rechercher un article..."
@@ -122,27 +149,31 @@ function closeIdle() {
               <tr>
                 <th class="p-2 text-left">Article</th>
                 <th class="p-2 text-center w-32">Quantité</th>
-                <th class="p-2 w-10"></th>
+                <th class="p-2 w-14"></th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(item, index) in form.articles" :key="item.id" class="border-t">
                 <td class="p-2">{{ item.designation }}</td>
                 <td class="p-2 text-center">
-                  <input
+                  <div class="flex items-center gap-2">
+
+                    <input
                     type="number"
                     min="1"
                     v-model.number="item.quantite_commandee"
                     class="w-24 text-center border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                  />
+                    />
+                    <span class="text-xs text-slate-800">{{ item.unite_mesure }}</span>
+                  </div>
                 </td>
                 <td class="p-2 text-center">
                   <button
                     type="button"
                     @click="removeArticle(index)"
-                    class="text-red-500 hover:text-red-700"
+                    class="text-red-700 hover:text-red-700 bg-red-200 hover:bg-red-300 p-1 rounded"
                   >
-                    ✕
+                    <XMarkIcon class="h-4 w-4" />
                   </button>
                 </td>
               </tr>

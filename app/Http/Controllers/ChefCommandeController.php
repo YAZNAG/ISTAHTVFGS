@@ -7,6 +7,8 @@ use App\Http\Resources\ChefCommandeResource;
 use App\Http\Resources\EditChefCommandeResource;
 use App\Http\Resources\ShowChefCommandeResource;
 use App\Models\Article;
+use App\Models\BonCommande;
+use App\Models\Categorie;
 use App\Models\ChefCommande;
 use App\Models\ChefCommandeItem;
 use Illuminate\Http\Request;
@@ -53,7 +55,8 @@ class ChefCommandeController extends Controller
     public function create()
     {
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
-            'articles' => Article::all(['id', 'designation'])
+            'articles' => Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']),
+            'categories' => Categorie::all(['id', 'nom']),
         ])->baseRoute('chef-commandes.index');
     }
 
@@ -63,6 +66,7 @@ class ChefCommandeController extends Controller
         #FIX: it creates multiple chef commandes
         $chefCommande = ChefCommande::create([
             'numero' => ChefCommande::genererNumero(),
+            'categorie_id' => $request->categorie_id,
             'note' => $request->note,
             'statut' => $request->type == 'submit' ? ChefCommande::STATUS_EN_ATTENTE_VALIDATION : ChefCommande::STATUS_CREE,
             'user_id' => auth()->user()->id,
@@ -143,9 +147,13 @@ class ChefCommandeController extends Controller
 
     public function showApprove(ChefCommande $chefCommande) {
         // $this->authorize('approve', $demande);
+        $marches = BonCommande::select(['id', 'reference'])
+            ->where('statut', BonCommande::STATUT_ATTENTE_LIVRAISON)
+            ->where('categorie_id', $chefCommande->categorie_id)->get();
 
         return Inertia::modal('ChefCommande/ApproveModal', [
-            'chefCommande' => ShowChefCommandeResource::make($chefCommande)
+            'chefCommande' => ShowChefCommandeResource::make($chefCommande),
+            'marches' => $marches
         ])->baseRoute('chef-commandes.index');
     } 
 
@@ -154,6 +162,7 @@ class ChefCommandeController extends Controller
 
         $request->validate([
             'validation_note' => 'nullable|string|max:500',
+            'marche_id' => 'required|integer|exists:bon_commandes,id',
         ]);
 
 
@@ -161,6 +170,7 @@ class ChefCommandeController extends Controller
         $chefCommande->update([
             'statut' => ChefCommande::STATUS_EN_ATTENTE_LIVRAISON,
             'validation_note' => $request->input('validation_note'),
+            'bon_commande_id' => $request->input('marche_id'),
             'validation_date' => now(),
         ]);
 
