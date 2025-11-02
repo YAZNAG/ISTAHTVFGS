@@ -57,7 +57,7 @@ class ChefCommandeController extends Controller
     public function create()
     {
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
-            'articles' => Article::all(['id', 'designation', 'unite_mesure']),
+            'articles' => Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']),
             'categories' => Categorie::all(['id', 'nom']),
         ])->baseRoute('chef-commandes.index');
     }
@@ -68,6 +68,7 @@ class ChefCommandeController extends Controller
         #FIX: it creates multiple chef commandes
         $chefCommande = ChefCommande::create([
             'numero' => ChefCommande::genererNumero(),
+            'categorie_id' => $request->categorie_id,
             'note' => $request->note,
             'statut' => $request->type == 'submit' ? ChefCommande::STATUS_EN_ATTENTE_VALIDATION : ChefCommande::STATUS_CREE,
             'user_id' => auth()->user()->id,
@@ -99,10 +100,11 @@ class ChefCommandeController extends Controller
 
     public function edit(ChefCommande $chefCommande)
     {
-        $articles = Article::all(['id', 'designation']);
+        $articles = Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']);
         return Inertia::modal('ChefCommande/EditCommandeModal', [
             'chefCommande' => EditChefCommandeResource::make($chefCommande),
-            'articles' => $articles
+            'articles' => $articles,
+            'categories' => Categorie::all(['id', 'nom']),
         ])
         ->baseRoute('chef-commandes.index');
         ;
@@ -111,6 +113,11 @@ class ChefCommandeController extends Controller
     public function update(StoreChefCommandeRequest $request, ChefCommande $chefCommande)
     {
 
+        $chefCommande->update([
+            'categorie_id' => $request->categorie_id,
+            'note' => $request->note,
+        ]);
+        
         $chefCommande->items()->delete();
 
         foreach ($request->articles as $article) {
@@ -150,7 +157,7 @@ class ChefCommandeController extends Controller
         // $this->authorize('approve', $demande);
         $marches = BonCommande::select(['id', 'reference'])
             ->where('statut', BonCommande::STATUT_ATTENTE_LIVRAISON)
-            ->get();
+            ->where('categorie_id', $chefCommande->categorie_id)->get();
 
         return Inertia::modal('ChefCommande/ApproveModal', [
             'chefCommande' => ShowChefCommandeResource::make($chefCommande),

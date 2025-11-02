@@ -5,7 +5,8 @@ import { useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
   chefCommande: Object, // existing chefCommande with items + articles
-  articles: Array
+  articles: Array,
+  categories: Array
 })
 
 const search = ref('')
@@ -14,17 +15,24 @@ const editCommandeModal = ref(null)
 
 // Initialize form with existing data
 const form = useForm({
+  categorie_id: props.chefCommande.categorie_id,
   articles: props.chefCommande.items.map(item => ({
     article_id: item.article.id,
     designation: item.article.designation,
-    quantite_commandee: item.quantite
+    quantite_commandee: item.quantite,
+    unite_mesure: item.article.unite_mesure
   })),
   note: props.chefCommande.note || ''
 })
 
+const articles = computed(() => {
+  return props.articles.filter(a => a.categorie_id === form.categorie_id)
+})
+
+
 // Filter available articles
 const filteredArticles = computed(() => {
-  return props.articles
+  return articles.value
     .filter(a => !form.articles.find(fa => fa.article_id === a.id))
     .filter(a => !search.value || a.designation.toLowerCase().includes(search.value.toLowerCase()))
 })
@@ -34,7 +42,8 @@ function selectArticle(article) {
   form.articles.push({
     article_id: article.id,
     designation: article.designation,
-    quantite_commandee: 1
+    quantite_commandee: 1,
+    unite_mesure: article.unite_mesure
   })
   search.value = ''
   dropdownOpen.value = false
@@ -57,6 +66,11 @@ function submit(type) {
 function closeIdle() {
   setTimeout(() => dropdownOpen.value = false, 300)
 }
+
+function onCategorieChange(event)
+{
+  form.articles = [];
+}
 </script>
 
 <template>
@@ -72,6 +86,19 @@ function closeIdle() {
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Categorie
+          </label>
+          <select v-model="form.categorie_id" @change="onCategorieChange" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="">Selectionner une categorie</option>
+            <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
+              {{ categorie.nom }}
+            </option>
+          </select>
+          <InputError :message="form.errors.categorie_id" />
+        </div>
+        
         <!-- Articles -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -123,12 +150,16 @@ function closeIdle() {
               <tr v-for="(item, index) in form.articles" :key="index" class="border-t">
                 <td class="p-2">{{ item.designation }}</td>
                 <td class="p-2 text-center">
-                  <input
+                  <div class="flex items-center gap-2">
+
+                    <input
                     type="number"
                     min="1"
                     v-model.number="item.quantite_commandee"
                     class="w-24 text-center border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                  />
+                    />
+                    <span class="text-xs text-slate-800">{{ item.unite_mesure }}</span>
+                  </div>
                 </td>
                 <td class="p-2 text-center">
                   <button
