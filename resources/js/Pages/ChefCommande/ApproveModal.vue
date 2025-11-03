@@ -151,6 +151,9 @@ const statutInfo = getChefCommandeStatutInfo(props.chefCommande.statut);
                 </div>
             </div>
 
+                <p v-if="$page.props.errors.articlesError" class="text-sm text-red-600 mb-3" v-html="$page.props.errors.articlesError ">
+                </p>
+            
             <!-- Form -->
             <form class="mt-8 space-y-4">
                 <div>

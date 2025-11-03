@@ -8,11 +8,13 @@ use App\Http\Resources\EditChefCommandeResource;
 use App\Http\Resources\ShowChefCommandeResource;
 use App\Models\Article;
 use App\Models\BonCommande;
+use App\Models\BonLivraison;
 use App\Models\Categorie;
 use App\Models\ChefCommande;
 use App\Models\ChefCommandeItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class ChefCommandeController extends Controller
@@ -163,16 +165,52 @@ class ChefCommandeController extends Controller
             'validation_note' => 'nullable|string|max:500',
             'marche_id' => 'required|integer|exists:bon_commandes,id',
         ]);
-
-
         
-        $chefCommande->update([
+        $marche = BonCommande::where('id', $request->input('marche_id'))->with('articles')->first();
+        $missingArticles = $chefCommande->items()->pluck('article_id')->diff(
+            $marche->articles->pluck('article_id')
+        );
+
+        if (!$missingArticles->isEmpty()) {
+            $articles = Article::whereIn('id', $missingArticles)->pluck('designation');
+            throw ValidationException::withMessages([
+                'articlesError' => "les articles suivants sont pas dans le marché $marche->reference: " . "<strong>" . $articles->join(', ') . "<strong>",
+            ]);
+        }
+        
+        DB::transaction(function () use ($chefCommande, $request) {
+
+            
+            $chefCommande->update([
             'statut' => ChefCommande::STATUS_EN_ATTENTE_LIVRAISON,
             'validation_note' => $request->input('validation_note'),
             'bon_commande_id' => $request->input('marche_id'),
             'validation_date' => now(),
         ]);
 
+
+        $bonlivraison = BonLivraison::create([
+            'numero' => BonLivraison::genererNumero(),
+            'statut' => BonLivraison::STATUS_EN_ATTENTE_LIVRAISON,
+            'chef_commande_id' => $chefCommande->id,
+            'fournisseur_id' => $marche->fournisseur_id,
+        ]);
+
+        ### Verify if all articles are belongs to the same marche
+
+        
+
+        foreach ($chefCommande->items as $item) {
+            $marcheArticle = $marche->articles->where('article_id', $item->article_id)->first();
+            $bonlivraison->items()->create([
+                'quantite' => 0,
+                'prix_unitaire' => $marcheArticle?->prix_unitaire_ht ?? -1,
+                'taux_tva' => $marcheArticle?->taux_tva ?? -1,
+                'article_id' => $item->article_id,
+            ]);
+        }
+            
+    });
           
         
         return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
