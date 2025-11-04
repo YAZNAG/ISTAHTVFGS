@@ -29,7 +29,7 @@ class ExportBonLivraisonResource extends JsonResource
                     'contact' => $this->fournisseur->contact,
                     'email' => $this->fournisseur->email,
                     'adresse' => $this->fournisseur->adresse,
-                    'logo' => $this->fournisseur->getFirstMediaUrl('logo'),
+                    'logo' => $this->fournisseur->getFirstMediaPath('logo'),
                 ];
             }),
 
