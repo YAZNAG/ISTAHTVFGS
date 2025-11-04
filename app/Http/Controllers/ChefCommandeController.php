@@ -178,7 +178,7 @@ class ChefCommandeController extends Controller
             ]);
         }
         
-        DB::transaction(function () use ($chefCommande, $request) {
+        DB::transaction(function () use ($chefCommande, $request, $marche) {
 
             
             $chefCommande->update([
@@ -203,7 +203,7 @@ class ChefCommandeController extends Controller
         foreach ($chefCommande->items as $item) {
             $marcheArticle = $marche->articles->where('article_id', $item->article_id)->first();
             $bonlivraison->items()->create([
-                'quantite' => 0,
+                'quantite' => $item->quantite_commandee,
                 'prix_unitaire' => $marcheArticle?->prix_unitaire_ht ?? -1,
                 'taux_tva' => $marcheArticle?->taux_tva ?? -1,
                 'article_id' => $item->article_id,

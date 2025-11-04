@@ -13,16 +13,21 @@ class BonLivraison extends Model
         'numero',
         'statut',
         'date_livraison',
-        'bon_commande_id',
+        'chef_commande_id',
         'notes',
         'created_by',
         'fournisseur_id',
     ];
 
+    protected $appends = ['total_ht', 'total_tva', 'total_ttc'];
+
     public function casts()
     {
         return [
             'date_livraison' => 'datetime',
+            'total_ht' => 'decimal:2',
+            'total_tva' => 'decimal:2',
+            'total_ttc' => 'decimal:2',
         ];
     }
 
@@ -31,6 +36,22 @@ class BonLivraison extends Model
         $lastNumber = (int) self::max('id') ?? 0;
         $numero = 'BL-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         return $numero;
+    }
+
+
+    public function getTotalHtAttribute()
+    {
+        return number_format($this->items->sum('montant_ht'), 2, '.', '');
+    }
+
+    public function getTotalTvaAttribute()
+    {
+        return number_format($this->items->sum('montant_tva'), 2, '.', '');
+    }
+
+    public function getTotalTtcAttribute()
+    {
+        return number_format($this->items->sum('montant_ttc'), 2, '.', '');
     }
 
     public function chefCommande()
@@ -57,6 +78,11 @@ class BonLivraison extends Model
     public function scopePending($query)
     {
         return $query->where('statut', self::STATUS_EN_ATTENTE_LIVRAISON);
+    }
+
+    public function scopeLivree($query)
+    {
+        return $query->where('statut', self::STATUS_LIVREE);
     }
 
 }

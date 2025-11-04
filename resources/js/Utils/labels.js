@@ -126,4 +126,23 @@ const getChefCommandeStatutInfo = (statut) => {
   }
 }
 
-export { getDemandeStatutInfo, getDemandeTypeInfo, getSortieStatutInfo, getSortieTypeInfo, getBonCommandeStatutInfo, getChefCommandeStatutInfo }
+const getBonLivraisonInfo = (type) => {
+  switch (type) {
+    case 'en_attente_livraison':
+      return { label: 'En attente de livraison', color: 'bg-orange-100 text-orange-800' }
+    case 'livree':
+      return { label: 'Livrée', color: 'bg-green-100 text-green-800' }
+    default:
+      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+  }
+}
+
+export { 
+  getBonLivraisonInfo, 
+  getDemandeStatutInfo, 
+  getDemandeTypeInfo, 
+  getSortieStatutInfo, 
+  getSortieTypeInfo, 
+  getBonCommandeStatutInfo, 
+  getChefCommandeStatutInfo
+}

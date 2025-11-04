@@ -18,8 +18,8 @@ return new class extends Migration
             $table->dateTime('date_livraison')->nullable(); 
             $table->foreignId('chef_commande_id')->constrained('chef_commandes');
             $table->text('notes')->nullable();
-            $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('fournisseur_id')->constrained('fournisseurs');
+            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->foreignId('fournisseur_id')->nullable()->constrained('fournisseurs');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -29,8 +29,8 @@ return new class extends Migration
             $table->decimal('quantite', 10, 2);
             $table->decimal('prix_unitaire', 10, 2);
             $table->decimal('taux_tva', 5, 2)->nullable();
-            $table->decimal('montant_tva', 10, 2)->nullable();
-            $table->decimal('prix_total', 10, 2);
+            // $table->decimal('montant_tva', 10, 2)->nullable();
+            // $table->decimal('prix_total', 10, 2);
             $table->foreignId('bon_livraison_id')->constrained('bon_livraisons');
             $table->foreignId('article_id')->constrained('articles');
             $table->timestamps();
