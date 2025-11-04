@@ -100,17 +100,16 @@ class FournisseurController extends Controller
                 'ville' => 'nullable|string|max:100',
                 'ice' => 'nullable|string|max:50',
                 'notes' => 'nullable|string',
-                'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'est_actif' => 'boolean',
             ]);
 
             // Gestion du logo
-            if ($request->hasFile('logo')) {
-                $logoPath = $request->file('logo')->store('fournisseurs/logos', 'public');
-                $validated['logo'] = $logoPath;
-            }
-
             $fournisseur = Fournisseur::create($validated);
+            if ($request->hasFile('logo')) {
+                // Supprimer l'ancien logo
+               $fournisseur->addMediaFromRequest('logo')->toMediaCollection('logo');
+            }
 
             DB::commit();
 
@@ -165,21 +164,7 @@ class FournisseurController extends Controller
             // Gestion du logo
             if ($request->hasFile('logo')) {
                 // Supprimer l'ancien logo
-                if ($fournisseur->logo && Storage::disk('public')->exists($fournisseur->logo)) {
-                    Storage::disk('public')->delete($fournisseur->logo);
-                }
-
-                $logoPath = $request->file('logo')->store('fournisseurs/logos', 'public');
-                $validated['logo'] = $logoPath;
-            } elseif ($request->has('logo') && $request->logo === 'delete') {
-                // Supprimer le logo existant
-                if ($fournisseur->logo && Storage::disk('public')->exists($fournisseur->logo)) {
-                    Storage::disk('public')->delete($fournisseur->logo);
-                }
-                $validated['logo'] = null;
-            } else {
-                // Garder le logo existant
-                unset($validated['logo']);
+               $fournisseur->addMediaFromRequest('logo')->toMediaCollection('logo');
             }
 
             $fournisseur->update($validated);
