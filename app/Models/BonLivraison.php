@@ -17,6 +17,7 @@ class BonLivraison extends Model
         'notes',
         'created_by',
         'fournisseur_id',
+        'reponsable_id',
     ];
 
     protected $appends = ['total_ht', 'total_tva', 'total_ttc'];
@@ -59,6 +60,11 @@ class BonLivraison extends Model
         return $this->belongsTo(ChefCommande::class, 'chef_commande_id', 'id');
     }
 
+    public function reponsable() 
+    {
+        return $this->belongsTo(User::class, 'reponsable_id', 'id');    
+    }
+    
     public function items()
     {
         return $this->hasMany(BonLivraisonItem::class, 'bon_livraison_id', 'id');

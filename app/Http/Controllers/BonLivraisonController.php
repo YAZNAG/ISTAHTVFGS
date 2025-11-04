@@ -7,6 +7,7 @@ use App\Http\Resources\IndexBonLivraisonResource;
 use App\Models\Article;
 use App\Models\BonCommande;
 use App\Models\BonLivraison;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -48,7 +49,8 @@ class BonLivraisonController extends Controller
 
         return Inertia::modal('BonLivraisons/Edit', [
             'bonLivraison' => EditBonLivraisonResource::make($bonLivraison),
-            'articles' => $articles
+            'articles' => $articles,
+            'users' => User::all(['id', 'name'])
         ]);
     }
 
@@ -56,6 +58,7 @@ class BonLivraisonController extends Controller
     {
         $request->validate([
             'date_livraison' => 'required|date',
+            'user_id' => 'required|exists:users,id',
             'items' => 'required|array',
             'items.*.article_id' => 'required|exists:articles,id',
             'items.*.quantite' => 'required|numeric',
@@ -67,6 +70,7 @@ class BonLivraisonController extends Controller
             $bonLivraison->update([
                 'date_livraison' => $request->date_livraison,
                 'statut' => BonLivraison::STATUS_LIVREE,
+                'user_id' => $request->user_id
             ]);
 
             $bonLivraison->items()->delete();
