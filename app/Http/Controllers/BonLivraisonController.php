@@ -111,7 +111,7 @@ class BonLivraisonController extends Controller
 
         $bonLivraison = ExportBonLivraisonResource::make($bonLivraison)->toArray($request);
 
-        // return response()->json($bonLivraison);
+        return response()->json($bonLivraison);
         return Pdf::view('pdf.bon-livraison', [
             'livraison' => $bonLivraison
         ])->format(Format::A4)
