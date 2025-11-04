@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class BonLivraisonController extends Controller
@@ -113,6 +114,7 @@ class BonLivraisonController extends Controller
         // return response()->json($bonLivraison);
         return Pdf::view('pdf.bon-livraison', [
             'livraison' => $bonLivraison
-        ]);
+        ])->format(Format::A4)
+            ->margins(5, 5, 5, 5);
     }
 }

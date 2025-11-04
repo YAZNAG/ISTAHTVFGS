@@ -5,19 +5,14 @@
     <title>Bon de Livraison - {{ $livraison['reference'] }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @page { margin: 25mm 20mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #111827; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #d1d5db; padding: 6px 8px; font-size: 11px; }
-        th { background-color: #f3f4f6; font-weight: 600; }
     </style>
 </head>
 <body class="bg-white text-gray-800">
 
     {{-- HEADER --}}
-    <div class="flex justify-between items-start mb-6">
+    <div class="flex justify-between items-start">
         <div>
-            <img src="{{ $livraison['fournisseur']['logo'] }}" alt="Logo" class="h-24 mb-2">
+            <img src="{{ public_path($livraison['fournisseur']['logo']) }}" alt="Logo" class="h-24 mb-2">
         </div>
 
         <div class="text-right">
