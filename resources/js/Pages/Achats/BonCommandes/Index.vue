@@ -470,8 +470,6 @@
                         </button>
                         </div>
 
-                        <Dump :data="marcheForm.data()" />
-
                         <div v-if="marcheForm.articles.length === 0" class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                             <DocumentTextIcon class="mx-auto h-12 w-12 text-gray-400" />
                             <p class="text-gray-500 mt-2">Aucun article sélectionné</p>

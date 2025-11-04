@@ -24,4 +24,9 @@ class ChefCommandeItem extends Model
         return $this->belongsTo(ChefCommande::class);
     }
 
+    public function articles() 
+    {
+        return $this->belongsTo(Article::class);
+    }
+
 }

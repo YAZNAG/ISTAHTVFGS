@@ -7,6 +7,7 @@ use Inertia\Inertia;
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\BonCommandeController;
+use App\Http\Controllers\BonLivraisonController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
 use App\Http\Controllers\CardexController;
@@ -231,7 +232,26 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('/chef-commandes', [ChefCommandeController::class, 'index'])->name('chef-commandes.index');
     Route::get('/chef-commandes/create', [ChefCommandeController::class, 'create'])->name('chef-commandes.create');
     Route::post('/chef-commandes', [ChefCommandeController::class, 'store'])->name('chef-commandes.store');
+    Route::get('/chef-commandes/{chefCommande}', [ChefCommandeController::class, 'show'])->name('chef-commandes.show');
+    Route::get('/chef-commandes/{chefCommande}/edit', [ChefCommandeController::class, 'edit'])->name('chef-commandes.edit');
+    Route::put('/chef-commandes/{chefCommande}', [ChefCommandeController::class, 'update'])->name('chef-commandes.update');
+    Route::delete('/chef-commandes/{chefCommande}', [ChefCommandeController::class, 'destroy'])->name('chef-commandes.destroy');
+    Route::patch('/chef-commandes/{chefCommande}/submit', [ChefCommandeController::class, 'submit'])->name('chef-commandes.submit');
+    Route::patch('/chef-commandes/{chefCommande}/cancel', [ChefCommandeController::class, 'cancel'])->name('chef-commandes.cancel');
+    Route::get('/chef-commandes/{chefCommande}/approve', [ChefCommandeController::class, 'showApprove'])->name('chef-commandes.showApprove');
+    Route::put('/chef-commandes/{chefCommande}/approve', [ChefCommandeController::class, 'approve'])->name('chef-commandes.approve');
+    Route::put('/chef-commandes/{chefCommande}/reject', [ChefCommandeController::class, 'reject'])->name('chef-commandes.reject');
     
+    #### Bon Livraison ####
+    Route::get('/bon-livraisons', [BonLivraisonController::class, 'index'])->name('bon-livraisons.index');
+    Route::get('/bon-livraisons/create', [BonLivraisonController::class, 'create'])->name('bon-livraisons.create');
+    // Route::post('/bon-livraisons', [BonLivraisonController::class, 'store'])->name('bon-livraisons.store');
+    Route::get('/bon-livraisons/{bonLivraison}/edit', [BonLivraisonController::class, 'edit'])->name('bon-livraisons.edit');
+    Route::put('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'update'])->name('bon-livraisons.update');
+    Route::get('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'show'])->name('bon-livraisons.show');
+    // Route::delete('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'destroy'])->name('bon-livraisons.destroy');
+    // Route::get('/bon-livraisons/{bonLivraison}/pdf', [BonLivraisonController::class, 'generatePdf'])->name('bon-livraisons.pdf');
+    // Route::get('/bon-livraisons/{bonLivraison}/debug', [BonLivraisonController::class, 'debugBonLivraison'])->name('bon-livraisons.debug');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 

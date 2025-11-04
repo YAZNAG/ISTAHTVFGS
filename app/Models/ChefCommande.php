@@ -12,6 +12,7 @@ class ChefCommande extends Model
     public const STATUS_EN_ATTENTE_LIVRAISON = 'en_attente_livraison';
     public const STATUS_LIVRE_COMPLETEMNT = 'livre_completement';
     public const STATUS_LIVRE_PARTIELLEMENT = 'livre_partiellement';
+    public const STATUS_REJET = 'rejet';
     public const STATUS_ANNULEE = 'annulee';
 
 
@@ -19,10 +20,18 @@ class ChefCommande extends Model
         'numero',
         'note',
         'statut',
+        'bon_commande_id',
         'user_id',
-        'annulee_at',
+        'validation_date',
         'validation_note',
     ];
+
+    public function casts()
+    {
+        return [
+            'validation_date' => 'datetime',
+        ];
+    }
 
     public static function genererNumero() // Retourne un int au lieu de string
     {
@@ -39,6 +48,11 @@ class ChefCommande extends Model
     public function items()
     {
         return $this->hasMany(ChefCommandeItem::class, 'chef_commande_id', 'id');
+    }
+
+    public function articles()
+    {
+        return $this->hasManyThrough(Article::class, ChefCommandeItem::class, 'chef_commande_id', 'id', 'id', 'article_id');
     }
 
 }

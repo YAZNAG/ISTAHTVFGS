@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('numero');
             $table->string('statut');
-            $table->foreignId('user_id')->constrained();
-            $table->timestamp('annule_at')->nullable();
             $table->text('note')->nullable();
+            $table->timestamp('validation_date')->nullable();
             $table->text('validation_note')->nullable();
+            $table->foreignId('bon_commande_id')->nullable()->constrained('bon_commandes');
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
         });
 

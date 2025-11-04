@@ -94,9 +94,9 @@ const getBonCommandeStatutInfo = (statut) => {
     case 'attente_livraison':
       return { label: 'En attente de livraison', color: 'bg-yellow-100 text-yellow-800' }
     case 'livre_completement':
-      return { label: 'Livrée complètement', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livré complètement', color: 'bg-green-100 text-green-800' }
     case 'livre_partiellement':
-      return { label: 'Livrée partiellement', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'Livré partiellement', color: 'bg-blue-100 text-blue-800' }
     case 'annule':
       return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
     default:
@@ -114,14 +114,35 @@ const getChefCommandeStatutInfo = (statut) => {
     case 'en_attente_livraison':
       return { label: 'En attente de livraison', color: 'bg-orange-100 text-orange-800' }
     case 'livre_completement':
-      return { label: 'Livrée complètement', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livré complètement', color: 'bg-green-100 text-green-800' }
     case 'livre_partiellement':
-      return { label: 'Livrée partiellement', color: 'bg-blue-100 text-blue-800' }
-    case 'annule':
+      return { label: 'Livré partiellement', color: 'bg-blue-100 text-blue-800' }
+    case 'rejet':
+      return { label: 'Rejeté', color: 'bg-rose-100 text-rose-600' }
+    case 'annulee':
       return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
     default:
       return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
   }
 }
 
-export { getDemandeStatutInfo, getDemandeTypeInfo, getSortieStatutInfo, getSortieTypeInfo, getBonCommandeStatutInfo, getChefCommandeStatutInfo }
+const getBonLivraisonInfo = (type) => {
+  switch (type) {
+    case 'en_attente_livraison':
+      return { label: 'En attente de livraison', color: 'bg-orange-100 text-orange-800' }
+    case 'livree':
+      return { label: 'Livrée', color: 'bg-green-100 text-green-800' }
+    default:
+      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+  }
+}
+
+export { 
+  getBonLivraisonInfo, 
+  getDemandeStatutInfo, 
+  getDemandeTypeInfo, 
+  getSortieStatutInfo, 
+  getSortieTypeInfo, 
+  getBonCommandeStatutInfo, 
+  getChefCommandeStatutInfo
+}

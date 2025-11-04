@@ -7,13 +7,18 @@ import {
   MagnifyingGlassIcon,
   PencilIcon,
   DocumentTextIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  TagIcon,
+  CubeIcon,
+  CheckIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import { getChefCommandeStatutInfo } from '@/Utils/labels.js'; // 👈 You can reuse your demande version and rename
+import { getChefCommandeStatutInfo } from '@/Utils/labels.js'; 
+import Dump from '@/Components/Dump.vue';
 
 const props = defineProps({
   chefCommandes: Object,
@@ -29,10 +34,10 @@ function formatDate(date) {
 }
 
 const filters = ref({
-  search: '',
-  status: '',
-  start_date: '',
-  end_date: '',
+  search: props.filters.search || '',
+  status: props.filters.status || '',
+  start_date: props.filters.start_date || '',
+  end_date: props.filters.end_date || '',
 })
 
 function resetFilters() {
@@ -53,18 +58,50 @@ function openCancelModal(id) {
 }
 
 function cancelChefCommande() {
-  return router.delete(route('chef-commandes.cancel', chefCommandeIdToCancel.value), {}, {
-    onSuccess: () => {
-      alert('Bon de commande annulé avec succès !')
-    },
-    onError: (errors) => {
-      alert('Impossible d’annuler le bon de commande : ' + errors.message)
-    }
-  })
+  return router.patch(route('chef-commandes.cancel', chefCommandeIdToCancel.value))
+}
+
+
+const showSubmitModal = ref(false)
+const chefCommandeIdToSubmit = ref(null)
+
+function opensubmitModal(id) {
+  chefCommandeIdToSubmit.value = id
+  showSubmitModal.value = true
+}
+
+function submitChefCommande() {
+  return router.patch(route('chef-commandes.submit', chefCommandeIdToSubmit.value));
 }
 
 const getStatutColor = (statut) => getChefCommandeStatutInfo(statut).color;
 const getStatutLabel = (statut) => getChefCommandeStatutInfo(statut).label;
+const commandeStatus = [
+  {
+    value: 'cree',
+    label: 'Crée',
+  },
+  {
+    value: 'en_attente_validation',
+    label: 'en attente d’approbation',
+  },
+  {
+    value: 'attente_livraison',
+    label: 'Attente de Livraison',
+  },
+  {
+    value: 'livre_partiellement',
+    label: 'Livre Partiellement',
+  },
+  {
+    value: 'livre_completement',
+    label: 'Livre Completement',
+  },
+  {
+    value: 'annule',
+    label: 'Annulée',
+  },
+];
 </script>
 
 <template>
@@ -116,9 +153,7 @@ const getStatutLabel = (statut) => getChefCommandeStatutInfo(statut).label;
               class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">Tous</option>
-              <option value="EN_ATTENTE">En attente</option>
-              <option value="VALIDEE">Validé</option>
-              <option value="REFUSEE">Refusé</option>
+              <option :value="status.value" v-for="status in commandeStatus" :key="status.value">{{ status.label }}</option>
             </select>
           </div>
 
@@ -167,42 +202,44 @@ const getStatutLabel = (statut) => getChefCommandeStatutInfo(statut).label;
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fournisseur</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant total</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Articles</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
 
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="bc in chefCommandes.data" :key="bc.id" class="hover:bg-gray-50">
+              <tr v-for="commande in chefCommandes.data" :key="commande.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                  {{ bc.reference || bc.id }}
+                  {{ commande.numero }}
                 </td>
 
                 <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                  {{ formatDate(bc.date_bon) }}
+                  {{ commande.created_at }}
                 </td>
 
-                <td class="px-6 py-4 whitespace-nowrap">{{ bc.fournisseur?.nom || '---' }}</td>
-
-                <td class="px-6 py-4 whitespace-nowrap">{{ bc.total }} MAD</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="bg-blue-100 border border-blue-400 text-blue-600 inline-flex gap-1 items-center px-2 py-1 rounded-full">
+                    <CubeIcon class="h-4 w-4" />
+                    {{ commande.articles_count }}
+                  </span>
+                </td>
 
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
                       'px-2 py-1 text-xs font-medium rounded-full',
-                      getStatutColor(bc.statut)
+                      getStatutColor(commande.statut)
                     ]"
                   >
-                    {{ getStatutLabel(bc.statut) }}
+                    {{ getStatutLabel(commande.statut) }}
                   </span>
                 </td>
 
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
                     <ModalLink
-                      :href="route('chef-commandes.show', bc.id)"
+                      :href="route('chef-commandes.show', commande.id)"
                       class="text-blue-600 hover:text-blue-900 p-1"
                       title="Voir détails"
                     >
@@ -210,17 +247,51 @@ const getStatutLabel = (statut) => getChefCommandeStatutInfo(statut).label;
                     </ModalLink>
 
                     <ModalLink
-                      :href="route('chef-commandes.edit', bc.id)"
+                      :href="route('chef-commandes.showApprove', commande.id)"
+                      class="text-orange-600 hover:text-orange-900 p-1"
+                      title="Approuver la commande"
+                      v-if="commande.statut === 'en_attente_validation'"
+                    >
+                      <QuestionMarkCircleIcon class="h-5 w-5" />
+                    </ModalLink>
+                    
+                    <ModalLink
+                      :href="route('chef-commandes.edit', commande.id)"
                       class="text-green-600 hover:text-green-900 p-1"
                       title="Modifier"
                     >
                       <PencilIcon class="h-5 w-5" />
                     </ModalLink>
 
+                    <template v-if="commande.statut === 'cree'">
+                      <button
+                          
+                          @click="openCancelModal(commande.id)"
+                          class="text-red-600 hover:text-red-800"
+                          title="Annuler la commande"
+                      >
+                          <XMarkIcon class="h-5 w-5" />
+                          <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                              Annuler
+                          </div>
+                      </button>
+
+                      <button
+                          @click="opensubmitModal(commande.id)"
+                          class="text-green-600 hover:text-green-800"
+                          title="Submitter la commande"
+                      >
+                          <CheckIcon class="h-5 w-5" />
+                          <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                              Submitter
+                          </div>
+                      </button>
+                    </template>
+
                     <a
                       class="text-purple-600 hover:text-purple-900 p-1 cursor-pointer"
-                      :href="bc.pdf_url"
-                      :class="!bc.pdf_url ? '!cursor-not-allowed opacity-50 pointer-events-none' : ''"
+                      :href="commande.pdf_url"
+                      :class="!commande.pdf_url ? '!cursor-not-allowed opacity-50 pointer-events-none' : ''"
                       title="Télécharger PDF"
                       target="_blank"
                     >
@@ -290,6 +361,15 @@ const getStatutLabel = (statut) => getChefCommandeStatutInfo(statut).label;
       message="Êtes-vous sûr de vouloir annuler ce bon de commande ?"
       :onConfirm="cancelChefCommande"
       @close="showCancelModal = false"
+    />
+
+    <ConfirmationModal
+      :show="showSubmitModal"
+      type="info"
+      title="Submettre le bon de commande"
+      message="Êtes-vous sûr de vouloir submettre ce bon de commande ?"
+      :onConfirm="submitChefCommande"
+      @close="showSubmitModal = false"
     />
   </AuthenticatedLayout>
 </template>

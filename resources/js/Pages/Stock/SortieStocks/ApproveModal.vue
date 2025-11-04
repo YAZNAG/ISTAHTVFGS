@@ -59,7 +59,6 @@ const demandeType = props.sortie.demande ? getDemandeTypeInfo(props.sortie.deman
 <AuthenticatedLayout>
     <Head title="Détails de la sortie" />
 
-    <Dump :data="sortie" />
     <Modal ref="approveModalRef">
         <div class="mb-2">
             <h2 class="text-lg font-semibold text-gray-900">Détails de la sortie</h2>
