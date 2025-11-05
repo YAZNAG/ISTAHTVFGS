@@ -372,7 +372,7 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Catégorie *</label>
-                                <select v-model="marcheForm.categorie_id" required
+                                <select v-model="marcheForm.categorie_id" required @change="onCategorieChange"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                     <option value="">Sélectionnez...</option>
                                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -399,7 +399,7 @@
                                         {{ getCategorieName(categorieId) }} ({{ articles?.length || 0 }} articles)
                                     </option>
                                 </select> -->
-                                <button type="button" @click="addRow" class="bg-green-600 text-white px-3 py-2 rounded text-sm">
+                                <button type="button" @click="addRow" :disabled="!marcheForm.categorie_id" class="bg-green-600 text-white px-3 py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                     + Article manuel
                                 </button>
                             </div>
@@ -1055,9 +1055,12 @@ const resetFilters = () => {
 
 const filteredArticles = (search) => {
   if (!search) return []
-  return props.articles.filter((a) =>
-    a.designation.toLowerCase().includes(search.toLowerCase())
-  )
+
+  return props.articles
+    .filter(a => a.categorie_id == marcheForm.categorie_id) 
+    .filter((a) =>
+        a.designation.toLowerCase().includes(search.toLowerCase())
+    )
 }
 
 // Select article
@@ -1093,23 +1096,6 @@ const removeArticle = (index) => {
     marcheForm.articles.splice(index, 1);
 };
 
-const onCategorieChange = (event) => {
-    const categorieId = event.target.value;
-    if (!categorieId) return;
-    
-    const articlesDeLaCategorie = props.articlesGroupes[categorieId] || [];
-    articlesDeLaCategorie.forEach(article => {
-        if (!marcheForm.articles.some(a => a.article_id === article.id)) {
-            marcheForm.articles.push({
-                article_id: article.id,
-                quantite_commandee: 1,
-                taux_tva: article.taux_tva || 20,
-            });
-        }
-    });
-    
-    event.target.value = '';
-};
 
 const onArticleChange = (index) => {
     const selectedArticle = getArticle(marcheForm.articles[index].article_id);
@@ -1400,7 +1386,12 @@ onMounted(() => {
 
 const formRows = ref([]);
 
-
+function onCategorieChange(event) {
+    console.log(event.target.value);
+    
+    marcheForm.articles = [];
+    formRows.value = [];
+}
 
 </script>
 
