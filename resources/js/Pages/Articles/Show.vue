@@ -94,13 +94,13 @@ const openImage = (imagePath) => {
                     <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
                     {{ isGeneratingPDF ? 'Génération...' : 'Télécharger PDF' }}
                 </button>
-                <Link
+                <!-- <Link
                     :href="route('articles.edit', article.id)"
                     class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                     <PencilIcon class="h-4 w-4 mr-2" />
                     Modifier
-                </Link>
+                </Link> -->
                 <button
                     @click="openDeleteConfirm(article)"
                     class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"

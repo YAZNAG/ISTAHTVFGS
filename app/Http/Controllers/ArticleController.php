@@ -24,7 +24,8 @@ class ArticleController extends Controller
                 'categorie', 
                 'categoriePrincipale', 
                 'naturePrestation', 
-                'images'
+                'images',
+                'lastEntryStock',
             ])
             ->latest()
             ->paginate(10);
@@ -62,14 +63,11 @@ class ArticleController extends Controller
             'designation' => 'required|string|max:255',
             'description' => 'nullable|string',
             'categorie_id' => 'required|exists:categories,id',
-            'categorie_principale_id' => 'required|exists:categorie_principales,id',
-            'nature_prestation_id' => 'required|exists:nature_prestations,id',
             'unite_mesure' => [
                 'required','string','max:20',
                 Rule::in(['kg','L','pièce','sachet','sac','boite','bidon','paquet','flacon','pot','bouteille']),
             ],
-            'seuil_minimal' => 'required|integer|min:0',
-            'seuil_maximal' => 'required|integer|min:0|gte:seuil_minimal', // CORRECTION: ajout de gte
+            'seuil_maximal' => 'required|integer|min:0', // CORRECTION: ajout de gte
             'est_actif' => 'boolean',
             'images' => 'nullable|array',
             'images.*' => 'file|image|mimes:jpg,jpeg,png,webp|max:4096',
@@ -78,15 +76,18 @@ class ArticleController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 // Créer l'article
+                $nature = NaturePrestation::first();
+                $categoryPrincipal = CategoriePrincipale::first();
+
                 $article = Article::create([
                     'reference' => $request->reference,
                     'designation' => $request->designation,
                     'description' => $request->description,
                     'categorie_id' => $request->categorie_id,
-                    'categorie_principale_id' => $request->categorie_principale_id,
-                    'nature_prestation_id' => $request->nature_prestation_id,
+                    'categorie_principale_id' => $categoryPrincipal->id,
+                    'nature_prestation_id' => $nature->id,
                     'unite_mesure' => $request->unite_mesure,
-                    'seuil_minimal' => $request->seuil_minimal,
+                    'seuil_minimal' => -1,
                     'seuil_maximal' => $request->seuil_maximal,
                     'est_actif' => $request->boolean('est_actif'),
                 ]);

@@ -55,7 +55,14 @@ class Article extends Model
     {
         return $this->hasMany(MouvementStock::class, 'article_id', 'id');
     }
-
+    
+    public function lastEntryStock()
+    {
+        return $this->hasOne(MouvementStock::class)
+            ->entrees()
+            ->latestOfMany('date_mouvement');
+    }
+    
     public function images(): HasMany
     {
         return $this->hasMany(ArticleImage::class);

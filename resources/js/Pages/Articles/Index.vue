@@ -721,7 +721,7 @@ const toggleCategoriesList = () => {
                         
                         <!-- Colonne droite -->
                         <div class="space-y-4">
-                            <div>
+                            <!-- <div>
                                 <label class="block text-sm font-medium text-gray-700">Catégorie principale *</label>
                                 <select v-model="articleForm.categorie_principale_id" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -730,8 +730,8 @@ const toggleCategoriesList = () => {
                                         {{ catPrinc.nom }}
                                     </option>
                                 </select>
-                            </div>
-                            <div>
+                            </div> -->
+                            <!-- <div>
                                 <label class="block text-sm font-medium text-gray-700">Nature de prestation *</label>
                                 <select v-model="articleForm.nature_prestation_id" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -740,7 +740,7 @@ const toggleCategoriesList = () => {
                                         {{ nature.nom }}
                                     </option>
                                 </select>
-                            </div>
+                            </div> -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Catégorie *</label>
                                 <select v-model="articleForm.categorie_id" required
@@ -771,11 +771,11 @@ const toggleCategoriesList = () => {
                                 </select>
                             </div>
                             
-                            <div>
+                            <!-- <div>
                                 <label class="block text-sm font-medium text-gray-700">Seuil minimal</label>
                                 <input v-model="articleForm.seuil_minimal" type="number" min="0"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
+                            </div> -->
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Seuil maximal</label>
@@ -1129,13 +1129,13 @@ const toggleCategoriesList = () => {
                                 Catégorie
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Nature
+                                Prix Unitaire
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Unité
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Seuils
+                                Seuil maximale
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Statut
@@ -1158,22 +1158,17 @@ const toggleCategoriesList = () => {
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ article.categorie.nom }}</div>
-                                <div class="text-xs text-gray-500">{{ article.categorie_principale.nom }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ article.nature_prestation.nom }}</div>
+                                <div class="text-sm text-gray-900">{{ article.last_entry_stock?.prix_unitaire || 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ article.unite_mesure }}</div>
                                 <div class="text-xs text-gray-500">TVA: {{ article.taux_tva }}%</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900"
-                                     :class="article.stock_actuel <= article.seuil_minimal ? 'text-red-600' : 'text-gray-900'">
-                                    Stock: {{ article.stock_actuel }}
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    Min: {{ article.seuil_minimal }} | Max: {{ article.seuil_maximal }}
+                                <div class="text-sm font-medium text-gray-900">
+                                   {{ article.seuil_maximal }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
