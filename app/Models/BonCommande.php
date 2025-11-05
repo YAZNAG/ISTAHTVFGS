@@ -89,6 +89,13 @@ class BonCommande extends Model
         return $this->articles->sum('montant_tva');
     }
 
+    public function scopeCurrent($query)
+    {
+        $today = today();
+        return $query->whereDate('date_debut', '<=', $today)
+                     ->whereDate('date_fin', '>=', $today);
+    }
+
     // Méthode pour vérifier si la commande est complètement livrée
     public function estCompletementLivree(): bool
     {

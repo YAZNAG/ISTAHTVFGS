@@ -117,7 +117,7 @@ class ChefCommandeController extends Controller
             'categorie_id' => $request->categorie_id,
             'note' => $request->note,
         ]);
-        
+
         $chefCommande->items()->delete();
 
         foreach ($request->articles as $article) {
@@ -156,6 +156,7 @@ class ChefCommandeController extends Controller
     public function showApprove(ChefCommande $chefCommande) {
         // $this->authorize('approve', $demande);
         $marches = BonCommande::select(['id', 'reference'])
+            ->current()
             ->where('statut', BonCommande::STATUT_ATTENTE_LIVRAISON)
             ->where('categorie_id', $chefCommande->categorie_id)->get();
 
