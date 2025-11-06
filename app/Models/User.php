@@ -13,6 +13,11 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    const MAGASINIER = 'MAGASINIER';
+    const ADMIN = 'ADMIN';
+    const DEMANDEUR = 'DEMANDEUR';
+    const CHEF_CUISINE = 'CHEF_CUISINE';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -78,22 +83,14 @@ class User extends Authenticatable
         return $this->hasMany(BonReception::class, 'created_by');
     }
 
-   
-    /**
-     * Vérifier si l'utilisateur est un magasinier
-     */
-    
-
-    /**
-     * Vérifier si l'utilisateur est responsable magasin
-     */
-    
-    /**
-     * Obtenir le rôle magasinier de l'utilisateur
-     */
    // Dans app/Models/User.php
-public function scopeMagasiniers($query)
-{
-    return $query->where('role', 'MAGASINIER');
-}
+    public function scopeMagasiniers($query)
+    {
+        return $query->where('role', self::MAGASINIER);
+    }
+
+    public function scopeChefs($query)
+    {
+        return $query->where('role', self::CHEF_CUISINE);
+    }
 }

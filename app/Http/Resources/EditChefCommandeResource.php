@@ -19,6 +19,7 @@ class EditChefCommandeResource extends JsonResource
             'numero' => $this->numero,
             'created_at' => $this->created_at->toDateString(),
             'categorie_id' => $this->categorie_id,
+            'user_id' => $this->user_id,
             'items' => $this->items->map(function ($item) {
                 return [
                     'quantite' => $item->quantite_commandee,

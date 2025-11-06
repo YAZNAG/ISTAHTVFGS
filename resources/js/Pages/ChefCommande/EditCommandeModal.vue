@@ -2,11 +2,13 @@
 import { ref, computed } from 'vue'
 import { Modal } from '@inertiaui/modal-vue'
 import { useForm } from '@inertiajs/vue3'
+import InputError from '@/Components/InputError.vue'
 
 const props = defineProps({
   chefCommande: Object, // existing chefCommande with items + articles
   articles: Array,
-  categories: Array
+  categories: Array,
+  users: Array
 })
 
 const search = ref('')
@@ -15,6 +17,7 @@ const editCommandeModal = ref(null)
 
 // Initialize form with existing data
 const form = useForm({
+  user_id: props.chefCommande.user_id,
   categorie_id: props.chefCommande.categorie_id,
   articles: props.chefCommande.items.map(item => ({
     article_id: item.article.id,
@@ -86,6 +89,22 @@ function onCategorieChange(event)
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
+        <div v-if="$page.props.auth.user.role == 'ADMIN'">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Chef
+          </label>
+          <select
+            v-model="form.user_id"
+            class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="">Choisissez un chef </option>
+            <option v-for="user in users" :key="user.id" :value="user.id">
+              {{ user.name }}
+            </option>
+          </select>
+          <InputError :message="form.errors.user_id" class="mt-2" />
+        </div>
+        
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Categorie

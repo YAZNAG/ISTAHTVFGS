@@ -60,20 +60,22 @@ class ChefCommandeController extends Controller
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
             'articles' => Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']),
             'categories' => Categorie::all(['id', 'nom']),
-            'users' => User::all(['id', 'name']),
+            'users' => User::chefs()->get(['id', 'name']),
         ])->baseRoute('chef-commandes.index');
     }
 
 
     public function store(StoreChefCommandeRequest $request)
     {
+        $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
+        
         #FIX: it creates multiple chef commandes
         $chefCommande = ChefCommande::create([
             'numero' => ChefCommande::genererNumero(),
             'categorie_id' => $request->categorie_id,
             'note' => $request->note,
             'statut' => $request->type == 'submit' ? ChefCommande::STATUS_EN_ATTENTE_VALIDATION : ChefCommande::STATUS_CREE,
-            'user_id' => auth()->user()->id,
+            'user_id' => $user_id,
         ]);
 
 
@@ -107,6 +109,7 @@ class ChefCommandeController extends Controller
             'chefCommande' => EditChefCommandeResource::make($chefCommande),
             'articles' => $articles,
             'categories' => Categorie::all(['id', 'nom']),
+            'users' => User::chefs()->get(['id', 'name']),
         ])
         ->baseRoute('chef-commandes.index');
         ;
@@ -115,9 +118,12 @@ class ChefCommandeController extends Controller
     public function update(StoreChefCommandeRequest $request, ChefCommande $chefCommande)
     {
 
+        $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
+
         $chefCommande->update([
             'categorie_id' => $request->categorie_id,
             'note' => $request->note,
+            'user_id' => $user_id,
         ]);
 
         $chefCommande->items()->delete();
