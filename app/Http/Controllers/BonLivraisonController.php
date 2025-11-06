@@ -18,14 +18,42 @@ use Spatie\LaravelPdf\Facades\Pdf;
 
 class BonLivraisonController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bonLivraisons = BonLivraison::livree()->withCount('items')->paginate(10);
-        $pendingLivraisons = BonLivraison::pending()->withCount('items')->get();
+        $search = $request->search;
+        $responsable_id = $request->responsable_id;
+        $bonLivraisons = BonLivraison::livree()->withCount('items')
+            ->when($search, function ($query, $search) {
+                return $query->where('numero', 'like', '%' . $search . '%')
+                    ->orWhereHas('fournisseur', function ($query) use ($search) {
+                        $query->where('nom', 'like', '%' . $search . '%');
+                    });
+            })
+            ->when($responsable_id, function ($query, $responsable_id) {
+                return $query->where('responsable_id', $responsable_id);
+            })
+            ->paginate(10)->withQueryString();
+
+        $pendingLivraisons = BonLivraison::pending()->withCount('items')
+            ->when($search, function ($query, $search) {
+                return $query->where('numero', 'like', '%' . $search . '%')
+                    ->orWhereHas('fournisseur', function ($query) use ($search) {
+                        $query->where('nom', 'like', '%' . $search . '%');
+                    });
+            })
+            ->when($responsable_id, function ($query, $responsable_id) {
+                return $query->where('responsable_id', $responsable_id);
+            })
+        ->get();
 
         return Inertia::render('BonLivraisons/Index', [
             'bonLivraisons' => IndexBonLivraisonResource::collection($bonLivraisons),
-            'pendingLivraisons' => IndexBonLivraisonResource::collection($pendingLivraisons)
+            'pendingLivraisons' => IndexBonLivraisonResource::collection($pendingLivraisons),
+            'magasiniers' => User::magasiniers()->get(['id', 'name']),
+            'filtres' => [
+                'search' => $search,
+                'responsable_id' => $responsable_id
+            ]
         ]);
     }
 
@@ -64,7 +92,7 @@ class BonLivraisonController extends Controller
         return Inertia::modal('BonLivraisons/Edit', [
             'bonLivraison' => EditBonLivraisonResource::make($bonLivraison),
             'articles' => $articles,
-            'users' => User::all(['id', 'name'])
+            'users' => User::magasiniers()->get(['id', 'name'])
         ]);
     }
 

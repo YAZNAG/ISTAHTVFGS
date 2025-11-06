@@ -35,6 +35,19 @@
                                 <MagnifyingGlassIcon class="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                             </div>
                         </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Magasiniers</label>
+                            <div class="relative">
+                                <select v-model="filters.responsable_id" 
+                                    class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                                    <option value="">Tous les magasiniers</option>
+                                    <option v-for="magasinier in magasiniers" :key="magasinier.id" :value="magasinier.id">
+                                        {{ magasinier.name }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex justify-between items-center mt-6">
                         <div class="text-sm text-gray-500">
@@ -360,12 +373,16 @@ const props = defineProps({
         type: Object,
         default: () => ({})
     },
+    magasiniers: {
+        type: Array,
+        default: () => ([])
+    }
 });
 
 
 // Filtres
 const filters = ref({
-    statut: props.filters?.statut || '',
+    responsable_id: props.filters?.responsable_id || '',
     search: props.filters?.search || '',
 });
 
@@ -380,11 +397,14 @@ const applyFilters = () => {
 
 const resetFilters = () => {
     filters.value = {
-        type_livraison: '',
-        statut: '',
-        responsable_reception_id: '',
+        responsable_id: '',
         search: '',
     };
+
+    router.get(route('bon-livraisons.index'), filters.value, {
+        preserveState: true,
+        replace: true,
+    });
 };
 
 
