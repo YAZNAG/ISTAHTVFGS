@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Bon de Commande {{ $bonCommande->reference }}</title>
+    <title>Appel d'offre {{ $bonCommande->reference }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
 
         <!-- TITLE -->
         <div class="text-center font-bold text-lg uppercase underline mb-4">
-            Bon de commande N° {{ $bonCommande->reference }}
+            Appel d'offre N° {{ $bonCommande->reference }}
         </div>
 
         <!-- SUPPLIER INFO -->

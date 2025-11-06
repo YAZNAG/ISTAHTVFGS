@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('chef_commande_id')->constrained('chef_commandes');
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->foreignId('responsable_id')->nullable()->constrained('users', 'id');
             $table->foreignId('fournisseur_id')->nullable()->constrained('fournisseurs');
             $table->softDeletes();
             $table->timestamps();

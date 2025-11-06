@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Fournisseur extends Model
+class Fournisseur extends Model implements HasMedia
 {
-    use SoftDeletes, HasFactory;
+    use SoftDeletes, HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'nom', 
@@ -36,6 +39,13 @@ class Fournisseur extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this
+            ->addMediaCollection('logo')
+            ->singleFile();
+    }
 
     public function bonCommandes(): HasMany
     {

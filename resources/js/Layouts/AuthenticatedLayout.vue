@@ -156,6 +156,8 @@ const sidebarSections = [
       { name: 'Marchés', href: '/achats/marches', match: '/achats/marches', icon: ClipboardDocumentListIcon, bgColor: 'bg-purple-100 text-purple-600' },
       { name: 'Bons de Commandes', href: '/chef-commandes', match: '/chef-commandes', icon: DocumentChartBarIcon, bgColor: 'bg-teal-100 text-teal-600' },
       { name: 'Bons de Livraison', href: '/bon-livraisons', match: '/bon-livraisons', icon: TruckIcon, bgColor: 'bg-orange-100 text-orange-600' },
+      { name: 'Bons de Réception', href: '/bon-receptions', match: '/bon-receptions', icon: DocumentChartBarIcon, bgColor: 'bg-indigo-100 text-indigo-600' 
+    },
     ]
   },
   {
@@ -216,7 +218,7 @@ const pageTitles = {
   '/achats/marches': 'Les Marchés',
   '/chef-commandes': 'Bons de Commandes',
   '/bon-livraisons': 'Bons de Livraison',
-  '/achats/bon-receptions': 'Bons de Réception',
+  '/bon-receptions': 'Bons de Réception',
   '/stock/entrees': 'Entrées de Stock',
   '/stock/sorties': 'Sorties de Stock',
   '/demandes': 'Mes Demandes',
@@ -236,6 +238,7 @@ const pageDescriptions = {
   '/achats/marches': 'Créez et suivez vos Marchés',
   '/chef-commandes': 'Créez et suivez vos bons de commandes',
   '/bon-livraisons': 'Créez et suivez vos bons de livraison',
+  '/bon-receptions': 'Enregistrez et validez les réceptions de marchandises',
   '/achats/bon-receptions': 'Enregistrez et validez les réceptions de marchandises',
   '/stock/entrees': 'Suivez vos entrées de stock',
   '/stock/sorties': 'Suivez vos sorties de stock',

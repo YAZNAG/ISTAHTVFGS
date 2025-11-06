@@ -12,6 +12,7 @@ use App\Models\BonLivraison;
 use App\Models\Categorie;
 use App\Models\ChefCommande;
 use App\Models\ChefCommandeItem;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -59,6 +60,7 @@ class ChefCommandeController extends Controller
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
             'articles' => Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']),
             'categories' => Categorie::all(['id', 'nom']),
+            'users' => User::all(['id', 'name']),
         ])->baseRoute('chef-commandes.index');
     }
 

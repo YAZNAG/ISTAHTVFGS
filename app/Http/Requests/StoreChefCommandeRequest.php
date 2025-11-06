@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreChefCommandeRequest extends FormRequest
 {
@@ -27,6 +28,7 @@ class StoreChefCommandeRequest extends FormRequest
             'articles' => 'required|array|min:1',
             'articles.*.article_id' => 'required|exists:articles,id',
             'articles.*.quantite_commandee' => 'required|numeric|min:1',
+            'user_id' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
         ];
     }
 }

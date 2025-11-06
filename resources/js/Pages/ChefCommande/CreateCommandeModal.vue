@@ -8,7 +8,8 @@ import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
   articles: Array,
-  categories: Array
+  categories: Array,
+  users: Array,
 })
 const search = ref('');
 const createCommandeModal = ref(null)
@@ -18,7 +19,8 @@ const dropdownOpen = ref(false)
 const form = useForm({
   categorie_id: '',
   articles: [],
-  note: ''
+  note: '',
+  user_id: '',
 });
 
 const articles = computed(() => {
@@ -87,7 +89,22 @@ function onCategorieChange(event)
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
-
+        <div v-if="$page.props.auth.user.role == 'ADMIN'">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Chef
+          </label>
+          <select
+            v-model="form.user_id"
+            class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="">Choisissez un chef </option>
+            <option v-for="user in users" :key="user.id" :value="user.id">
+              {{ user.name }}
+            </option>
+          </select>
+          <InputError :message="form.errors.user_id" class="mt-2" />
+        </div>
+        
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Categorie

@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\EditBonLivraisonResource;
+use App\Http\Resources\ExportBonLivraisonResource;
 use App\Http\Resources\IndexBonLivraisonResource;
+use App\Http\Resources\ShowBonLivraisonResource;
 use App\Models\Article;
 use App\Models\BonCommande;
 use App\Models\BonLivraison;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Enums\Format;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class BonLivraisonController extends Controller
 {
@@ -27,6 +32,16 @@ class BonLivraisonController extends Controller
 
     public function create()
     {
+        // return Inertia::modal('BonLivraisons/Create');
+    }
+
+    public function show(BonLivraison $bonLivraison)
+    {
+        $bonLivraison->load(['items', 'responsable', 'fournisseur']);
+
+        return Inertia::render('BonLivraisons/ShowDetails', [
+            'bonLivraison' => ShowBonLivraisonResource::make($bonLivraison)
+        ]);
         // return Inertia::modal('BonLivraisons/Create');
     }
 
@@ -48,7 +63,8 @@ class BonLivraisonController extends Controller
 
         return Inertia::modal('BonLivraisons/Edit', [
             'bonLivraison' => EditBonLivraisonResource::make($bonLivraison),
-            'articles' => $articles
+            'articles' => $articles,
+            'users' => User::all(['id', 'name'])
         ]);
     }
 
@@ -56,6 +72,7 @@ class BonLivraisonController extends Controller
     {
         $request->validate([
             'date_livraison' => 'required|date',
+            'user_id' => 'required|exists:users,id',
             'items' => 'required|array',
             'items.*.article_id' => 'required|exists:articles,id',
             'items.*.quantite' => 'required|numeric',
@@ -67,6 +84,7 @@ class BonLivraisonController extends Controller
             $bonLivraison->update([
                 'date_livraison' => $request->date_livraison,
                 'statut' => BonLivraison::STATUS_LIVREE,
+                'responsable_id' => $request->user_id
             ]);
 
             $bonLivraison->items()->delete();
@@ -84,5 +102,19 @@ class BonLivraisonController extends Controller
         });
 
         return redirect()->route('bon-livraisons.index')->with('success', 'Bon de livraison mis à jour avec succès.');
+    }
+
+
+    public function export(Request $request, BonLivraison $bonLivraison)
+    {
+        $bonLivraison->load(['items.article', 'fournisseur']);
+
+        $bonLivraison = ExportBonLivraisonResource::make($bonLivraison)->toArray($request);
+
+        // return response()->json($bonLivraison);
+        return Pdf::view('pdf.bon-livraison', [
+            'livraison' => $bonLivraison
+        ])->format(Format::A4)
+            ->margins(5, 5, 5, 5);
     }
 }

@@ -7,7 +7,8 @@ import InputError from '@/Components/InputError.vue'
 
 const props = defineProps({
   bonLivraison: Object, // existing bon livraison with items + articles
-  articles: Array
+  articles: Array,
+  users: Array
 })
 
 const search = ref('')
@@ -17,6 +18,7 @@ const editBonLivraisonModal = ref(null)
 // Initialize form with existing data
 const form = useForm({
   date_livraison: props.bonLivraison.date_livraison || new Date().toISOString().split('T')[0],
+  user_id: '',
   items: props.bonLivraison.items.map(item => ({
     id: item.id,
     article_id: item.article_id,
@@ -97,6 +99,22 @@ function submit() {
         <input v-model="form.date_livraison" type="date" required
           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
         <InputError :message="form.errors.date_livraison" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Responsable
+        </label>
+        <select
+          v-model="form.user_id"
+          class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+        >
+          <option value="">Choisissez un responsable </option>
+          <option v-for="user in users" :key="user.id" :value="user.id">
+            {{ user.name }}
+          </option>
+        </select>
+        <InputError :message="form.errors.user_id" class="mt-2" />
       </div>
 
       <!-- Article Selector -->

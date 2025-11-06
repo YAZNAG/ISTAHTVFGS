@@ -250,7 +250,7 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'update'])->name('bon-livraisons.update');
     Route::get('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'show'])->name('bon-livraisons.show');
     // Route::delete('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'destroy'])->name('bon-livraisons.destroy');
-    // Route::get('/bon-livraisons/{bonLivraison}/pdf', [BonLivraisonController::class, 'generatePdf'])->name('bon-livraisons.pdf');
+    Route::get('/bon-livraisons/{bonLivraison}/pdf', [BonLivraisonController::class, 'export'])->name('bon-livraisons.pdf');
     // Route::get('/bon-livraisons/{bonLivraison}/debug', [BonLivraisonController::class, 'debugBonLivraison'])->name('bon-livraisons.debug');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
