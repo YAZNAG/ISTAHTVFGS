@@ -24,7 +24,6 @@
             <h2 class="text-lg font-bold">Bon de Livraison</h2>
             <p class="text-sm mt-2"><strong>Référence:</strong> {{ $livraison['reference'] }}</p>
             <p class="text-sm"><strong>Date:</strong> {{ $livraison['date_livraison'] }}</p>
-            <p class="text-xs text-gray-500 mt-1">Créé le {{ $livraison['created_at'] }}</p>
         </div>
     </div>
 
