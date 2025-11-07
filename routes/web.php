@@ -52,12 +52,12 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Route API pour les détails des commandes
-    Route::get('api/commandes/{id}/details', [BonReceptionController::class, 'getCommandeDetails'])
-        ->name('bon-receptions.commande-details');
+    // Route::get('api/commandes/{id}/details', [BonReceptionController::class, 'getCommandeDetails'])
+    //     ->name('bon-receptions.commande-details');
     
     // Route pour les statistiques
-    Route::get('api/bon-receptions/stats', [BonReceptionController::class, 'stats'])
-        ->name('bon-receptions.stats');
+    // Route::get('api/bon-receptions/stats', [BonReceptionController::class, 'stats'])
+    //     ->name('bon-receptions.stats');
     // Routes pour les articles
     Route::resource('articles', ArticleController::class);
 
@@ -96,52 +96,52 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('marches/{bonCommande}/statut', [BonCommandeController::class, 'updateStatut'])->name('bon-commandes.statut');
         Route::post('marches/fournisseurs/store', [BonCommandeController::class, 'storeFournisseur'])->name('bon-commandes.fournisseurs.store');
         Route::get('marches/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
-        Route::get('/marches/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
+        // Route::get('/marches/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
 
       // Routes pour les bons de réception
-Route::resource('bon-receptions', BonReceptionController::class);
-Route::get('bon-receptions/create/{bonCommande}', [BonReceptionController::class, 'create'])
-    ->name('bon-receptions.create-from-commande');
-Route::get('bon-receptions/{bonReception}/details', [BonReceptionController::class, 'showDetails'])
-    ->name('bon-receptions.show-details');
-Route::get('bon-receptions/{bonReception}/download-pdf', [BonReceptionController::class, 'downloadPdf'])
-    ->name('bon-receptions.download-pdf');
-Route::get('bon-receptions/{bonReception}/download-bon-livraison', [BonReceptionController::class, 'downloadBonLivraison'])
-    ->name('bon-receptions.download-bon-livraison');
-Route::get('bon-receptions/{bonReception}/download-facture', [BonReceptionController::class, 'downloadFacture'])
-    ->name('bon-receptions.download-facture');
-Route::get('bon-receptions/commande-details/{id}', [BonReceptionController::class, 'getCommandeDetails'])
-    ->name('bon-receptions.commande-details');
+// Route::resource('bon-receptions', BonReceptionController::class);
+// Route::get('bon-receptions/create/{bonCommande}', [BonReceptionController::class, 'create'])
+//     ->name('bon-receptions.create-from-commande');
+// Route::get('bon-receptions/{bonReception}/details', [BonReceptionController::class, 'showDetails'])
+//     ->name('bon-receptions.show-details');
+// Route::get('bon-receptions/{bonReception}/download-pdf', [BonReceptionController::class, 'downloadPdf'])
+//     ->name('bon-receptions.download-pdf');
+// Route::get('bon-receptions/{bonReception}/download-bon-livraison', [BonReceptionController::class, 'downloadBonLivraison'])
+//     ->name('bon-receptions.download-bon-livraison');
+// Route::get('bon-receptions/{bonReception}/download-facture', [BonReceptionController::class, 'downloadFacture'])
+//     ->name('bon-receptions.download-facture');
+// Route::get('bon-receptions/commande-details/{id}', [BonReceptionController::class, 'getCommandeDetails'])
+//     ->name('bon-receptions.commande-details');
 
     
 
-    Route::get('/debug-commande/{id}', function ($id) {
-    $commande = \Marche::with(['articles.article'])->find($id);
+//     Route::get('/debug-commande/{id}', function ($id) {
+//     $commande = \Marche::with(['articles.article'])->find($id);
     
-    if (!$commande) {
-        return response()->json(['error' => 'Commande non trouvée'], 404);
-    }
+//     if (!$commande) {
+//         return response()->json(['error' => 'Commande non trouvée'], 404);
+//     }
 
-    $debugData = [
-        'commande_id' => $commande->id,
-        'reference' => $commande->reference,
-        'articles_count' => $commande->articles->count(),
-        'articles' => $commande->articles->map(function ($article) {
-            return [
-                'article_id' => $article->article_id,
-                'designation' => $article->article->designation,
-                'quantite_commandee' => $article->quantite_commandee,
-                'prix_unitaire_ht' => $article->prix_unitaire_ht,
-                'taux_tva' => $article->taux_tva,
-                'montant_ht' => $article->montant_ht,
-                'montant_tva' => $article->montant_tva,
-                'montant_ttc' => $article->montant_ttc,
-            ];
-        })
-    ];
+//     $debugData = [
+//         'commande_id' => $commande->id,
+//         'reference' => $commande->reference,
+//         'articles_count' => $commande->articles->count(),
+//         'articles' => $commande->articles->map(function ($article) {
+//             return [
+//                 'article_id' => $article->article_id,
+//                 'designation' => $article->article->designation,
+//                 'quantite_commandee' => $article->quantite_commandee,
+//                 'prix_unitaire_ht' => $article->prix_unitaire_ht,
+//                 'taux_tva' => $article->taux_tva,
+//                 'montant_ht' => $article->montant_ht,
+//                 'montant_tva' => $article->montant_tva,
+//                 'montant_ttc' => $article->montant_ttc,
+//             ];
+//         })
+//     ];
 
-    return response()->json($debugData);
-});
+//     return response()->json($debugData);
+// });
         // Fournisseurs
         Route::get('fournisseurs', [FournisseurController::class, 'index'])->name('fournisseurs.index');
         Route::post('fournisseurs', [FournisseurController::class, 'store'])->name('fournisseurs.store');
@@ -179,10 +179,10 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
         Route::get('/sorties/{sortieStock}/download-pdf', [SortieStockController::class, 'downloadPdf'])->name('sortie-stocks.download-pdf');
 
         // Routes des Mouvements de Stock
-        Route::get('/mouvements', [MouvementStockController::class, 'index'])->name('mouvement-stocks.index');
-        Route::get('/mouvements/export', [MouvementStockController::class, 'export'])->name('mouvement-stocks.export');
-        Route::get('/mouvements/stats', [MouvementStockController::class, 'stats'])->name('mouvement-stocks.stats');
-        Route::get('/mouvements/article/{article}', [MouvementStockController::class, 'byArticle'])->name('mouvement-stocks.by-article');
+        // Route::get('/mouvements', [MouvementStockController::class, 'index'])->name('mouvement-stocks.index');
+        // Route::get('/mouvements/export', [MouvementStockController::class, 'export'])->name('mouvement-stocks.export');
+        // Route::get('/mouvements/stats', [MouvementStockController::class, 'stats'])->name('mouvement-stocks.stats');
+        // Route::get('/mouvements/article/{article}', [MouvementStockController::class, 'byArticle'])->name('mouvement-stocks.by-article');
     });
 
 
