@@ -526,6 +526,7 @@ const fournisseurForm = useForm({
     notes: '',
     logo: null,
     logoPreview: null,
+    _method: 'post'
 });
 
 // Watch pour les filtres
@@ -629,10 +630,12 @@ const submitFournisseurForm = () => {
     const url = isEditing.value 
         ? route('fournisseurs.update', selectedFournisseur.value.id)
         : route('fournisseurs.store');
+
+    if (isEditing.value){
+        fournisseurForm._method = 'put';
+    }
     
-    const method = isEditing.value ? 'put' : 'post';
-    
-    fournisseurForm[method](url, {
+    fournisseurForm.post(url, {
         onSuccess: () => {
             closeAllForms();
             showToast(
