@@ -47,46 +47,6 @@
       </div>
 
       <!-- Top Fournisseurs -->
-      <div class="bg-white rounded-2xl shadow-sm p-4">
-        <h2 class="text-lg font-semibold mb-4">Top Fournisseurs (dépenses)</h2>
-        <apexchart type="bar" height="300" :options="fournisseurChartOptions" :series="fournisseurChartSeries" />
-      </div>
-    </div>
-
-    <!-- Low Stock + Recent Demandes -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Low Stock -->
-      <div class="bg-white rounded-2xl shadow-sm p-4">
-        <h2 class="text-lg font-semibold mb-4">Articles en stock faible</h2>
-        <table class="w-full text-sm border border-gray-200 rounded-md">
-          <thead class="bg-gray-100 text-gray-600">
-            <tr>
-              <th class="p-2 text-left">Référence</th>
-              <th class="p-2 text-left">Désignation</th>
-              <th class="p-2 text-center">Stock</th>
-              <th class="p-2 text-center">Seuil</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="a in lowStockArticles"
-              :key="a.reference"
-              class="border-t text-gray-700"
-            >
-              <td class="p-2">{{ a.reference }}</td>
-              <td class="p-2">{{ a.designation }}</td>
-              <td class="p-2 text-center">{{ a.quantite_stock }} <span class="text-red-600">(-{{ a.seuil_minimal - a.quantite_stock }})</span></td>
-              <td class="p-2 text-center text-green-600 font-semibold">{{ a.seuil_minimal }}</td>
-            </tr>
-            <tr v-if="!lowStockArticles.length">
-              <td colspan="4" class="p-2 text-center text-gray-400">
-                Aucun article en stock faible
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
       <!-- Recent Demandes -->
       <div class="bg-white rounded-2xl shadow-sm p-4">
         <h2 class="text-lg font-semibold mb-4">Dernières demandes</h2>
@@ -129,17 +89,88 @@
       </div>
     </div>
 
+    <!-- Low Stock + Max Stock -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Low Stock -->
+      <div class="bg-white rounded-2xl shadow-sm p-4">
+        <h2 class="text-lg font-semibold mb-4">Articles en stock faible</h2>
+        <table class="w-full text-sm border border-gray-200 rounded-md">
+          <thead class="bg-gray-100 text-gray-600">
+            <tr>
+              <th class="p-2 text-left">Référence</th>
+              <th class="p-2 text-left">Désignation</th>
+              <th class="p-2 text-center">Stock</th>
+              <th class="p-2 text-center">Seuil</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="a in lowStockArticles"
+              :key="a.reference"
+              class="border-t text-gray-700"
+            >
+              <td class="p-2">{{ a.reference }}</td>
+              <td class="p-2">{{ a.designation }}</td>
+              <td class="p-2 text-center">{{ a.quantite_stock }} <span class="text-red-600">(-{{ a.seuil_minimal - a.quantite_stock }})</span></td>
+              <td class="p-2 text-center text-green-600 font-semibold">{{ a.seuil_minimal }}</td>
+            </tr>
+            <tr v-if="!lowStockArticles.length">
+              <td colspan="4" class="p-2 text-center text-gray-400">
+                Aucun article en stock faible
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Low Stock -->
+      <div class="bg-white rounded-2xl shadow-sm p-4">
+        <h2 class="text-lg font-semibold mb-4">Articles dépassant la quantité maximale</h2>
+        <table class="w-full text-sm border border-gray-200 rounded-md">
+          <thead class="bg-gray-100 text-gray-600">
+            <tr>
+              <th class="p-2 text-left">Référence</th>
+              <th class="p-2 text-left">Désignation</th>
+              <th class="p-2 text-center">Stock</th>
+              <th class="p-2 text-center">Maximum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="a in overstockedArticles"
+              :key="a.reference"
+              class="border-t text-gray-700"
+            >
+              <td class="p-2">{{ a.reference }}</td>
+              <td class="p-2">{{ a.designation }}</td>
+              <td class="p-2 text-center">
+                {{ a.quantite_stock }}
+                <span class="text-green-600">(+{{ a.quantite_stock - a.seuil_maximal }})</span>
+              </td>
+              <td class="p-2 text-center text-red-600 font-semibold">{{ a.seuil_maximal }}</td>
+            </tr>
+            <tr v-if="!overstockedArticles.length">
+              <td colspan="4" class="p-2 text-center text-gray-400">
+                Aucun article dépassant la quantité maximale
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
     <!-- Top Articles -->
     <div class="bg-white rounded-2xl shadow-sm p-4">
-      <h2 class="text-lg font-semibold mb-4">Top 5 Articles en stock</h2>
+      <h2 class="text-lg font-semibold mb-4">Articles les plus utilisés</h2>
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div
-          v-for="a in topArticles"
+          v-for="a in topUsedArticles"
           :key="a.designation"
           class="p-3 rounded-lg bg-gray-50 text-center"
         >
           <p class="font-semibold text-gray-800">{{ a.designation }}</p>
-          <p class="text-sm text-gray-600">{{ a.quantite_stock }} unités</p>
+          <p class="text-sm text-gray-600">{{ a.total_sorties }} {{ a.unite_mesure}}</p>
         </div>
       </div>
     </div>
@@ -154,14 +185,15 @@ import * as HeroIcons from '@heroicons/vue/24/outline'
 import KpiCard from '@/Components/KpiCard.vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head } from '@inertiajs/vue3'
+import Dump from '@/Components/Dump.vue'
 
 const props = defineProps({
   stats: Object,
   bonCommandeStatus: Object,
-  topArticles: Array,
+  topUsedArticles: Array,
   lowStockArticles: Array,
   recentDemandes: Array,
-  fournisseurSpending: Array,
+  overstockedArticles: Array,
 })
 
 // --- Bon Commande Chart ---
@@ -174,19 +206,5 @@ const commandeChartOptions = computed(() => ({
 
 const commandeChartSeries = computed(() => Object.values(props.bonCommandeStatus))
 
-// --- Fournisseur Spending Chart ---
-const fournisseurChartOptions = computed(() => ({
-  chart: { type: 'bar', toolbar: { show: false } },
-  xaxis: { categories: props.fournisseurSpending.map(f => f.nom) },
-  plotOptions: { bar: { borderRadius: 6, horizontal: false } },
-  colors: ['#6366F1'],
-  dataLabels: { enabled: false },
-}))
 
-const fournisseurChartSeries = computed(() => [
-  {
-    name: 'Dépenses (MAD)',
-    data: props.fournisseurSpending.map(f => parseFloat(f.total_spent)),
-  },
-])
 </script>

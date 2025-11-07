@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\BonCommande;
 use App\Models\Demande;
 use App\Models\Fournisseur;
+use App\Models\MouvementStock;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,10 +43,31 @@ class DashboardController extends Controller
         $lowStockArticles = Article::whereColumn('quantite_stock', '<', 'seuil_minimal')
             ->get(['reference', 'designation', 'quantite_stock', 'seuil_minimal']);
 
-        
+        // ---- Max Stock Articles ----
+        $overstockedArticles = Article::whereColumn('quantite_stock', '>', 'seuil_maximal')
+            ->get(['reference', 'designation', 'quantite_stock', 'seuil_maximal']);
+
+        $topUsedArticles = MouvementStock::select('article_id', DB::raw('SUM(quantite_sortie) as total_sorties'))
+            ->sorties()
+            ->groupBy('article_id')
+            ->orderByDesc('total_sorties')
+            ->with('article')
+            ->take(10)
+            ->get()
+            ->map(function($ms) {
+                return [
+                    'article_id' => $ms->article_id,
+                    'reference' => $ms->article->reference,
+                    'designation' => $ms->article->designation,
+                    'unite_mesure' => $ms->article->unite_mesure,
+                    'total_sorties' => $ms->total_sorties,
+                ];
+            })
+            ;
+
         // ---- Recent Demandes ----
         $recentDemandes = Demande::latest()
-            ->take(5)
+            ->take(8)
             ->get(['numero', 'motif', 'statut', 'created_at'])
             ->map(fn($d) => [
                 'numero' => $d->numero,
@@ -56,16 +78,6 @@ class DashboardController extends Controller
             ]);
 
 
-        $fournisseurSpending = Fournisseur::select('fournisseurs.id', 'fournisseurs.nom')
-            ->leftJoin('entree_stocks', 'entree_stocks.fournisseur_id', '=', 'fournisseurs.id')
-            ->leftJoin('ligne_entree_stocks', 'ligne_entree_stocks.entree_stock_id', '=', 'entree_stocks.id')
-            ->selectRaw('ROUND(COALESCE(SUM(ligne_entree_stocks.prix_total * (1 + (ligne_entree_stocks.taux_tva / 100))), 0), 2) as total_spent')
-            ->groupBy('fournisseurs.id', 'fournisseurs.nom')
-            ->orderByDesc('total_spent')
-            ->take(5)
-            ->get();
-
-        
 
         return Inertia::render('Dashboard', [
             'stats' => [
@@ -77,10 +89,10 @@ class DashboardController extends Controller
                 // 'totalStockValue' => $totalStockValue,
             ],
             'bonCommandeStatus' => $bonCommandeStatus,
-            'topArticles' => $topArticles,
+            'topUsedArticles' => $topUsedArticles,
             'lowStockArticles' => $lowStockArticles,
+            'overstockedArticles' => $overstockedArticles,
             'recentDemandes' => $recentDemandes,
-            'fournisseurSpending' => $fournisseurSpending,
         ]);
     }
 }
