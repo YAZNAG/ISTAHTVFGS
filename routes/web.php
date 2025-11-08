@@ -19,6 +19,7 @@ use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\RapportsController;
+use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\UserManagementController;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -252,6 +253,17 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     // Route::delete('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'destroy'])->name('bon-livraisons.destroy');
     Route::get('/bon-livraisons/{bonLivraison}/pdf', [BonLivraisonController::class, 'export'])->name('bon-livraisons.pdf');
     // Route::get('/bon-livraisons/{bonLivraison}/debug', [BonLivraisonController::class, 'debugBonLivraison'])->name('bon-livraisons.debug');
+
+    #### Bon Reception ####
+    Route::get('/bon-receptions', [ReceptionController::class, 'index'])->name('bon-receptions.index');
+    Route::get('/bon-receptions/create', [ReceptionController::class, 'create'])->name('bon-receptions.create');
+    Route::post('/bon-receptions', [ReceptionController::class, 'store'])->name('bon-receptions.store');
+    Route::get('/bon-receptions/{reception}', [ReceptionController::class, 'show'])->name('bon-receptions.show');
+    Route::delete('/bon-receptions/{reception}', [ReceptionController::class, 'destroy'])->name('bon-receptions.destroy');
+
+
+    Route::get('/bon-receptions/{bonReception}/pdf', [ReceptionController::class, 'export'])->name('bon-receptions.pdf');
+
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
