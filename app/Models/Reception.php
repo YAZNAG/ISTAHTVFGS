@@ -37,4 +37,9 @@ class Reception extends Model implements HasMedia
     {
         return $this->belongsTo(BonLivraison::class);
     }
+
+    public function mouvements()
+    {
+        return $this->morphMany(MouvementStock::class, 'referenceable');
+    }
 }

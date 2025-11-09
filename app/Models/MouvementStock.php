@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MouvementStock extends Model
 {
+    use SoftDeletes;
 
     protected $appends = ['quantite'];
 
@@ -22,10 +24,9 @@ class MouvementStock extends Model
         'quantite_entree',
         'quantite_sortie',
         'quantite_actuelle',
-        'referenceable',
         'motif',
-        'sourceable_id',
-        'sourceable_type',
+        'referenceable_id',
+        'referenceable_type',
     ];
 
     protected $casts = [
@@ -58,31 +59,9 @@ class MouvementStock extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function sourceable()
+    public function referenceable()
     {
         return $this->morphTo();
-    }
-
-    // Méthode pour créer un mouvement depuis une entrée
-    public static function creerDepuisEntree(LigneEntreeStock $ligneEntree): self
-    {
-        $article = $ligneEntree->article;
-        $entreeStock = $ligneEntree->entreeStock;
-
-        return self::create([
-            'article_id' => $ligneEntree->article_id,
-            'type_mouvement' => self::TYPE_ENTREE,
-            'quantite' => $ligneEntree->quantite,
-            'prix_unitaire' => $ligneEntree->prix_unitaire,
-            'reference' => $entreeStock->numero_affichage,
-            'date_mouvement' => $entreeStock->date_entree,
-            'motif' => 'Entrée stock - ' . ($entreeStock->bonReception->numero_affichage ?? 'N/A'),
-            'stock_avant' => $article->quantite_stock - $ligneEntree->quantite,
-            'stock_apres' => $article->quantite_stock,
-            'source_type' => get_class($entreeStock),
-            'source_id' => $entreeStock->id,
-            'created_by' => $entreeStock->created_by,
-        ]);
     }
 
     // Scope pour les entrées

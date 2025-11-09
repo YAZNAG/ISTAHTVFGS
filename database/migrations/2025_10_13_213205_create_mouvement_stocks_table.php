@@ -21,7 +21,7 @@ return new class extends Migration
             
             // Article
             $table->decimal('prix_unitaire', 10, 2);
-            $table->decimal('prix_ht', 10, 2);
+            $table->decimal('taux_tva', 10, 2);
             
             // Quantités
             $table->decimal('quantite_entree', 10, 2)->default(0);
@@ -31,9 +31,10 @@ return new class extends Migration
             // Références
             $table->text('motif')->nullable();
             
-            $table->nullableMorphs('sourceable'); // SorieStock or EntreeStock
+            $table->nullableMorphs('referenceable'); // SorieStock or EntreeStock
             $table->foreignId('article_id')->constrained('articles');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

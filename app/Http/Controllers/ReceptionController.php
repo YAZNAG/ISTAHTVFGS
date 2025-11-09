@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Resources\IndexReceptionResource;
 use App\Http\Resources\ShowReceptionResource;
 use App\Models\BonLivraison;
+use App\Models\MouvementStock;
 use App\Models\Reception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ReceptionController extends Controller
@@ -45,15 +47,37 @@ class ReceptionController extends Controller
             'bon' => 'required|file',
         ]);
 
-        $reception = Reception::create([
-            'bon_livraison_id' => $request->bon_livraison_id,
-            'numero' => Reception::genererNumero(),
-        ]);
+        DB::transaction(function () use ($request) {
+            
+            $reception = Reception::create([
+                'bon_livraison_id' => $request->bon_livraison_id,
+                'numero' => Reception::genererNumero(),
+            ]);
 
-        $reception->addMediaFromRequest('bon')->usingName("Bon de réception {$reception->numero}")->toMediaCollection('bon');
+            $reception->addMediaFromRequest('bon')->usingName("Bon de réception {$reception->numero}")->toMediaCollection('bon');
 
-        # TODO: add mouvement stock 
-
+            $reception->load(['bonLivraison.items.article']);
+            
+            foreach ($reception->bonLivraison->items as $item) {
+                $item->article->increment('quantite_stock', $item->quantite);
+                        
+                $nouvelleQuantiteActuelle = $item->article->quantite_stock;
+                MouvementStock::create([
+                    'type' => MouvementStock::TYPE_ENTREE,
+                    'article_id' => $item->article_id,
+                    'date_mouvement' => now(),
+                    'prix_unitaire' => $item->prix_unitaire,
+                    'taux_tva' => $item->taux_tva,
+                    'type_mouvement' => MouvementStock::TYPE_ENTREE,
+                    'quantite_entree' => $item->quantite,
+                    'quantite_sortie' => 0,
+                    'quantite_actuelle' => $nouvelleQuantiteActuelle,
+                    'motif' => 'Reception de bon de livraison n° ' . $reception->bonLivraison->numero,
+                    'referenceable_id' => $reception->id,
+                    'referenceable_type' => Reception::class,
+                ]);
+            }
+        });
         return redirect()->back()->with('success', 'Bon de reception ajouté avec succès');
     }
 
@@ -67,10 +91,22 @@ class ReceptionController extends Controller
 
     public function destroy(Request $request, Reception $reception)
     {
-        # TODO: delete reception and the related mouvement stock
-        $reception->clearMediaCollection('bon');
+        DB::transaction(function () use ($reception) {
+            
+            # TODO: delete reception and the related mouvement stock
+            $reception->load(['bonLivraison.items.article', 'mouvements']);
+            
+            foreach ($reception->bonLivraison->items as $item) {
+                $item->article->decrement('quantite_stock', $item->quantite);
+                
+                $reception->mouvements()->delete();
+            }
+            
         
-        $reception->delete();
+            $reception->clearMediaCollection('bon');
+            
+            $reception->delete();
+        });
 
         return redirect()->back()->with('success', 'Bon de reception supprimé avec succès');
     }
