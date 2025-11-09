@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->integer('seuil_minimal')->default(0);
             $table->integer('seuil_maximal')->default(0);
 
+            $table->boolean('in_marche')->default(false);
             $table->boolean('est_actif')->default(true);
             $table->timestamps();
         });

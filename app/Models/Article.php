@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\IsExistsInMarcheScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,8 @@ class Article extends Model
         'unite_mesure',
         'seuil_minimal', 
         'seuil_maximal', 
-        'est_actif'
+        'est_actif',
+        'in_marche'
     ];
 
     protected $casts = [
@@ -30,6 +32,16 @@ class Article extends Model
         'seuil_minimal' => 'integer',
         'seuil_maximal' => 'integer'
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new IsExistsInMarcheScope);
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+{
+    return $this->withNonExists()->where($field ?? $this->getRouteKeyName(), $value)->first();
+}
 
     public function categorie(): BelongsTo
     {

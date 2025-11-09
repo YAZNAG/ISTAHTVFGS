@@ -75,6 +75,7 @@ class BonCommandeController extends Controller
     });
 
     $articles = Article::with(['categorie', 'categoriePrincipale', 'naturePrestation'])
+        ->withNonExists()
         ->where('est_actif', true)
         ->get();
 
@@ -358,6 +359,7 @@ private function updateArticlesPrix(BonCommande $bonCommande, Request $request)
     $validatedArticles = [];
     
     foreach ($request->articles as $articleData) {
+
         // Trouver l'enregistrement dans la table pivot
         $articlePivot = BonCommandeArticle::where('id', $articleData['id'])
             ->where('bon_commande_id', $bonCommande->id)
@@ -371,6 +373,9 @@ private function updateArticlesPrix(BonCommande $bonCommande, Request $request)
             continue;
         }
 
+        Article::onlyNonExists()->find($articlePivot->article_id)?->update([
+            'in_marche' => true
+        ]);
         $prixUnitaireHT = floatval($articleData['prix_unitaire_ht']);
         $quantite = floatval($articlePivot->quantite_commandee);
         $tauxTVA = floatval($articlePivot->taux_tva);

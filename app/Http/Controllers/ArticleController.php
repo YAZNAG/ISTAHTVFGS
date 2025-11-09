@@ -27,6 +27,7 @@ class ArticleController extends Controller
                 'images',
                 'lastEntryStock',
             ])
+            ->withNonExists()
             ->latest()
             ->paginate(10);
 
