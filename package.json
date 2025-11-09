@@ -23,6 +23,7 @@
     "dependencies": {
         "@heroicons/vue": "^2.2.0",
         "@inertiaui/modal-vue": "^1.0.0-beta-4",
+        "@vueuse/core": "^14.0.0",
         "apexcharts": "^5.3.5",
         "html2canvas": "^1.4.1",
         "jspdf": "^3.0.3",

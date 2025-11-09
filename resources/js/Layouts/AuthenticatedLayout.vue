@@ -27,11 +27,58 @@
             </span>
 
             <!-- User info -->
-            <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-700">{{ $page.props.auth.user.name }}</span>
-              <div class="h-8 w-8 bg-blue-100 border border-blue-200 text-blue-800 rounded-full object-cover border flex items-center justify-center font-semibold">
-                {{ $page.props.auth.user.name.charAt(0) }}
-              </div>
+
+            <div class="relative" ref="userMenu">
+              <button
+                @click="isUserMenuOpen = !isUserMenuOpen"
+                class="flex items-center space-x-2 focus:outline-none"
+              >
+                <span class="text-sm text-gray-700">{{ $page.props.auth.user.name }}</span>
+                <div
+                  class="h-8 w-8 bg-blue-100 border border-blue-200 text-blue-800 rounded-full flex items-center justify-center font-semibold"
+                >
+                  {{ $page.props.auth.user.name.charAt(0) }}
+                </div>
+                <svg
+                  class="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              <!-- Dropdown -->
+              <div
+              v-if="isUserMenuOpen"
+              class="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50"
+            >
+              <Link
+                href="/profile"
+                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                @click="isUserMenuOpen = false"
+              >
+                <UserIcon class="w-5 h-5 mr-2 text-gray-500" />
+                Mon Compte
+              </Link>
+
+              <Link
+                :href="route('logout')"
+                method="POST"
+                as="button"
+                class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                @click="isUserMenuOpen = false"
+              >
+                <ArrowLeftOnRectangleIcon class="w-5 h-5 mr-2 text-gray-500" />
+                Se Déconnecter
+              </Link>
+            </div>
             </div>
           </div>
         </div>
@@ -132,11 +179,20 @@ import {
   DocumentChartBarIcon,
   ArrowUpCircleIcon,
   DocumentIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  ArrowLeftOnRectangleIcon
 } from '@heroicons/vue/24/outline'
+import { onClickOutside } from '@vueuse/core'
 
 const isSidebarOpen = ref(false)
+const isUserMenuOpen = ref(false)
+const userMenu = ref(null)
 const page = usePage()
+
+
+onClickOutside(userMenu, () => {
+  isUserMenuOpen.value = false
+})
 
 // Optional supplier count
 const fournisseursCount = computed(() => page.props.fournisseursStats?.total || null)
@@ -201,13 +257,6 @@ const sidebarSections = [
       { name: 'Les Rapports', href: '/rapports', match: '/rapports', icon: ChartBarIcon, bgColor: 'bg-indigo-100 text-indigo-600' },
     ]
   },
-  {
-    label: 'Administration',
-    items: [
-      { name: 'Profil', href: '/profile', match: '/profile', icon: UserIcon, bgColor: 'bg-gray-100 text-gray-600' },
-      { name: 'Paramètres', href: '/parametres', match: '/parametres', icon: Cog6ToothIcon, bgColor: 'bg-red-100 text-red-600' },
-    ]
-  },
 ]
 
 // Dynamic page titles
@@ -224,8 +273,6 @@ const pageTitles = {
   '/demandes': 'Mes Demandes',
   '/users': 'Gestion des Utilisateurs',
   '/rapports': 'Rapports',
-  '/profile': 'Mon Profil',
-  '/parametres': 'Paramètres du Système',
   '/fiches-techniques/pedagogique': 'Fiches Techniques Pédagogiques',
   '/fiches-techniques/collectivite': 'Fiches Techniques Collectivité',
 }
@@ -245,8 +292,6 @@ const pageDescriptions = {
   '/demandes': 'Gérez et suivez vos demandes d\'articles',
   '/users': 'Gérez les utilisateurs de l\'application',
   '/rapports': 'Consultez les rapports',
-  '/profile': 'Gérez vos informations personnelles',
-  '/parametres': 'Configurez les paramètres de l\'application',
   '/fiches-techniques/pedagogique': 'Consultez les fiches techniques pédagogiques',
   '/fiches-techniques/collectivite': 'Consultez les fiches techniques collectivité',
 }
