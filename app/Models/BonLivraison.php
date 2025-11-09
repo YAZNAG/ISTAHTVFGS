@@ -55,6 +55,11 @@ class BonLivraison extends Model
         return number_format($this->items->sum('montant_ttc'), 2, '.', '');
     }
 
+    public function reception()
+    {
+        return $this->hasOne(Reception::class, 'bon_livraison_id', 'id');
+    }
+
     public function chefCommande()
     {
         return $this->belongsTo(ChefCommande::class, 'chef_commande_id', 'id');

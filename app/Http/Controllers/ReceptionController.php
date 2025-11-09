@@ -31,7 +31,7 @@ class ReceptionController extends Controller
 
     public function create()
     {
-        $bonLivraisons = BonLivraison::livree()->get(['id', 'numero']);
+        $bonLivraisons = BonLivraison::livree()->whereDoesntHave('reception')->get(['id', 'numero']);
 
         return Inertia::modal('Receptions/Create', [
             'bonLivraisons' => $bonLivraisons
