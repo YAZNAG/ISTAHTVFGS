@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('numero');
             $table->foreignId('bon_livraison_id')->constrained('bon_livraisons');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
