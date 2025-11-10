@@ -115,6 +115,10 @@ class Article extends Model
 
     public function getPriceAttribute()
     {
-        return BonCommandeArticle::where('article_id', $this->id)->latest()->first()?->prix_unitaire_ht;
+        return BonCommandeArticle::where('article_id', $this->id)
+            ->whereHas('bonCommande', function ($query) {
+                $query->whereDate('date_debut', '>=', now())
+                    ->whereDate('date_fin', '<=', now());
+            })->first()?->prix_unitaire_ht;
     }
 }

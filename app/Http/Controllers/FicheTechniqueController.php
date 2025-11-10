@@ -122,12 +122,16 @@ class FicheTechniqueController extends Controller
 
                 # Create etape ingredients
                 foreach ($ficheEtape['articles'] as $ingredient) {
-                    $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])->latest()->first();
+                    $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])
+                        ->whereHas('bonCommande', function ($query) {
+                            $query->whereDate('date_debut', '<=', now())
+                                ->whereDate('date_fin', '>=', now());
+                        })->first();
                     
                     $etape->ingredients()->create([
                         'article_id' => $ingredient['article_id'],
                         'quantite' => $ingredient['quantite'],
-                        'prix_unitaire' => $articleFromLastEntree->prix_unitaire,
+                        'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
                         'taux_tva' => $articleFromLastEntree->taux_tva,
                     ]);
                 }
