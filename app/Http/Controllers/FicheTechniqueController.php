@@ -68,9 +68,9 @@ class FicheTechniqueController extends Controller
         // $articles = Article::actives()->get(['id', 'designation', 'unite_mesure']);
 
         $articles = Article::actives()
-        ->with(['mouvementsStock' => function ( $query) {
-            $query->where('type', MouvementStock::TYPE_ENTREE)->latest('date_mouvement')->limit(1); // latest livree entry
-        }])
+        // ->with(['mouvementsStock' => function ( $query) {
+        //     $query->where('type', MouvementStock::TYPE_ENTREE)->latest('date_mouvement')->limit(1); // latest livree entry
+        // }])
         ->get(['id', 'designation', 'unite_mesure']);
 
 
