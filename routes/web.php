@@ -210,6 +210,8 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('/demandes/{demande}/approve', [DemandeController::class, 'showApprove'])->name('demandes.show.approve');
     Route::put('/demandes/{demande}/approve', [DemandeController::class, 'approve'])->name('demandes.approve');
     Route::put('/demandes/{demande}/reject', [DemandeController::class, 'reject'])->name('demandes.reject');
+    Route::patch('/demandes/{demande}/submit', [DemandeController::class, 'submit'])->name('demandes.submit');
+
     
 
     ##### Fiches Techniques ####

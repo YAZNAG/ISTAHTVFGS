@@ -25,10 +25,14 @@ const getDemandeStatutInfo = (statut) => {
       return { label: 'En attente de validation', color: 'bg-yellow-100 text-yellow-800' }
     case 'en_attente_livraison':
       return { label: 'En attente de livraison', color: 'bg-blue-100 text-blue-800' }
+    case 'validee':
+      return { label: 'Validée', color: 'bg-green-100 text-green-800' }
     case 'livree':
       return { label: 'Livrée', color: 'bg-green-100 text-green-800' }
     case 'annulee':
-      return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
+      return { label: 'Annulée', color: 'bg-red-100 text-red-800' }
+    case 'rejetee':
+      return { label: 'Rejetée', color: 'bg-rose-100 text-rose-600' }
     default:
       return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
   }

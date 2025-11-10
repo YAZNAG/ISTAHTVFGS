@@ -145,14 +145,12 @@ const statusInfo = ref(getDemandeStatutInfo(props.demande.statut));
                         <tr>
                             <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase">Article</th>
                             <th class="px-6 py-3 text-center font-medium text-gray-500 uppercase">Quantité demandée</th>
-                            <th class="px-6 py-3 text-center font-medium text-gray-500 uppercase">Quantité on stock</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr v-for="item in demande.articles" :key="item.id" class="hover:bg-gray-50">
                             <td class="px-6 py-4">{{ item.designation }}</td>
                             <td class="px-6 py-4 text-center">{{ item.quantite_demandee }}</td>
-                            <td class="px-6 py-4 text-center">{{ item.quantite_stock }}</td>
                         </tr>
                     </tbody>
                 </table>

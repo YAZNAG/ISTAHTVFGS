@@ -23,6 +23,7 @@ class Demande extends Model implements HasMedia
         'date_validation',
         'valide_par',
         'commentaire_validation',
+        'fiche_id',
     ];
 
     protected $dates = [
@@ -58,6 +59,11 @@ class Demande extends Model implements HasMedia
     public function articles()
     {
         return $this->hasMany(DemandeArticle::class, 'demande_id');
+    }
+
+    public function fiche()
+    {
+        return $this->belongsTo(FicheTechnique::class, 'fiche_id');
     }
 
     /*

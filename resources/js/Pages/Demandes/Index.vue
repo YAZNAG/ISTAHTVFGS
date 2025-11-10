@@ -13,7 +13,8 @@ import {
     PencilIcon,
     TrashIcon,
     CheckIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    XMarkIcon
 } from '@heroicons/vue/24/outline'
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -44,11 +45,11 @@ const filters = ref({
 
 function resetFilters() {
   filters.value = { search: '', status: '', start_date: '', end_date: '' }
-  router.get(route('demandes.mes-demandes'))
+  router.get(route('demandes.index'))
 }
 
 function applyFilters() {
-  router.get(route('demandes.mes-demandes'), filters.value)
+  router.get(route('demandes.index'), filters.value)
 }
 
 const showCancelModal = ref(false)
@@ -59,8 +60,24 @@ function openCancelModal(id) {
   showCancelModal.value = true
 }
 
+const showSubmitModal = ref(false)
+const demandeIdToSubmit = ref(null)
+
+function opensubmitModal(id) {
+  demandeIdToSubmit.value = id
+  showSubmitModal.value = true
+}
+
+function submitDemande() {
+  return router.patch(route('demandes.submit', demandeIdToSubmit.value), {
+    preserveScroll: true 
+  });
+}
+
 function cancelDemande() {
-  return router.delete(route('demandes.cancel', demandeIdToCancel.value), {}, {
+  return router.delete(route('demandes.cancel', demandeIdToCancel.value), {
+    preserveScroll: true 
+  }, {
     onSuccess: () => {
       alert('Demande annulée avec succès !')
     },
@@ -131,9 +148,11 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                             class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
                         >
                             <option value="">Tous</option>
-                            <option value="EN_ATTENTE">En attente</option>
-                            <option value="VALIDEE">Validée</option>
-                            <option value="REFUSEE">Refusée</option>
+                            <option value="en_attente_validation">En attente de validation</option>
+                            <option value="validee">Validée</option>
+                            <option value="rejetee">Rejetée</option>
+                            <option value="annulee">Annulée</option>
+
                         </select>
                     </div>
 
@@ -226,7 +245,7 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                                 <!-- valideur -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class='px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full' >
-                                        {{ demande.validateur || 'Non validé' }}
+                                        {{ demande.valide_par || 'Non validé' }}
                                     </span>
                                 </td>
 
@@ -246,6 +265,31 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                                         >
                                             <EyeIcon class="h-5 w-5" />
                                         </ModalLink>
+
+                                        <template v-if="demande.statut === 'cree'">
+                                            <button
+                                                
+                                                @click="openCancelModal(demande.id)"
+                                                class="text-red-600 hover:text-red-800"
+                                                title="Annuler la demande"
+                                            >
+                                                <XMarkIcon class="h-5 w-5" />
+                                                <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                                                    Annuler
+                                                </div>
+                                            </button>
+
+                                            <button
+                                                @click="opensubmitModal(demande.id)"
+                                                class="text-green-600 hover:text-green-800"
+                                                title="Submitter la demande"
+                                            >
+                                                <CheckIcon class="h-5 w-5" />
+                                                <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                                                    Submitter
+                                                </div>
+                                            </button>
+                                        </template>
 
                                         <ModalLink
                                             :href="route('demandes.edit', demande.id)"
@@ -271,7 +315,6 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                                             :href="route('demandes.show.approve', demande.id)"
                                             class="text-orange-600 hover:text-orange-900 p-1"
                                             title="Approuver la demande"
-                                            v-if="demande.statut === 'cree'"
                                         >
                                             <QuestionMarkCircleIcon class="h-5 w-5" />
                                         </Link>
@@ -340,6 +383,15 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
             message="Êtes-vous sûr de vouloir annuler cette demande ?"
             :onConfirm="cancelDemande"
             @close="showCancelModal = false"
+        />
+
+        <ConfirmationModal
+            :show="showSubmitModal"
+            type="info"
+            title="Submettre la demande"
+            message="Êtes-vous sûr de vouloir submettre cette demande ?"
+            :onConfirm="submitDemande"
+            @close="showSubmitModal = false"
         />
     </AuthenticatedLayout>
 </template>

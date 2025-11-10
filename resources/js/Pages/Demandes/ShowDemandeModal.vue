@@ -60,7 +60,7 @@ const demandeType = getDemandeTypeInfo(props.demande.type);
             </div>
 
             <!-- Validation Information -->
-            <div v-if="['approuvee','rejetee'].includes(demande.statut)"
+            <div v-if="['validee','rejetee'].includes(demande.statut)"
                 class="bg-white p-6 rounded-lg shadow-sm border"
             >
                 <h2 class="text-lg font-semibold mb-4">Informations de validation</h2>

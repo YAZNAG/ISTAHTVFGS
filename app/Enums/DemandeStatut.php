@@ -11,17 +11,17 @@ enum DemandeStatut: string
     
     case CREE = 'cree';
     case ANNULEE = 'annulee';
-    // case APPROUVEE = 'approuvee';
-    case EN_ATTENTE_LIVRAISON = 'en_attente_livraison';
-    case LIVREE = 'livree';
+    case REJETEE = 'rejetee';
+    case EN_ATTENTE_VALIDATION = 'en_attente_validation';
+    case VALIDEE = 'validee';
 
     public function label(): string
     {
         return match ($this) {
             self::CREE => 'Crée',
-            self::EN_ATTENTE_LIVRAISON => 'En attente de livraison',
-            // self::APPROUVEE => 'Approuvée',
-            self::LIVREE => 'livrée',
+            self::EN_ATTENTE_VALIDATION => 'en attente de validation',
+            self::VALIDEE => 'Validee',
+            self::REJETEE => 'Rejetee',
             self::ANNULEE => 'Annulée',
         };
     }

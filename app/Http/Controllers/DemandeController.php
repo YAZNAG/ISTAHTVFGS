@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\DemandeStatut;
+use App\Enums\FicheType;
 use App\Http\Resources\EditDemendeResource;
+use App\Http\Resources\FicheTechniqueDemandeResource;
 use App\Http\Resources\MesDemendesResource;
 use App\Http\Resources\ShowDemendeResource;
 use App\Models\Article;
 use App\Models\Demande;
+use App\Models\FicheTechnique;
 use App\Models\MouvementStock;
 use App\Models\SortieStock;
 use App\Models\User;
@@ -66,12 +69,19 @@ class DemandeController extends Controller
 
     public function create(Request $request) {
         $this->authorize('create', Demande::class);
-        
-        $articles = Article::all(['id', 'designation']);
 
+        $articles = Article::all(['id', 'designation']);
+        
+        $fichesCollectives = FicheTechnique::collectivite()->with('ingredients')->get();
+
+        $fichesPedagogiques = FicheTechnique::pedagogique()->with('ingredients')->get();
+        
         $data = [
-            'articles' => $articles
+            'articles' => $articles,
+            'fichesCollectives' => FicheTechniqueDemandeResource::collection($fichesCollectives),
+            'fichesPedagogiques' => FicheTechniqueDemandeResource::collection($fichesPedagogiques)
         ];
+
 
         if (auth()->user()->isAdmin()) {
             $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
@@ -86,24 +96,26 @@ class DemandeController extends Controller
         $request->validate([
             'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
             'fiche_technique' => 'required|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
-            'articles' => 'required|array|min:1',
-            'articles.*.article_id' => ['required', 'exists:articles,id'],
-            'articles.*.quantite' => ['required', 'numeric', 'min:1', new InStockRule],
             'motif' => 'nullable|string|max:500',
+            'fiche_id' => 'required|exists:fiches_techniques,id',
         ]);
 
         DB::transaction(function () use ($request) {
             
             $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
+
+            $fiche = FicheTechnique::findOrFail($request->fiche_id);
+            
             $demande = Demande::create([
                 'numero' => Demande::generateNumero(),
                 'demandeur_id' => auth()->user()->id,
                 'motif' => $request->input('motif'),
                 'statut' => DemandeStatut::CREE,
                 'user_id' => $user_id,
+                'fiche_id' => $request->fiche_id
             ]);
             
-            foreach ($request->input('articles') as $article) {
+            foreach ($fiche->ingredients as $article) {
                 $demande->articles()->create([
                     'article_id' => $article['article_id'],
                     'quantite_demandee' => $article['quantite'],
@@ -117,15 +129,31 @@ class DemandeController extends Controller
         return redirect()->back();
     }
 
+    public function submit(Demande $demande)
+    {
+
+        $demande->update([
+            'statut' => DemandeStatut::EN_ATTENTE_VALIDATION,
+        ]);
+
+        return redirect()->back()->with('success', 'Demande mise à jour avec succès.');
+    }
+
     public function edit(Demande $demande) {
         $this->authorize('update', $demande);
         
         $articles = Article::all(['id', 'designation']);
         $demande->load(['articles']);
 
+        $fichesCollectives = FicheTechnique::collectivite()->with('ingredients')->get();
+
+        $fichesPedagogiques = FicheTechnique::pedagogique()->with('ingredients')->get();
+        
         $data = [
             'articles' => $articles,
-            'demande' => EditDemendeResource::make($demande)
+            'demande' => EditDemendeResource::make($demande),
+            'fichesCollectives' => FicheTechniqueDemandeResource::collection($fichesCollectives),
+            'fichesPedagogiques' => FicheTechniqueDemandeResource::collection($fichesPedagogiques)
         ];
 
         if (auth()->user()->isAdmin()) {
@@ -143,31 +171,29 @@ class DemandeController extends Controller
         $request->validate([
             'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
             'fiche_technique' => 'nullable|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
-            'articles' => 'required|array|min:1',
-            'articles.*.article_id' => ['required', 'exists:articles,id'],
-            'articles.*.quantite' => ['required', 'numeric', 'min:1', new InStockRule],
+            'fiche_id' => 'required|exists:fiches_techniques,id',
             'motif' => 'nullable|string|max:500',
         ]);
 
         
         DB::transaction(function () use ($request, $demande) {
-
+            $fiche = FicheTechnique::findOrFail($request->fiche_id);
+            
             $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
             $demande->update([
                 'motif' => $request->input('motif'),
                 'user_id' => $user_id,
+                'fiche_id' => $request->fiche_id
             ]);
             
-            foreach ($request->input('articles') as $article) {
-                $demande->articles()->delete();
+            $demande->articles()->delete();
 
                 // Add new/updated articles
-                foreach ($request->input('articles') as $article) {
-                    $demande->articles()->create([
-                        'article_id' => $article['article_id'],
-                        'quantite_demandee' => $article['quantite'],
-                    ]);
-                }
+            foreach ($fiche->ingredients as $article) {
+                $demande->articles()->create([
+                    'article_id' => $article['article_id'],
+                    'quantite_demandee' => $article['quantite'],
+                ]);
             }
 
             if ($request->hasFile('fiche_technique')) {
@@ -211,57 +237,40 @@ class DemandeController extends Controller
             'commentaire_validation' => 'nullable|string|max:500',
         ]);
 
-        $errors = [];
-
-        foreach ($demande->articles as $ligne) {
-
-            if ($ligne->article->quantite_stock < $ligne->quantite_demandee) {
-                $errors[] = "La quantité demandée pour l'article « {$ligne->article->designation} » ({$ligne->quantite_demandee}) dépasse le stock disponible ({$ligne->article->quantite_stock}).";
-            }
-
-        }
-
-        if (!empty($errors)) {
-            throw ValidationException::withMessages([
-                'articlesError' => [$errors],
-            ]);
-        }
-
-
-        
         DB::transaction(function () use ($demande, $request) {
             
             $demande->update([
-                'statut' => DemandeStatut::EN_ATTENTE_LIVRAISON,
+                'statut' => DemandeStatut::VALIDEE,
                 'commentaire_validation' => $request->input('commentaire_validation'),
                 'date_validation' => now(),
+                'valide_par' => auth()->user()->id
             ]);
 
-            $sortieStock = SortieStock::create([
-                'numero' => SortieStock::genererNumero(),
-                'type_sortie' => SortieStock::TYPE_DEMANDE,
-                'demandeur_id' => $demande->demandeur_id,
-                'date_sortie' => now(),
-                'demande_id' => $demande->id,
-                'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
-                'statut' => SortieStock::STATUT_ATTENTE_LIVRAISON,
-            ]);
+            // $sortieStock = SortieStock::create([
+            //     'numero' => SortieStock::genererNumero(),
+            //     'type_sortie' => SortieStock::TYPE_DEMANDE,
+            //     'demandeur_id' => $demande->demandeur_id,
+            //     'date_sortie' => now(),
+            //     'demande_id' => $demande->id,
+            //     'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
+            //     'statut' => SortieStock::STATUT_ATTENTE_LIVRAISON,
+            // ]);
             
-            foreach ($demande->articles as $articleLine) {
+            // foreach ($demande->articles as $articleLine) {
 
-                # Article line from the last entree stock
-                $lastEntreeArticle = MouvementStock::entrees()->where('article_id', $articleLine->article_id)
-                                    ->orderBy('date_mouvement', 'desc')
-                                    ->orderBy('id', 'desc')
-                                    ->first();
+            //     # Article line from the last entree stock
+            //     $lastEntreeArticle = MouvementStock::entrees()->where('article_id', $articleLine->article_id)
+            //                         ->orderBy('date_mouvement', 'desc')
+            //                         ->orderBy('id', 'desc')
+            //                         ->first();
                 
-                $sortieStock->lignesSortie()->create([
-                    'article_id' => $articleLine->article_id,
-                    'quantite' => $articleLine->quantite_demandee,
-                    'prix_unitaire' => $lastEntreeArticle->prix_unitaire,
-                    'taux_tva' => $lastEntreeArticle->taux_tva
-                ]);
-            }
+            //     $sortieStock->lignesSortie()->create([
+            //         'article_id' => $articleLine->article_id,
+            //         'quantite' => $articleLine->quantite_demandee,
+            //         'prix_unitaire' => $lastEntreeArticle->prix_unitaire,
+            //         'taux_tva' => $lastEntreeArticle->taux_tva
+            //     ]);
+            // }
             
         });
         
@@ -277,7 +286,7 @@ class DemandeController extends Controller
         ]);
 
         $demande->update([
-            'statut' => DemandeStatut::ANNULEE,
+            'statut' => DemandeStatut::REJETEE,
             'commentaire_validation' => $request->input('commentaire_validation'),
             'date_validation' => now(),
         ]);

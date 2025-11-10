@@ -21,6 +21,7 @@ class EditDemendeResource extends JsonResource
             'numero' => $this->numero,
             'motif' => $this->motif,
             'demandeur_id' => $this->demandeur_id,
+            'fiche_id' => $this->fiche_id,
             'articles' => $this->articles->map(function ($article) {
                 return [
                     'id' => $article->id,

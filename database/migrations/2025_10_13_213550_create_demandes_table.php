@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('numero')->unique(); // e.g. DEM-2025-0001
             $table->foreignId('demandeur_id')->constrained('users');
+            $table->foreignId('fiche_id')->constrained('fiches_techniques');
             $table->text('motif')->nullable(); // reason or comment for the demand
             $table->string('statut');
             $table->timestamp('date_demande')->useCurrent();

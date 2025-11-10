@@ -46,4 +46,15 @@ class FicheTechnique extends Model
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
+
+    public function demande()
+    {
+        return $this->hasOne(Demande::class, 'fiche_id');
+    }
+
+    public function ingredients()
+    {
+        return $this->hasManyThrough(Ingredient::class, Etape::class, 'fiche_id', 'etape_id', 'id', 'id');
+    }
+    
 }
