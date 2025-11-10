@@ -117,8 +117,17 @@ class Article extends Model
     {
         return BonCommandeArticle::where('article_id', $this->id)
             ->whereHas('bonCommande', function ($query) {
-                $query->whereDate('date_debut', '>=', now())
-                    ->whereDate('date_fin', '<=', now());
+                $query->whereDate('date_debut', '<=', now())
+                        ->whereDate('date_fin', '>=', now());
             })->first()?->prix_unitaire_ht;
+    }
+
+    public function isLastMarche()
+    {
+        return BonCommandeArticle::where('article_id', $this->id)
+            ->whereHas('bonCommande', function ($query) {
+                $query->whereDate('date_debut', '<=', now())
+                        ->whereDate('date_fin', '>=', now());
+            })->first();
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Resources\FicheTechniqueDemandeResource;
 use App\Http\Resources\MesDemendesResource;
 use App\Http\Resources\ShowDemendeResource;
 use App\Models\Article;
+use App\Models\BonCommandeArticle;
 use App\Models\Demande;
 use App\Models\FicheTechnique;
 use App\Models\MouvementStock;
@@ -246,31 +247,37 @@ class DemandeController extends Controller
                 'valide_par' => auth()->user()->id
             ]);
 
-            // $sortieStock = SortieStock::create([
-            //     'numero' => SortieStock::genererNumero(),
-            //     'type_sortie' => SortieStock::TYPE_DEMANDE,
-            //     'demandeur_id' => $demande->demandeur_id,
-            //     'date_sortie' => now(),
-            //     'demande_id' => $demande->id,
-            //     'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
-            //     'statut' => SortieStock::STATUT_ATTENTE_LIVRAISON,
-            // ]);
+            $sortieStock = SortieStock::create([
+                'numero' => SortieStock::genererNumero(),
+                'type_sortie' => SortieStock::TYPE_DEMANDE,
+                'demandeur_id' => $demande->demandeur_id,
+                'date_sortie' => now(),
+                'demande_id' => $demande->id,
+                'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
+                'statut' => SortieStock::STATUT_ATTENTE_LIVRAISON,
+            ]);
             
-            // foreach ($demande->articles as $articleLine) {
+            foreach ($demande->articles as $articleLine) {
 
-            //     # Article line from the last entree stock
-            //     $lastEntreeArticle = MouvementStock::entrees()->where('article_id', $articleLine->article_id)
-            //                         ->orderBy('date_mouvement', 'desc')
-            //                         ->orderBy('id', 'desc')
-            //                         ->first();
+                # Article line from the last marche
+                // $lastEntreeArticle = MouvementStock::entrees()->where('article_id', $articleLine->article_id)
+                //                     ->orderBy('date_mouvement', 'desc')
+                //                     ->orderBy('id', 'desc')
+                //                     ->first();
+
+                $lastEntreeArticle = BonCommandeArticle::where('article_id', $articleLine->article_id)
+                ->whereHas('bonCommande', function ($query) {
+                    $query->whereDate('date_debut', '<=', now())
+                        ->whereDate('date_fin', '>=', now());
+                })->first();
                 
-            //     $sortieStock->lignesSortie()->create([
-            //         'article_id' => $articleLine->article_id,
-            //         'quantite' => $articleLine->quantite_demandee,
-            //         'prix_unitaire' => $lastEntreeArticle->prix_unitaire,
-            //         'taux_tva' => $lastEntreeArticle->taux_tva
-            //     ]);
-            // }
+                $sortieStock->lignesSortie()->create([
+                    'article_id' => $articleLine->article_id,
+                    'quantite' => $articleLine->quantite_demandee,
+                    'prix_unitaire' => $lastEntreeArticle->prix_unitaire_ht,
+                    'taux_tva' => $lastEntreeArticle->taux_tva
+                ]);
+            }
             
         });
         
