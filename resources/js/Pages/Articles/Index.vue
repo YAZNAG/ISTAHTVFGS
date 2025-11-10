@@ -1160,7 +1160,7 @@ const toggleCategoriesList = () => {
                                 <div class="text-sm text-gray-900">{{ article.categorie.nom }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ article.last_entry_stock?.prix_unitaire || 'N/A' }}</div>
+                                <div class="text-sm text-gray-900">{{ article.price || 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ article.unite_mesure }}</div>

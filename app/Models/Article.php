@@ -33,6 +33,8 @@ class Article extends Model
         'seuil_maximal' => 'integer'
     ];
 
+    protected $appends = ['price'];
+
     protected static function booted()
     {
         static::addGlobalScope(new IsExistsInMarcheScope);
@@ -110,4 +112,9 @@ class Article extends Model
 {
     return $this->hasMany(LigneReception::class);
 }
+
+    public function getPriceAttribute()
+    {
+        return BonCommandeArticle::where('article_id', $this->id)->latest()->first()?->prix_unitaire_ht;
+    }
 }
