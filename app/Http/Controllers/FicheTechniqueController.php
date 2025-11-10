@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateFicheTechniqueRequest;
 use App\Http\Resources\EditFicheTechniqueResource;
 use App\Http\Resources\ShowFicheTechniqueResource;
 use App\Models\Article;
+use App\Models\BonCommandeArticle;
 use App\Models\Etape;
 use App\Models\FicheTechnique;
 use App\Models\MouvementStock;
@@ -79,7 +80,7 @@ class FicheTechniqueController extends Controller
                 'id' => $article->id,
                 'designation' => $article->designation,
                 'unite_mesure' => $article->unite_mesure,
-                'prix_unitaire' => $article->mouvementsStock?->first()->prix_unitaire ?? 'Prix indisponible'
+                'prix_unitaire' => $article->price ?? 'Prix indisponible'
             ];
         });
 
@@ -121,8 +122,8 @@ class FicheTechniqueController extends Controller
 
                 # Create etape ingredients
                 foreach ($ficheEtape['articles'] as $ingredient) {
-                    $articleFromLastEntree = MouvementStock::entrees()->where('article_id', $ingredient['article_id'])->latest('date_mouvement')->first();
-
+                    $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])->latest()->first();
+                    
                     $etape->ingredients()->create([
                         'article_id' => $ingredient['article_id'],
                         'quantite' => $ingredient['quantite'],
@@ -204,10 +205,12 @@ class FicheTechniqueController extends Controller
                     $etape->ingredients()->whereNotIn('id', $requestIngredientIds)->delete();
 
                     foreach ($ficheEtape['articles'] as $ingredient) {
-                        $articleFromLastEntree = MouvementStock::entrees()
-                            ->where('article_id', $ingredient['article_id'])
-                            ->latest('date_mouvement')
-                            ->first();
+                        // $articleFromLastEntree = MouvementStock::entrees()
+                        //     ->where('article_id', $ingredient['article_id'])
+                        //     ->latest('date_mouvement')
+                        //     ->first();
+                        $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])->latest()->first();
+
 
                         if (!empty($ingredient['id'])) {
                             // Update existing ingredient
@@ -223,7 +226,7 @@ class FicheTechniqueController extends Controller
                             $etape->ingredients()->create([
                                 'article_id' => $ingredient['article_id'],
                                 'quantite' => $ingredient['quantite'],
-                                'prix_unitaire' => $articleFromLastEntree->prix_unitaire,
+                                'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
                                 'taux_tva' => $articleFromLastEntree->taux_tva,
                             ]);
                         }
@@ -236,15 +239,12 @@ class FicheTechniqueController extends Controller
                     ]);
 
                     foreach ($ficheEtape['articles'] as $ingredient) {
-                        $articleFromLastEntree = MouvementStock::entrees()
-                            ->where('article_id', $ingredient['article_id'])
-                            ->latest('date_mouvement')
-                            ->first();
+                        $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])->latest()->first();
 
                         $etape->ingredients()->create([
                             'article_id' => $ingredient['article_id'],
                             'quantite' => $ingredient['quantite'],
-                            'prix_unitaire' => $articleFromLastEntree->prix_unitaire,
+                            'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
                             'taux_tva' => $articleFromLastEntree->taux_tva,
                         ]);
                     }
