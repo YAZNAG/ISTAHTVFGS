@@ -10,6 +10,7 @@ use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\BonLivraisonController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
+use App\Http\Controllers\BonSortieController;
 use App\Http\Controllers\CardexController;
 use App\Http\Controllers\ChefCommandeController;
 use App\Http\Controllers\DashboardController;
@@ -170,14 +171,14 @@ Route::post('/entrees/{entreeStock}/valider', [EntreeStockController::class, 'va
 Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'annuler'])
     ->name('entree-stocks.annuler');
         // Routes des Sorties de Stock
-        Route::get('/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
-        Route::get('/sorties/create', [SortieStockController::class, 'create'])->name('sortie-stocks.create');
-        Route::post('/sorties', [SortieStockController::class, 'store'])->name('sortie-stocks.store');
-        Route::get('/sorties/{sortieStock}', [SortieStockController::class, 'show'])->name('sortie-stocks.show');
-        Route::get('/sorties/{sortieStock}/edit', [SortieStockController::class, 'edit'])->name('sortie-stocks.edit');
-        Route::put('/sorties/{sortieStock}', [SortieStockController::class, 'update'])->name('sortie-stocks.update');
-        Route::delete('/sorties/{sortieStock}', [SortieStockController::class, 'destroy'])->name('sortie-stocks.destroy');
-        Route::get('/sorties/{sortieStock}/download-pdf', [SortieStockController::class, 'downloadPdf'])->name('sortie-stocks.download-pdf');
+        // Route::get('/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
+        // Route::get('/sorties/create', [SortieStockController::class, 'create'])->name('sortie-stocks.create');
+        // Route::post('/sorties', [SortieStockController::class, 'store'])->name('sortie-stocks.store');
+        // Route::get('/sorties/{sortieStock}', [SortieStockController::class, 'show'])->name('sortie-stocks.show');
+        // Route::get('/sorties/{sortieStock}/edit', [SortieStockController::class, 'edit'])->name('sortie-stocks.edit');
+        // Route::put('/sorties/{sortieStock}', [SortieStockController::class, 'update'])->name('sortie-stocks.update');
+        // Route::delete('/sorties/{sortieStock}', [SortieStockController::class, 'destroy'])->name('sortie-stocks.destroy');
+        // Route::get('/sorties/{sortieStock}/download-pdf', [SortieStockController::class, 'downloadPdf'])->name('sortie-stocks.download-pdf');
 
         // Routes des Mouvements de Stock
         // Route::get('/mouvements', [MouvementStockController::class, 'index'])->name('mouvement-stocks.index');
@@ -226,10 +227,10 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('/fiches-techniques/{fiche}/export', [FicheTechniqueController::class, 'export'])->name('fiches-techniques.export');
 
     ##### Sortie Stock #####
-    Route::get('/sorties/{sortieStock}/approve', [SortieStockController::class, 'showApprove'])->name('sortie-stocks.show.approve');
-    Route::put('/sorties/{sortieStock}/approve', [SortieStockController::class, 'approve'])->name('sortie-stocks.approve');
-    Route::put('/sorties/{sortieStock}/reject', [SortieStockController::class, 'reject'])->name('sortie-stocks.reject');
-    Route::put('/sorties/{sortieStock}/livrer', [SortieStockController::class, 'livrer'])->name('sortie-stocks.livrer');
+    // Route::get('/sorties/{sortieStock}/approve', [SortieStockController::class, 'showApprove'])->name('sortie-stocks.show.approve');
+    // Route::put('/sorties/{sortieStock}/approve', [SortieStockController::class, 'approve'])->name('sortie-stocks.approve');
+    // Route::put('/sorties/{sortieStock}/reject', [SortieStockController::class, 'reject'])->name('sortie-stocks.reject');
+    // Route::put('/sorties/{sortieStock}/livrer', [SortieStockController::class, 'livrer'])->name('sortie-stocks.livrer');
 
     #### Chef Bon Commandes ####
     Route::get('/chef-commandes', [ChefCommandeController::class, 'index'])->name('chef-commandes.index');
@@ -262,9 +263,16 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::post('/bon-receptions', [ReceptionController::class, 'store'])->name('bon-receptions.store');
     Route::get('/bon-receptions/{reception}', [ReceptionController::class, 'show'])->name('bon-receptions.show');
     Route::delete('/bon-receptions/{reception}', [ReceptionController::class, 'destroy'])->name('bon-receptions.destroy');
-
-
     Route::get('/bon-receptions/{bonReception}/pdf', [ReceptionController::class, 'export'])->name('bon-receptions.pdf');
+
+    #### Bon Sortie ####
+    Route::get('/bon-sorties', [BonSortieController::class, 'index'])->name('bon-sorties.index');
+    Route::get('/bon-sorties/{bonSortie}', [BonSortieController::class, 'show'])->name('bon-sorties.show');
+    Route::get('/bon-sorties/{bonSortie}/showApprove', [BonSortieController::class, 'showApprove'])->name('bon-sorties.showApprove');
+    Route::put('/bon-sorties/{bonSortie}/approve', [BonSortieController::class, 'approve'])->name('bon-sorties.approve');
+    Route::get('/bon-sorties/{bonSortie}/reject', [BonSortieController::class, 'reject'])->name('bon-sorties.reject');
+
+    Route::get('/bon-sorties/{bonSortie}/download-pdf', [BonSortieController::class, 'downloadPdf'])->name('bon-sorties.download-pdf');
 
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');

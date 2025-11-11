@@ -21,7 +21,9 @@ class SortieStock extends Model
         'notes',
         'statut',
         'demande_id',
-        'created_by'
+        'created_by',
+        'date_validation',
+        'valide_par',
     ];
 
     protected $casts = [
@@ -45,6 +47,11 @@ class SortieStock extends Model
     const STATUT_ANNULE = 'annule';
 
     const TYPE_DEMANDE = 'demande';
+
+    public function valideur()
+    {
+        return $this->belongsTo(User::class, 'valide_par');
+    }
 
     public function demande(): BelongsTo
     {
