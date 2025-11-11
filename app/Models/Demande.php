@@ -19,7 +19,6 @@ class Demande extends Model implements HasMedia
         'motif',
         'statut',
         'date_demande',
-        'user_id',
         'date_validation',
         'valide_par',
         'commentaire_validation',

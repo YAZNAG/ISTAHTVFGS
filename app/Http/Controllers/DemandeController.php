@@ -109,10 +109,9 @@ class DemandeController extends Controller
             
             $demande = Demande::create([
                 'numero' => Demande::generateNumero(),
-                'demandeur_id' => auth()->user()->id,
+                'demandeur_id' => $user_id,
                 'motif' => $request->input('motif'),
                 'statut' => DemandeStatut::CREE,
-                'user_id' => $user_id,
                 'fiche_id' => $request->fiche_id
             ]);
             
