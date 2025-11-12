@@ -305,7 +305,7 @@ onMounted(() => {
     <!-- Sidebar -->
     <aside 
       :class="[
-        'fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-30 transition-all duration-300',
+        'fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-20 transition-all duration-300',
         {
           'w-64': !sidebarCollapsed || mobileViewport,
           'w-20': sidebarCollapsed && !mobileViewport,
