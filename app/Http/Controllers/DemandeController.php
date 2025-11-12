@@ -253,7 +253,7 @@ class DemandeController extends Controller
                 'date_sortie' => now(),
                 'demande_id' => $demande->id,
                 'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
-                'statut' => SortieStock::STATUT_ATTENTE_LIVRAISON,
+                'statut' => SortieStock::STATUT_ATTENTE_VALIDATION,
             ]);
             
             foreach ($demande->articles as $articleLine) {
