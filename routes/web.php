@@ -156,20 +156,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Routes pour la Gestion du Stock
     Route::prefix('stock')->group(function () {
-        // Routes des Entrées en Stock
         Route::get('/entrees', [EntreeStockController::class, 'index'])->name('entree-stocks.index');
-        // Route::get('/entrees/create', [EntreeStockController::class, 'create'])->name('entree-stocks.create');
-        // Route::post('/entrees', [EntreeStockController::class, 'store'])->name('entree-stocks.store');
-        Route::get('/entrees/{entreeStock}', [EntreeStockController::class, 'show'])->name('entree-stocks.show');
-        Route::get('/entrees/{entreeStock}/edit', [EntreeStockController::class, 'edit'])->name('entree-stocks.edit');
-        Route::put('/entrees/{entreeStock}', [EntreeStockController::class, 'update'])->name('entree-stocks.update');
-        Route::delete('/entrees/{entreeStock}', [EntreeStockController::class, 'destroy'])->name('entree-stocks.destroy');
-        Route::get('/entrees/{entreeStock}/download-pdf', [EntreeStockController::class, 'downloadPdf'])->name('entree-stocks.download-pdf');
-        // Routes pour la gestion des statuts des entrées de stock
-Route::post('/entrees/{entreeStock}/valider', [EntreeStockController::class, 'valider'])
-    ->name('entree-stocks.valider');
-Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'annuler'])
-    ->name('entree-stocks.annuler');
         // Routes des Sorties de Stock
         // Route::get('/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
         // Route::get('/sorties/create', [SortieStockController::class, 'create'])->name('sortie-stocks.create');
