@@ -12,7 +12,8 @@ import {
   ArchiveBoxIcon,
   CheckIcon,
   XMarkIcon,
-  InboxIcon
+  InboxIcon,
+  DocumentArrowDownIcon
 } from '@heroicons/vue/24/outline'
 import { Link, router, Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -62,6 +63,15 @@ function applyFilters() {
             <h1 class="text-3xl font-bold mb-2">Entrées Stock</h1>
             <p class="text-blue-100 text-lg opacity-90">Suivi des entrées d'articles en stock</p>
           </div>
+
+           <ModalLink
+              as="button"
+              :href="route('entree-stocks.export.create')"
+              class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 transition-all duration-200 font-semibold border border-blue-400"
+          >
+              <DocumentArrowDownIcon class="h-5 w-5" />
+              Exporter
+          </ModalLink>
         </div>
       </div>
 

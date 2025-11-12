@@ -16,7 +16,7 @@
           <InputLabel for="start_date">Date de début</InputLabel>
           <input
             id="start_date"
-            type="date"
+            type="month"
             v-model="exportForm.start_date"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             required
@@ -29,7 +29,7 @@
           <InputLabel for="end_date">Date de fin</InputLabel>
           <input
             id="end_date"
-            type="date"
+            type="month"
             v-model="exportForm.end_date"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />

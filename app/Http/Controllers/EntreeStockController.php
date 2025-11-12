@@ -67,6 +67,11 @@ class EntreeStockController extends Controller
         ]);
     }
 
+    function createExport() 
+    {
+        
+        return Inertia::modal('Stock/EntreeStocks/CreateExportModal')->baseRoute('entree-stocks.index');
+    }
 
     public function export(Request $request) 
     {
@@ -93,6 +98,10 @@ class EntreeStockController extends Controller
         }
 
         $articles = ExportEntreeStockRecource::collection($data)->toArray($request);
+
+        return view('pdf.fiche-entree', 
+                    compact('articles', 'startDate', 'endDate')
+    );
 
         return Pdf::view('pdf.fiche-entree', 
                     compact('articles', 'startDate', 'endDate')
