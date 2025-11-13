@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\NotificationResource;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -29,10 +31,11 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'flash' => [
                 'success' => session('success'),
@@ -40,6 +43,9 @@ class HandleInertiaRequests extends Middleware
                 'warning' => session('warning'),
                 'info' => session('info'),
             ],
+
+            'notifications' => $user ? Inertia::scroll(fn () => NotificationResource::collection($user->notifications()->paginate(8))) : null,
+            'notifications_unread_count' => $user?->unreadNotifications()->count(),
         ];
     }
 }

@@ -1,6 +1,6 @@
 <!-- resources/js/Components/NotificationDropdown.vue -->
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, useTemplateRef } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { 
   BellIcon,
@@ -12,89 +12,30 @@ import {
   CheckCircleIcon,
   BanknotesIcon
 } from '@heroicons/vue/24/outline'
+import { InfiniteScroll, usePage } from '@inertiajs/vue3'
+import Dump from './Dump.vue'
 
+const page = usePage();
 // State
 const isOpen = ref(false)
-const notifications = ref([])
-const loading = ref(false)
-const page = ref(1)
-const hasMore = ref(true)
 
 // Refs
 const dropdownRef = ref(null)
-const listRef = ref(null)
-
+const scrollContainer = useTemplateRef('scrollContainer', null)
 // Click outside
 onClickOutside(dropdownRef, () => {
   isOpen.value = false
 })
 
 // Computed
-const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
+const unreadCount = computed(() => page.props.notifications_unread_count)
+const notifications = computed(() => page.props.notifications)
+const isLastLoad = computed(() => notifications.value.meta.last_page == notifications.value.meta.current_page)
 
-// Load notifications
-const loadNotifications = async (loadMore = false) => {
-  if (!hasMore.value && loadMore) return
-  
-  loading.value = true
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
-    // Generate mock data
-    const newNotifications = Array(10).fill(null).map((_, i) => ({
-      id: Date.now() + i,
-      message: `Nouvelle notification #${page.value * 10 + i + 1}`,
-      time: `Il y a ${Math.floor(Math.random() * 60) + 1} minutes`,
-      type: ['demande', 'marche', 'error', 'warning'][Math.floor(Math.random() * 4)],
-      read: Math.random() > 0.3
-    }))
-    
-    if (loadMore) {
-      notifications.value.push(...newNotifications)
-    } else {
-      notifications.value = newNotifications
-    }
-    
-    // Stop after 3 pages
-    if (page.value >= 3) {
-      hasMore.value = false
-    }
-    
-    page.value++
-  } catch (error) {
-    console.error('Failed to load notifications:', error)
-  } finally {
-    loading.value = false
-  }
-}
 
 // Toggle dropdown
 const toggle = () => {
   isOpen.value = !isOpen.value
-  if (isOpen.value && notifications.value.length === 0) {
-    loadNotifications()
-  }
-}
-
-// Handle infinite scroll
-const handleScroll = (event) => {
-  const { scrollTop, scrollHeight, clientHeight } = event.target
-  if (scrollHeight - scrollTop <= clientHeight * 1.2 && !loading.value && hasMore.value) {
-    loadNotifications(true)
-  }
-}
-
-// Mark all as read
-const markAllAsRead = () => {
-  notifications.value.forEach(n => n.read = true)
-}
-
-// Handle notification click
-const handleClick = (notification) => {
-  notification.read = true
-  // Here you can emit an event or navigate
-  // Example: window.location.href = `/demandes/${notification.id}`
 }
 
 const getNotificationConfig = (type) => {
@@ -149,13 +90,12 @@ const getNotificationConfig = (type) => {
       
       <!-- List Container -->
       <div 
-        ref="listRef"
         class="max-h-96 overflow-y-auto"
-        @scroll="handleScroll"
+        ref="scrollContainer"
       >
         <!-- Empty State -->
         <div 
-          v-if="notifications.length === 0 && !loading"
+          v-if="notifications.length === 0"
           class="px-4 py-8 text-center"
         >
           <div class="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
@@ -166,58 +106,59 @@ const getNotificationConfig = (type) => {
         </div>
         
         <!-- Notifications -->
+        <InfiniteScroll data="notifications" >
         <div 
-          v-for="notification in notifications" 
+          v-for="notification in notifications.data" 
           :key="notification.id"
           class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
           :class="{ 'bg-blue-50': !notification.read }"
-          @click="handleClick(notification)"
         >
           <div class="flex items-start space-x-3">
-            <!-- Status Dot -->
             <div 
               class="w-2 h-2 rounded-full mt-2 flex-shrink-0"
               :class="notification.read ? 'bg-gray-300' : 'bg-blue-600'"
             ></div>
             
-            <!-- Content -->
             <div class="flex-1 min-w-0">
-              <p class="text-sm text-gray-900 leading-snug">{{ notification.message }}</p>
+              <p class="text-sm text-gray-900 leading-snug" v-html="notification.message"></p>
               <p class="text-xs text-gray-500 mt-1">{{ notification.time }}</p>
             </div>
             
-            <!-- Type Icon -->
             <div 
-              v-if="notification.type"
-              class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-              :class="getNotificationConfig(notification.type).colorClass"
+              class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100 text-gray-600"
             >
-              <component 
-                :is="getNotificationConfig(notification.type).icon" 
+              <BellIcon
                 class="w-3 h-3"
               />
             </div>
           </div>
         </div>
-        
-        <!-- Loading Indicator -->
-        <div v-if="loading" class="px-4 py-3 text-center">
-          <div class="inline-flex items-center space-x-2 text-sm text-gray-500">
-            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-            </svg>
-            <span>Chargement...</span>
+
+        <!-- <template #next="{ loading, hasMore }">
+          <div v-if="loading" class="px-4 py-3 text-center">
+            <div class="inline-flex items-center space-x-2 text-sm text-gray-500">
+              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+              </svg>
+              <span>Chargement...</span>
+            </div>
           </div>
-        </div>
+
+          
+
+          <div 
+            v-if="!hasMore "
+            class="px-4 py-2 text-center text-xs text-gray-500 border-t border-gray-100"
+          >
+            Vous avez tout vu !
+          </div>
+        </template> -->
         
-        <!-- End of List -->
-        <div 
-          v-if="!hasMore && notifications.length > 0 && !loading"
-          class="px-4 py-2 text-center text-xs text-gray-500 border-t border-gray-100"
-        >
-          Vous avez tout vu !
-        </div>
+        
+        </InfiniteScroll>
+
+        
       </div>
     </div>
   </div>

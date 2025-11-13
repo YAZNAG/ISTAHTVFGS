@@ -19,6 +19,7 @@ use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RapportsController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\UserManagementController;
@@ -261,6 +262,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/bon-sorties/{bonSortie}/download-pdf', [BonSortieController::class, 'downloadPdf'])->name('bon-sorties.download-pdf');
 
+
+    #### Notifications ####
+    Route::get('/notification/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
