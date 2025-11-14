@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Categorie;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -13,73 +14,67 @@ class CategoriesSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('categories')->insert([
+        $categories = [
             [
-                'id' => 1,
                 'nom' => 'légume',
-                'code' => 'legume',
+                'code' => 'LEG',
                 'description' => '',
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'est_actif' => 1,
-                'created_at' => '2025-09-29 10:08:00',
-                'updated_at' => '2025-09-29 10:08:00'
             ],
             [
-                'id' => 2,
                 'nom' => 'épiserie',
-                'code' => 'episerie',
+                'code' => 'EP',
                 'description' => '',
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'est_actif' => 1,
-                'created_at' => '2025-09-29 10:08:00',
-                'updated_at' => '2025-09-29 10:08:00'
             ],
             [
-                'id' => 3,
-                'nom' => 'viande et babats',
-                'code' => 'viande-et-babats',
+                'nom' => 'viandes',
+                'code' => 'VIA',
                 'description' => '',
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'est_actif' => 1,
-                'created_at' => '2025-09-29 10:08:00',
-                'updated_at' => '2025-09-29 10:08:00'
             ],
             [
-                'id' => 4,
-                'nom' => 'volaille et oeufs',
-                'code' => 'volaille-et-oeufs',
+                'nom' => 'volailles',
+                'code' => 'VOL',
                 'description' => '',
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'est_actif' => 1,
-                'created_at' => '2025-09-29 10:08:00',
-                'updated_at' => '2025-09-29 10:08:00'
             ],
             [
-                'id' => 5,
-                'nom' => 'poisson',
-                'code' => 'poisson',
+                'nom' => 'poissons',
+                'code' => 'POI',
                 'description' => '',
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'est_actif' => 1,
-                'created_at' => '2025-09-29 10:08:00',
-                'updated_at' => '2025-09-29 10:08:00'
             ],
             [
-                'id' => 6,
-                'nom' => 'fruit',
-                'code' => 'fruit',
+                'nom' => 'fruits',
+                'code' => 'FRU',
                 'description' => null,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'est_actif' => 1,
-                'created_at' => null,
-                'updated_at' => null
+            ],
+            [
+                'nom' => 'pain',
+                'code' => 'PAI',
+                'description' => null,
+                'categorie_principale_id' => 1,
+                'nature_prestation_id' => 1,
+                'est_actif' => 1,
             ]
-        ]);
+        ];
+
+        foreach ($categories as $category) {
+            Categorie::create($category);
+        }
     }
 }
