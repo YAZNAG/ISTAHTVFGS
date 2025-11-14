@@ -12,7 +12,7 @@ import {
   CheckCircleIcon,
   BanknotesIcon
 } from '@heroicons/vue/24/outline'
-import { InfiniteScroll, usePage } from '@inertiajs/vue3'
+import { InfiniteScroll, Link, usePage } from '@inertiajs/vue3'
 import Dump from './Dump.vue'
 
 const page = usePage();
@@ -79,13 +79,13 @@ const getNotificationConfig = (type) => {
       <!-- Header -->
       <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <p class="text-sm font-semibold text-gray-900">Notifications</p>
-        <button 
+        <Link
+          :href="route('notifications.readAll')" 
           v-if="unreadCount > 0"
-          @click="markAllAsRead"
           class="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
         >
           Tout marquer comme lu
-        </button>
+        </Link>
       </div>
       
       <!-- List Container -->
@@ -104,15 +104,16 @@ const getNotificationConfig = (type) => {
           <p class="text-sm font-medium text-gray-900">Aucune notification</p>
           <p class="text-xs text-gray-500 mt-1">Vous êtes à jour !</p>
         </div>
-        
+
         <!-- Notifications -->
-        <InfiniteScroll data="notifications" >
+        <InfiniteScroll data="notifications" preserve-url>
         <div 
           v-for="notification in notifications.data" 
           :key="notification.id"
           class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
           :class="{ 'bg-blue-50': !notification.read }"
         >
+        <Link :href="route('notifications.read', notification.id)">
           <div class="flex items-start space-x-3">
             <div 
               class="w-2 h-2 rounded-full mt-2 flex-shrink-0"
@@ -132,9 +133,10 @@ const getNotificationConfig = (type) => {
               />
             </div>
           </div>
+        </Link>
         </div>
 
-        <!-- <template #next="{ loading, hasMore }">
+        <template #next="{ loading, hasMore }">
           <div v-if="loading" class="px-4 py-3 text-center">
             <div class="inline-flex items-center space-x-2 text-sm text-gray-500">
               <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -145,7 +147,6 @@ const getNotificationConfig = (type) => {
             </div>
           </div>
 
-          
 
           <div 
             v-if="!hasMore "
@@ -153,7 +154,7 @@ const getNotificationConfig = (type) => {
           >
             Vous avez tout vu !
           </div>
-        </template> -->
+        </template>
         
         
         </InfiniteScroll>

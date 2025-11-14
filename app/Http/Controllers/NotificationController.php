@@ -12,7 +12,18 @@ class NotificationController extends Controller
         $notification = $request->user()->notifications()->find($notification);
         $notification->markAsRead();
 
-        return Inertia::location($notification->data['url']);
+        $url = data_get($notification->data, 'url');
+
+        if ($url) {
+            return Inertia::location($url);
+        } 
+
+        return redirect()->back();
         
+    }
+
+    public function readAll(Request $request) {
+        $request->user()->unreadNotifications->markAsRead();
+        return redirect()->back();
     }
 }

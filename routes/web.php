@@ -265,6 +265,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     #### Notifications ####
     Route::get('/notification/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::get('/notification/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
