@@ -20,7 +20,7 @@ class ExportEntreeStockRecource extends JsonResource
             'designation_article' => $this->article->designation,
             'stock_initial' => $this->quantite_actuelle - $this->quantite_entree,
             'quantite_entree' => $this->quantite_entree,
-            'reference_bon_reception' => $this->sourceable?->bonReception->numero,
+            'reference_bon_reception' => $this->referenceable?->numero,
             'stock_actuel' => $this->quantite_actuelle,
             'unite' => $this->article->unite_mesure,
             'prix_unitaire' => $this->prix_unitaire,

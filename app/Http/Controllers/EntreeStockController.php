@@ -84,7 +84,7 @@ class EntreeStockController extends Controller
 
         $query = MouvementStock::entrees()->with([
             'article',
-            'sourceable.bonReception',
+            'referenceable',
         ]);
 
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
