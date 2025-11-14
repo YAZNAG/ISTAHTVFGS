@@ -136,14 +136,14 @@ const menuGroups = [
         icon: ArrowDownTrayIcon, 
         bgColor: 'bg-emerald-100 text-emerald-600' 
       },
-      // { 
-      //   name: 'Sorties Stock', 
-      //   title: 'Les Sorties Stock',
-      //   href: '/stock/sorties', 
-      //   match: '/stock/sorties', 
-      //   icon: ArrowUpTrayIcon, 
-      //   bgColor: 'bg-amber-100 text-amber-600' 
-      // },
+      { 
+        name: 'Sorties Stock', 
+        title: 'Les Sorties Stock',
+        href: '/stock/sorties', 
+        match: '/stock/sorties', 
+        icon: ArrowUpTrayIcon, 
+        bgColor: 'bg-amber-100 text-amber-600' 
+      },
     ]
   },
   {

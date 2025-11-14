@@ -156,8 +156,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Routes pour la Gestion du Stock
-    Route::prefix('stock')->group(function () {
-        Route::get('/entrees', [EntreeStockController::class, 'index'])->name('entree-stocks.index');
+    // Route::prefix('stock')->group(function () {
+    //     Route::get('/entrees', [EntreeStockController::class, 'index'])->name('entree-stocks.index');
         // Routes des Sorties de Stock
         // Route::get('/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
         // Route::get('/sorties/create', [SortieStockController::class, 'create'])->name('sortie-stocks.create');
@@ -173,7 +173,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Route::get('/mouvements/export', [MouvementStockController::class, 'export'])->name('mouvement-stocks.export');
         // Route::get('/mouvements/stats', [MouvementStockController::class, 'stats'])->name('mouvement-stocks.stats');
         // Route::get('/mouvements/article/{article}', [MouvementStockController::class, 'byArticle'])->name('mouvement-stocks.by-article');
-    });
+    // });
 
 
 
@@ -266,6 +266,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     #### Notifications ####
     Route::get('/notification/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::get('/notification/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+
+
+    #### Stock Entrees ####
+    Route::get('stock/entrees', [EntreeStockController::class, 'index'])->name('entree-stocks.index');
+    Route::get('entree-stocks/export/create', [EntreeStockController::class, 'createExport'])->name('entree-stocks.export.create');
+    Route::get('entree-stocks/export', [EntreeStockController::class, 'export'])->name('entree-stocks.export');
+
+
+    #### Stock Sorties ####
+    Route::get('stock/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
+    Route::get('sortie-stocks/export/create', [SortieStockController::class, 'createExport'])->name('sortie-stocks.export.create');
+    Route::get('sortie-stocks/export', [SortieStockController::class, 'export'])->name('sortie-stocks.export');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
@@ -276,8 +288,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('marches/export', [BonCommandeController::class, 'export'])->name('bon-commandes.export');
 
-    Route::get('entree-stocks/export/create', [EntreeStockController::class, 'createExport'])->name('entree-stocks.export.create');
-    Route::get('entree-stocks/export', [EntreeStockController::class, 'export'])->name('entree-stocks.export');
 
     Route::get('cardex/{article}', [CardexController::class, 'export'])->name('cardex.export');
     
