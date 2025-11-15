@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ArticleStockController;
 use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\BonLivraisonController;
 use App\Http\Controllers\FournisseurController;
@@ -278,6 +279,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('stock/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
     Route::get('sortie-stocks/export/create', [SortieStockController::class, 'createExport'])->name('sortie-stocks.export.create');
     Route::get('sortie-stocks/export', [SortieStockController::class, 'export'])->name('sortie-stocks.export');
+    
+
+    #### Articles Stock ####
+    Route::get('/stock/articles', [ArticleStockController::class, 'index'])->name('articles-stocks.index');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 

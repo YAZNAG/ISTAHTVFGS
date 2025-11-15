@@ -38,7 +38,8 @@ import {
   MagnifyingGlassIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  CubeIcon
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
@@ -135,6 +136,14 @@ const menuGroups = [
         match: '/stock/entrees', 
         icon: ArrowDownTrayIcon, 
         bgColor: 'bg-emerald-100 text-emerald-600' 
+      },
+      { 
+        name: 'Articles en stock', 
+        title: 'Stock des Articles',
+        href: '/stock/articles', 
+        match: '/stock/articles', 
+        icon: CubeIcon, 
+        bgColor: 'bg-rose-100 text-rose-600' 
       },
       { 
         name: 'Sorties Stock', 
