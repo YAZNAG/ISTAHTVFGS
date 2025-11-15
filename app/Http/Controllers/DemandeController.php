@@ -71,14 +71,12 @@ class DemandeController extends Controller
     public function create(Request $request) {
         $this->authorize('create', Demande::class);
 
-        $articles = Article::all(['id', 'designation']);
         
         $fichesCollectives = FicheTechnique::collectivite()->with('ingredients')->get();
 
         $fichesPedagogiques = FicheTechnique::pedagogique()->with('ingredients')->get();
         
         $data = [
-            'articles' => $articles,
             'fichesCollectives' => FicheTechniqueDemandeResource::collection($fichesCollectives),
             'fichesPedagogiques' => FicheTechniqueDemandeResource::collection($fichesPedagogiques)
         ];

@@ -50,6 +50,8 @@ watch(selectedFiche, (ficheId) => {
     designation: a.designation,
     quantite: a.quantite ?? 0,
     prix_unitaire: a.prix_unitaire ?? 0,
+    unite_mesure: a.unite_mesure
+
   }))
 })
 
@@ -78,6 +80,7 @@ onMounted(() => {
         article_id: a.id,
         designation: a.designation,
         quantite: a.quantite_demandee ?? 0,
+        unite_mesure: a.unite_mesure
         // prix_unitaire: a.prix_unitaire ?? 0,
       }))
     }
@@ -118,7 +121,7 @@ function submit() {
 
       <!-- Type -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Type de Fiche</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Type de Demande</label>
         <select
           v-model="type"
           class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -177,7 +180,7 @@ function submit() {
           <tbody>
             <tr v-for="(a, i) in articles" :key="i" class="border-t">
               <td class="p-2">{{ a.designation }}</td>
-              <td class="p-2 text-center">{{ a.quantite }}</td>
+              <td class="p-2 text-center">{{ a.quantite }} {{ a.unite_mesure }}</td>
               <td class="p-2 text-center">{{ a.prix_unitaire }} DH</td>
             </tr>
           </tbody>

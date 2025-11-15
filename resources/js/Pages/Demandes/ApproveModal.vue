@@ -150,7 +150,7 @@ const statusInfo = ref(getDemandeStatutInfo(props.demande.statut));
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr v-for="item in demande.articles" :key="item.id" class="hover:bg-gray-50">
                             <td class="px-6 py-4">{{ item.designation }}</td>
-                            <td class="px-6 py-4 text-center">{{ item.quantite_demandee }}</td>
+                            <td class="px-6 py-4 text-center">{{ item.quantite_demandee }} {{ item.unite_mesure }}</td>
                         </tr>
                     </tbody>
                 </table>

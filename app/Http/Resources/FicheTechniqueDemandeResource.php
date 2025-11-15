@@ -23,7 +23,8 @@ class FicheTechniqueDemandeResource extends JsonResource
                     'id' => $ingredient->article_id,
                     'designation' => $ingredient->article->designation,
                     'quantite' => $ingredient->quantite,
-                    'prix_unitaire' => $ingredient->prix_unitaire
+                    'prix_unitaire' => $ingredient->prix_unitaire,
+                    'unite_mesure' => $ingredient->article->unite_mesure
                 ];
             })
         ];
