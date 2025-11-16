@@ -23,6 +23,7 @@ use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RapportsController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\UserManagementController;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -287,6 +288,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
     Route::get('/cardex/create', [CardexController::class, 'create'])->name('cardex.create');
+    
+    #### Restaurants ####
+    Route::get('/restaurants', [RestaurantController::class, 'index'])->name('restaurants.index');
+    Route::get('/restaurants/create', [RestaurantController::class, 'create'])->name('restaurants.create');
+    Route::post('/restaurants', [RestaurantController::class, 'store'])->name('restaurants.store');
+    Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
+    Route::get('/restaurants/{restaurant}/edit', [RestaurantController::class, 'edit'])->name('restaurants.edit');
+    Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.update');
+    Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy'])->name('restaurants.destroy');
+    // Route::get('/restaurants/{restaurant}/export', [RestaurantController::class, 'export'])->name('restaurants.export');
+
     
     ##### Exports #####
     Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');

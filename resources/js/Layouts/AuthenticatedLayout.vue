@@ -39,7 +39,8 @@ import {
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   ChevronRightIcon,
-  CubeIcon
+  CubeIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
@@ -179,6 +180,14 @@ const menuGroups = [
   {
     label: 'Fiches Techniques',
     items: [
+      {
+        name: 'Restaurants',
+        title: 'Les Restaurants',
+        href: '/restaurants',
+        match: '/restaurants',
+        icon: ClipboardDocumentListIcon,
+        bgColor: 'bg-orange-100 text-orange-600'
+      },
       { 
         name: 'Pédagogiques', 
         title: 'Les Fiches Pédagogiques',
