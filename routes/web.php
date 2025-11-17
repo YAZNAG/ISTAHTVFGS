@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiFicheController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -307,6 +308,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     Route::get('cardex/{article}', [CardexController::class, 'export'])->name('cardex.export');
+
+
+    #### API ####
+    Route::get('/fiches/type/{type}', [ApiFicheController::class, 'getFicheByType'])->name('fiches.byType');
+    
     
 });
 

@@ -9,16 +9,19 @@ const props = defineProps({
   demandeurs: Array,
   fichesCollectives: Array,   // with articles
   fichesPedagogiques: Array,  // with articles
+  restaurants: Array,  // with articles
+  types: Object,
 })
 
 const createDemandeModal = ref(null)
 
-const type = ref('')
 const selectedFiche = ref(null)
 
 const fiches = computed(() => {
-  if (type.value === 'collective') return props.fichesCollectives
-  if (type.value === 'pedagogique') return props.fichesPedagogiques
+  if (form.demandable_type === 'collectivite') return props.fichesCollectives
+  if (form.demandable_type === 'pedagogique') return props.fichesPedagogiques
+  if (form.demandable_type === 'restaurant') return props.restaurants
+
   return []
 })
 
@@ -26,7 +29,8 @@ const form = useForm({
   demandeur: null,
   fiche_technique: null,
   motif: '',
-  fiche_id: '',
+  demandable_id: '',
+  demandable_type: '',
 })
 
 const articles = ref([])
@@ -35,14 +39,14 @@ function handleFileUpload(event) {
 }
 
 // when fiche changes, auto load its articles (read-only)
-watch(selectedFiche, (ficheId) => {
+watch(() => form.demandable_id, (ficheId) => {
   const fiche = fiches.value.find(f => f.id === ficheId)
+  
   if (!fiche) {
-    form.fiche_id = null
     articles.value = []
     return
   }
-  form.fiche_id = fiche.id
+  
   articles.value = fiche.articles.map(a => ({
     article_id: a.id,
     designation: a.designation,
@@ -50,14 +54,19 @@ watch(selectedFiche, (ficheId) => {
     prix_unitaire: a.prix_unitaire ?? 0,
     unite_mesure: a.unite_mesure
   }))
+});
+
+watch(() => form.demandable_type, () => {
+  form.demandable_id = null
+  articles.value = []
 })
 
 function submit() {
   form.post(route('demandes.store'), {
     onSuccess: () => {
       form.reset()
-      selectedFiche.value = null
-      type.value = ''
+      form.demandable_id = null,
+      form.demandable_type = ''
       createDemandeModal.value.close()
     },
   })
@@ -70,6 +79,8 @@ function submit() {
     <div class="mb-4">
       <h2 class="text-lg font-semibold">Nouvelle Demande d’Articles</h2>
     </div>
+
+    <Dump :data="form.data()" />
 
     <!-- Body -->
     <form @submit.prevent="submit" class="space-y-4">
@@ -88,33 +99,31 @@ function submit() {
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Type de Demande</label>
         <select
-          v-model="type"
+          v-model="form.demandable_type"
           class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
         >
           <option disabled value="">Sélectionnez un type</option>
-          <option value="collective">Collective</option>
-          <option value="pedagogique">Pédagogique</option>
+          <option :value="type.value" v-for="type in types" :key="type.value">{{ type.label }}</option>
         </select>
       </div>
 
       <!-- Fiche -->
-      <div v-if="type">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Fiche <span class="text-xs text-gray-400">({{ type == 'collective' ? 'Module' : 'Repas' }})</span></label>
+      <div v-if="form.demandable_type">
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche' }}</label>
         <select
-          v-model="selectedFiche"
+          v-model="form.demandable_id"
           class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
         >
-          <option disabled value="">Sélectionnez une fiche</option>
+          <option disabled value="">Sélectionnez une {{ form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche' }}</option>
           <option v-for="fiche in fiches" :key="fiche.id" :value="fiche.id">
             {{ fiche.nom }}
           </option>
         </select>
-        <InputError :message="form.errors.fiche_id" />
-
+        <InputError :message="form.errors.demandable_id" />
       </div>
 
       <!-- Fiche Technique -->
-      <div>
+      <div v-if="form.demandable_type !== 'restaurant'">
         <label class="block text-sm font-medium text-gray-700 mb-1">
           Fiche Technique
         </label>
@@ -140,14 +149,12 @@ function submit() {
             <tr>
               <th class="p-2 text-left">Article</th>
               <th class="p-2 text-center">Quantité</th>
-              <!-- <th class="p-2 text-center">Prix</th> -->
             </tr>
           </thead>
           <tbody>
             <tr v-for="(a, i) in articles" :key="i" class="border-t">
               <td class="p-2">{{ a.designation }}</td>
               <td class="p-2 text-center">{{ a.quantite }} ({{ a.unite_mesure }})</td>
-              <!-- <td class="p-2 text-center">{{ a.prix_unitaire }} DH</td> -->
             </tr>
           </tbody>
         </table>
@@ -157,12 +164,39 @@ function submit() {
         <p class="text-sm text-gray-500">Cette fiche ne contient aucun article.</p>
       </div>
 
-      <!-- Motif -->
+      <!-- Motif / Restaurant motif selector -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">
           Motif de la demande
         </label>
+
+        <!-- Restaurant mode -->
+        <div v-if="form.demandable_type === 'restaurant'">
+          <select
+            v-model="form.motif"
+            class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option disabled value="">Sélectionnez un motif</option>
+            <option value="petit-déjeuner">Petit-déjeuner</option>
+            <option value="déjeuner">Déjeuner</option>
+            <option value="dîner">Dîner</option>
+            <option value="goûter">Goûter</option>
+            <option value="autre">Autre</option>
+          </select>
+
+          <!-- Free text only when "autre" is chosen -->
+          <textarea
+            v-if="form.motif === 'autre'"
+            v-model="form.motifAutre"
+            class="w-full mt-2 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+            rows="2"
+            placeholder="Précisez le motif"
+          ></textarea>
+        </div>
+
+        <!-- Default mode -->
         <textarea
+          v-else
           v-model="form.motif"
           class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
           rows="2"

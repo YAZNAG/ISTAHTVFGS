@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Enums\DemandeStatut;
 use App\Enums\FicheType;
+use App\Http\Requests\StoreDemandeRequest;
 use App\Http\Resources\EditDemendeResource;
 use App\Http\Resources\FicheTechniqueDemandeResource;
 use App\Http\Resources\MesDemendesResource;
+use App\Http\Resources\RestaurantDemandeResource;
 use App\Http\Resources\ShowDemendeResource;
 use App\Models\Article;
 use App\Models\BonCommandeArticle;
 use App\Models\Demande;
 use App\Models\FicheTechnique;
 use App\Models\MouvementStock;
+use App\Models\Restaurant;
 use App\Models\SortieStock;
 use App\Models\User;
 use App\Rules\InStockRule;
@@ -75,10 +78,15 @@ class DemandeController extends Controller
         $fichesCollectives = FicheTechnique::collectivite()->with('ingredients')->get();
 
         $fichesPedagogiques = FicheTechnique::pedagogique()->with('ingredients')->get();
+
+        $restaurants = Restaurant::with(['items', 'items.article'])->get();
         
         $data = [
             'fichesCollectives' => FicheTechniqueDemandeResource::collection($fichesCollectives),
-            'fichesPedagogiques' => FicheTechniqueDemandeResource::collection($fichesPedagogiques)
+            'fichesPedagogiques' => FicheTechniqueDemandeResource::collection($fichesPedagogiques),
+            'restaurants' => RestaurantDemandeResource::collection($restaurants),
+
+            'types' => FicheType::toSelect(),
         ];
 
 
@@ -89,38 +97,56 @@ class DemandeController extends Controller
         return Inertia::render('Demandes/CreateDemandeModal', $data);
     }
     
-    public function store(Request $request) {
+    public function store(StoreDemandeRequest $request) {
         $this->authorize('create', Demande::class);
+
         
-        $request->validate([
-            'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
-            'fiche_technique' => 'required|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
-            'motif' => 'nullable|string|max:500',
-            'fiche_id' => 'required|exists:fiches_techniques,id',
-        ]);
+        // $request->validate([
+        //     'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
+        //     'fiche_technique' => 'required|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
+        //     'motif' => 'nullable|string|max:500',
+        //     'fiche_id' => 'required|exists:fiches_techniques,id',
+        // ]);
 
         DB::transaction(function () use ($request) {
             
             $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
 
-            $fiche = FicheTechnique::findOrFail($request->fiche_id);
-            
+            $model = $request->demandable_type == FicheType::RESTAURANT->value ? Restaurant::class : FicheTechnique::class;
+            $demandable = $model::findOrFail($request->demandable_id);
+
             $demande = Demande::create([
                 'numero' => Demande::generateNumero(),
                 'demandeur_id' => $user_id,
                 'motif' => $request->input('motif'),
                 'statut' => DemandeStatut::CREE,
-                'fiche_id' => $request->fiche_id
+                'demandable_id'   => $demandable->id,
+                'demandable_type' => $demandable->getMorphClass(),
             ]);
+
+
             
-            foreach ($fiche->ingredients as $article) {
-                $demande->articles()->create([
-                    'article_id' => $article['article_id'],
-                    'quantite_demandee' => $article['quantite'],
-                ]);
+            if ($demandable instanceof FicheTechnique) {
+                // existing behaviour
+                foreach ($demandable->ingredients as $ing) {
+                    $demande->articles()->create([
+                        'article_id'        => $ing['article_id'],
+                        'quantite_demandee' => $ing['quantite'],
+                    ]);
+                }
+
+                $demande->addMediaFromRequest('fiche_technique')->toMediaCollection('fiches_techniques');
             }
 
-            $demande->addMediaFromRequest('fiche_technique')->toMediaCollection('fiches_techniques');
+            if ($demandable instanceof Restaurant) {
+                foreach ($demandable->items as $item) {
+                    $demande->articles()->create([
+                        'article_id'        => $item->article_id, 
+                        'quantite_demandee' => $item->quantite, 
+                    ]);
+                }
+            }
+
             
         });
 

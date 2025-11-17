@@ -6,12 +6,14 @@ enum FicheType : string
 {
     case COLLECTIVITE = 'collectivite';
     case PEDAGOGIQUE = 'pedagogique';
+    case RESTAURANT = 'restaurant';
 
     public function label(): string
     {
         return match ($this) {
             self::COLLECTIVITE => 'Collectivité',
             self::PEDAGOGIQUE => 'Pédagogique',
+            self::RESTAURANT => 'Restaurant',
         };
     }
 
@@ -25,6 +27,10 @@ enum FicheType : string
             [
                 'value' => self::PEDAGOGIQUE->value,
                 'label' => self::PEDAGOGIQUE->label(),
+            ],
+            [
+                'value' => self::RESTAURANT->value,
+                'label' => self::RESTAURANT->label(),
             ],
         ];
     }
