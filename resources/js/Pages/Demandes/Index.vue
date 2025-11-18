@@ -291,15 +291,15 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                                             </button>
                                         </template>
 
-                                        <ModalLink
+                                        <!-- <ModalLink
                                             :href="route('demandes.edit', demande.id)"
                                             class="text-green-600 hover:text-green-900 p-1"
                                             title="Modifier"
                                         >
                                             <PencilIcon class="h-5 w-5" />
-                                        </ModalLink>
+                                        </ModalLink> -->
 
-                                        <a
+                                        <!-- <a
                                             class="text-purple-600 hover:text-purple-900 p-1 cursor-pointer"
                                             :class="!demande.fiche_technique ? '!cursor-not-allowed opacity-50 pointer-events-none' : ''"
                                             :style="{ pointerEvents: demande.fiche_technique ? 'auto' : 'none' }"
@@ -308,7 +308,7 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                                             :href="demande.fiche_technique"
                                         >
                                             <DocumentTextIcon class="h-5 w-5" />
-                                        </a>
+                                        </a> -->
 
                                         <!-- Approve -->
                                         <Link

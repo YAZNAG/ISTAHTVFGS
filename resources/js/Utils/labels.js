@@ -40,16 +40,12 @@ const getDemandeStatutInfo = (statut) => {
 
 const getDemandeTypeInfo = (type) => {
   switch (type) {
-    case 'vente':
-      return { label: 'Vente', color: 'bg-green-100 text-green-800' }
-    case 'transfert':
-      return { label: 'Transfert', color: 'bg-blue-100 text-blue-800' }
-    case 'perte':
-      return { label: 'Perte', color: 'bg-red-100 text-red-800' }
-    case 'ajustement':
-      return { label: 'Ajustement', color: 'bg-yellow-100 text-yellow-800' }
-    case 'demande':
-      return { label: 'Demande', color: 'bg-purple-100 text-purple-800' }
+    case 'collectivite':
+      return { label: 'Collectivité', color: 'bg-purple-100 text-purple-800' }
+    case 'pedagogique':
+      return { label: 'Pédagogique', color: 'bg-blue-100 text-blue-800' }
+    case 'restaurant':
+      return { label: 'Restaurant', color: 'bg-yellow-100 text-yellow-800' }
     default:
       return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
   }

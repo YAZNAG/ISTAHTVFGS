@@ -24,6 +24,7 @@ class Demande extends Model implements HasMedia
         'commentaire_validation',
         'demandable_id',
         'demandable_type',
+        'type',
     ];
 
     protected $dates = [

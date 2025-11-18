@@ -80,8 +80,6 @@ function submit() {
       <h2 class="text-lg font-semibold">Nouvelle Demande d’Articles</h2>
     </div>
 
-    <Dump :data="form.data()" />
-
     <!-- Body -->
     <form @submit.prevent="submit" class="space-y-4">
 

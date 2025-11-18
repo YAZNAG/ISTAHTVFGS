@@ -122,6 +122,7 @@ class DemandeController extends Controller
                 'statut' => DemandeStatut::CREE,
                 'demandable_id'   => $demandable->id,
                 'demandable_type' => $demandable->getMorphClass(),
+                'type' => $request->demandable_type,
             ]);
 
 

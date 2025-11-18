@@ -23,6 +23,7 @@ class ShowDemendeResource extends JsonResource
             'commentaire_validation' => $this->commentaire_validation,
             'date_validation' => $this->date_validation,
             'motif' => $this->motif,
+            'type' => $this->type,
             'statut' => $this->statut,
             'statut_label' => DemandeStatut::from($this->statut)->label(),
             'created_at' => $this->created_at,
