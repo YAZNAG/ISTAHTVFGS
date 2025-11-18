@@ -17,6 +17,7 @@
         "phiki/phiki": "^2.0",
         "spatie/laravel-medialibrary": "^11.15",
         "spatie/laravel-pdf": "^1.8",
+        "spatie/laravel-permission": "^6.23",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
