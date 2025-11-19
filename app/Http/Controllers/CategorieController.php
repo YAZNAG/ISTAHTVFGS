@@ -6,10 +6,23 @@ use App\Models\Categorie;
 use App\Models\CategoriePrincipale;
 use App\Models\NaturePrestation;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Inertia;
 
-class CategorieController extends Controller
+class CategorieController extends Controller implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_categories', only: ['index']),
+            new Middleware('permission:create_categories', only: ['store']),
+            new Middleware('permission:edit_categories', only: ['edit', 'update']),
+
+        ];
+    }
+    
     public function index()
     {
         $categories = Categorie::all();

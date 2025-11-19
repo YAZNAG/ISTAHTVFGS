@@ -22,13 +22,11 @@ class ArticleController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            // new Middleware('permission:list_articles', only: ['index']),
-            // new Middleware('permission:show_articles', only: ['show']),
-            // new Middleware('permission:create_articles', only: ['store']),
-            // new Middleware('permission:edit_articles', only: ['edit', 'update']),
-            // new Middleware('permission:delete_articles', only: ['destroy']),
+            new Middleware('permission:list_articles', only: ['index']),
+            new Middleware('permission:show_articles', only: ['show']),
+            new Middleware('permission:create_articles', only: ['create', 'store']),
+            new Middleware('permission:edit_articles', only: ['edit', 'update']),
 
-            // new Middleware('permission:edit_admins', only: ['edit', 'update', 'activate', 'deactivate']),
         ];
     }
 

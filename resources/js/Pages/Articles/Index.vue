@@ -11,7 +11,9 @@ import {
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
-import Dump from '@/Components/Dump.vue';
+import { usePermission } from '@/Utils/permission';
+
+const {can, canAny} = usePermission();
 
 const props = defineProps({
   articles: Object,        // paginated list
@@ -53,7 +55,6 @@ function getStatutLabel(st) {
   <AuthenticatedLayout>
     <Head title="Articles" />
 
-    <Dump :data="articles" />
 
     <div class="space-y-6">
       <!-- ====== HEADER ====== -->
@@ -64,6 +65,7 @@ function getStatutLabel(st) {
             <p class="text-indigo-100 text-lg opacity-90">Gérez et suivez tous vos articles</p>
           </div>
           <ModalLink
+            v-if="can('create_articles')"
             :href="route('articles.create')"
             class="bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
           >
@@ -143,8 +145,9 @@ function getStatutLabel(st) {
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex space-x-2">
+                  <div class="flex space-x-2" v-if="canAny(['show_articles', 'edit_articles'])">
                     <ModalLink
+                      v-if="can('show_articles')"
                       :href="route('articles.show', article.id)"
                       class="text-blue-600 hover:text-blue-900 p-1"
                       title="Voir détails"
@@ -152,6 +155,7 @@ function getStatutLabel(st) {
                       <EyeIcon class="h-5 w-5" />
                     </ModalLink>
                     <ModalLink
+                      v-if="can('edit_articles')"
                       :href="route('articles.edit', article.id)"
                       class="text-green-600 hover:text-green-900 p-1"
                       title="Modifier"

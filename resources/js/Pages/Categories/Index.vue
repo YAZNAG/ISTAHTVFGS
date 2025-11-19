@@ -10,10 +10,14 @@ import { router } from '@inertiajs/vue3';
 import { ModalLink } from '@inertiaui/modal-vue';
 import { Head } from '@inertiajs/vue3';
 import CreateCategorieModal from './CreateCategorieModal.vue';
+import { usePermission } from '@/Utils/permission';
 
 defineProps({
     categories: Array,   // plain array, no pagination
 });
+
+const { can, canAny } = usePermission();
+
 
 function openDeleteConfirm(categorie) {
     if (confirm(`Supprimer la catégorie « ${categorie.nom} » ?`)) {
@@ -24,6 +28,7 @@ function openDeleteConfirm(categorie) {
 
 <template>
     <AuthenticatedLayout>
+
         <Head title="Catégories" />
 
         <div class="space-y-6">
@@ -34,7 +39,7 @@ function openDeleteConfirm(categorie) {
                         <h1 class="text-3xl font-bold mb-2">Catégories</h1>
                         <p class="text-indigo-100 text-lg opacity-90">Gérez et suivez toutes vos catégories</p>
                     </div>
-                    <ModalLink href="#create-categorie-modal"
+                    <ModalLink href="#create-categorie-modal" v-if="can('create_categories')"
                         class="bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl">
                         <PlusIcon class="h-5 w-5" />
                         Nouvelle catégorie
@@ -45,7 +50,7 @@ function openDeleteConfirm(categorie) {
             <!-- Cards grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div v-for="categorie in categories" :key="categorie.id"
-                     class="border rounded-lg p-4 bg-white hover:shadow-md transition">
+                    class="border rounded-lg p-4 bg-white hover:shadow-md transition">
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
                             <h4 class="font-semibold text-gray-900 capitalize">{{ categorie.nom }}</h4>
@@ -58,9 +63,8 @@ function openDeleteConfirm(categorie) {
                         </div>
 
                         <div class="flex space-x-1 ml-4">
-                            <ModalLink :href="route('categories.edit', categorie.id)"
-                                       class="text-blue-600 hover:text-blue-900 p-1"
-                                       title="Modifier">
+                            <ModalLink :href="route('categories.edit', categorie.id)" v-if="can('edit_categories')"
+                                class="text-blue-600 hover:text-blue-900 p-1" title="Modifier">
                                 <PencilIcon class="h-4 w-4" />
                             </ModalLink>
                             <!-- <button @click="openDeleteConfirm(categorie)"
@@ -80,7 +84,7 @@ function openDeleteConfirm(categorie) {
                 <p class="mt-1 text-sm text-gray-500">Commencez par créer votre première catégorie.</p>
                 <div class="mt-6">
                     <ModalLink :href="route('categories.create')"
-                               class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
                         <PlusIcon class="h-4 w-4 mr-2" />
                         Nouvelle catégorie
                     </ModalLink>

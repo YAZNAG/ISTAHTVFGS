@@ -46,6 +46,10 @@ import {
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
+import Dump from '@/Components/Dump.vue'
+import { usePermission } from '@/Utils/permission'
+
+const { can, canAny } = usePermission();
 
 // State management
 const sidebarOpen = ref(false)
@@ -78,7 +82,8 @@ const menuGroups = [
         href: '/categories', 
         match: '/categories', 
         icon: TagIcon, 
-        bgColor: 'bg-amber-100 text-amber-600' 
+        bgColor: 'bg-amber-100 text-amber-600',
+        permission: 'list_categories',
       },
       { 
         name: 'Articles',
@@ -86,7 +91,8 @@ const menuGroups = [
         href: '/articles', 
         match: '/articles', 
         icon: Squares2X2Icon, 
-        bgColor: 'bg-green-100 text-green-600' 
+        bgColor: 'bg-green-100 text-green-600',
+        permission: 'list_articles',
       },
     ]
   },
@@ -247,6 +253,13 @@ const menuGroups = [
   },
 ]
 
+const showItem = (item) => {
+  
+  if (!item.permission) return true
+  if (typeof item.permission === 'string') return can(item.permission)
+  return canAny(item.permission)
+}
+
 // Rest of the script remains the same...
 const userMenuRef = ref(null)
 const notificationMenuRef = ref(null)
@@ -395,6 +408,8 @@ onMounted(() => {
             >
               {{ group.label }}
             </p>
+
+            
             
             <!-- Group Items -->
             <div class="space-y-1">
@@ -402,7 +417,8 @@ onMounted(() => {
                 v-for="(item, itemIndex) in group.items" 
                 :key="item.href"
               >
-                <Link 
+                <Link
+                  v-if="showItem(item)"
                   :href="item.href"
                   class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors"
                   :class="[
@@ -535,6 +551,8 @@ onMounted(() => {
           </div>
         </div>
       </header>
+
+      <Dump :data="$page.props.auth.permissions " />
 
       <!-- Main Content Area -->
       <main class="flex-1 p-4 md:p-6">
