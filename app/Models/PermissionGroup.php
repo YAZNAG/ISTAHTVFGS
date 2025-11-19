@@ -14,7 +14,7 @@ class PermissionGroup extends Model
     protected $table = 'permissions_groups';
 
     protected $fillable = [
-        'display_name',
+        'name',
     ];
 
     public function permissions()

@@ -40,7 +40,8 @@ import {
   ArrowRightOnRectangleIcon,
   ChevronRightIcon,
   CubeIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
@@ -216,6 +217,14 @@ const menuGroups = [
         match: '/users', 
         icon: UsersIcon, 
         bgColor: 'bg-cyan-100 text-cyan-600' 
+      },
+      { 
+        name: 'Rôles & Permissions', 
+        title: 'Les Rôles et Permissions',
+        href: '/roles', 
+        match: '/roles', 
+        icon: ShieldCheckIcon, 
+        bgColor: 'bg-purple-100 text-purple-600' 
       },
       { 
         name: 'Rapports',

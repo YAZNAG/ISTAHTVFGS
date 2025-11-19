@@ -25,6 +25,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RapportsController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserManagementController;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -299,6 +300,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.update');
     Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy'])->name('restaurants.destroy');
     // Route::get('/restaurants/{restaurant}/export', [RestaurantController::class, 'export'])->name('restaurants.export');
+
+    #### Roles & Permissions ####
+    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
+    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+    Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
     
     ##### Exports #####
