@@ -14,6 +14,7 @@ use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
 use App\Http\Controllers\BonSortieController;
 use App\Http\Controllers\CardexController;
+use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ChefCommandeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DemandeController;
@@ -67,24 +68,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //     ->name('bon-receptions.stats');
     // Routes pour les articles
     Route::resource('articles', ArticleController::class);
+    Route::get('/categories', [CategorieController::class, 'index'])->name('categories.index');
+    Route::post('/categories/store', [CategorieController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{categorie}/edit', [CategorieController::class, 'edit'])->name('categories.edit');
+    Route::put('/categories/{categorie}', [CategorieController::class, 'update'])->name('categories.update');
 
-    // Routes supplémentaires pour les autres fonctionnalités
-    Route::prefix('articles')->group(function () {
-        // Catégories
-        Route::post('/categories/store', [ArticleController::class, 'storeCategorie'])->name('categories.store');
-        Route::put('/categories/{categorie}', [ArticleController::class, 'updateCategorie'])->name('categories.update');
-        Route::delete('/categories/{categorie}', [ArticleController::class, 'destroyCategorie'])->name('categories.destroy');
-        
-        // Catégories principales
-        Route::post('/categorie-principales/store', [ArticleController::class, 'storeCategoriePrincipale'])->name('categorie-principales.store');
-        Route::put('/categorie-principales/{categoriePrincipale}', [ArticleController::class, 'updateCategoriePrincipale'])->name('categorie-principales.update');
-        Route::delete('/categorie-principales/{categoriePrincipale}', [ArticleController::class, 'destroyCategoriePrincipale'])->name('categorie-principales.destroy');
-        
-        // Natures de prestation
-        Route::post('/nature-prestations/store', [ArticleController::class, 'storeNaturePrestation'])->name('nature-prestations.store');
-        Route::put('/nature-prestations/{naturePrestation}', [ArticleController::class, 'updateNaturePrestation'])->name('nature-prestations.update');
-        Route::delete('/nature-prestations/{naturePrestation}', [ArticleController::class, 'destroyNaturePrestation'])->name('nature-prestations.destroy');
-    });
 
     // Module Achats
     Route::prefix('achats')->group(function () {

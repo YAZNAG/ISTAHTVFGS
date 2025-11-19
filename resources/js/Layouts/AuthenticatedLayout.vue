@@ -41,7 +41,8 @@ import {
   ChevronRightIcon,
   CubeIcon,
   ClipboardDocumentListIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  TagIcon
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
@@ -70,6 +71,14 @@ const menuGroups = [
         match: '/dashboard', 
         icon: HomeIcon, 
         bgColor: 'bg-blue-100 text-blue-600' 
+      },
+      { 
+        name: 'Catégories',
+        title: 'Les Catégories',
+        href: '/categories', 
+        match: '/categories', 
+        icon: TagIcon, 
+        bgColor: 'bg-amber-100 text-amber-600' 
       },
       { 
         name: 'Articles',
