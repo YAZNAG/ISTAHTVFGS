@@ -11,6 +11,7 @@
                 </div>
                 <div class="flex space-x-3">
                     <button
+                        v-if="can('export_fournisseurs')"
                         @click="exportFournisseurs"
                         class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors"
                     >
@@ -18,6 +19,7 @@
                         Exporter
                     </button>
                     <button
+                        v-if="can('create_fournisseurs')"
                         @click="openFournisseurForm()"
                         class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
                     >
@@ -308,6 +310,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
                                         <Link
+                                            v-if="can('show_fournisseurs')"
                                             :href="route('fournisseurs.show', fournisseur.id)"
                                             class="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-all duration-200 group/tooltip relative"
                                             title="Voir détails complets"
@@ -316,6 +319,7 @@
                                         </Link>
                                         
                                         <button
+                                            v-if="can('edit_fournisseurs')"
                                             @click="editFournisseur(fournisseur)"
                                             class="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
                                             title="Modifier"
@@ -323,6 +327,7 @@
                                             <PencilIcon class="h-4 w-4" />
                                         </button>
                                         <button
+                                            v-if="can('edit_fournisseurs')"
                                             @click="openToggleModal(fournisseur.id)"
                                             :class="[
                                                 'p-1 rounded-lg transition-colors',
@@ -335,6 +340,7 @@
                                             <PowerIcon class="h-4 w-4" />
                                         </button>
                                         <button
+                                            v-if="can('delete_fournisseurs')"
                                             @click="confirmDelete(fournisseur)"
                                             class="text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors"
                                             title="Supprimer"
@@ -357,7 +363,8 @@
                             {{ filters.search || filters.est_actif !== '' || filters.ville ? 'Aucun résultat pour vos critères de recherche.' : 'Commencez par créer votre premier fournisseur.' }}
                         </p>
                         <div class="mt-8" v-if="!filters.search && filters.est_actif === '' && !filters.ville">
-                            <button 
+                            <button
+                                v-if="can('create_fournisseurs')"
                                 @click="openFournisseurForm()"
                                 class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                             >
@@ -473,6 +480,9 @@ import {
     EyeIcon
 } from '@heroicons/vue/24/outline';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { usePermission } from '@/Utils/permission';
+
+const { can } = usePermission();
 
 // Props
 const props = defineProps({
