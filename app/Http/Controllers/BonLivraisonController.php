@@ -11,13 +11,25 @@ use App\Models\BonCommande;
 use App\Models\BonLivraison;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-class BonLivraisonController extends Controller
+class BonLivraisonController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_bonLivraisons', only: ['index']),
+            new Middleware('permission:show_bonLivraisons', only: ['show']),
+            new Middleware('permission:validate_bonLivraisons', only: ['edit', 'update']),
+            new Middleware('permission:pdf_bonLivraisons', only: ['export']),
+
+        ];
+    }
     public function index(Request $request)
     {
         $search = $request->search;

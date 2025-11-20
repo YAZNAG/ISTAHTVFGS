@@ -153,6 +153,7 @@
 
                                 <td class="px-6 py-4 text-center">
                                     <ModalLink
+                                        v-if="can('validate_bonLivraisons')"
                                         :href="route('bon-livraisons.edit', bon.id)"
                                         class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium text-sm"
                                     >
@@ -254,6 +255,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex justify-center items-center gap-1">
                                         <Link
+                                            v-if="can('show_bonLivraisons')"
                                             :href="route('bon-livraisons.show', bon.id)"
                                             class="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-all duration-200 group/tooltip relative"
                                             title="Voir détails du bon"
@@ -265,6 +267,7 @@
                                         </Link>
 
                                         <a
+                                            v-if="can('pdf_bonLivraisons')"
                                             :href="route('bon-livraisons.pdf', bon.id)"
                                             class="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-xl transition-all duration-200 group/tooltip relative"
                                             title="Télécharger PDF"
@@ -352,6 +355,10 @@ import {
 } from '@heroicons/vue/24/outline';
 import Dump from '@/Components/Dump.vue';
 import { getBonLivraisonInfo } from '@/Utils/labels';
+import { usePermission } from '@/Utils/permission';
+
+
+const { can } = usePermission();
 
 const getStatutColor = (statut) => getBonLivraisonInfo(statut).color;
 const getStatutLabel = (statut) => getBonLivraisonInfo(statut).label;
