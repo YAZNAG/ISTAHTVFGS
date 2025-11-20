@@ -22,6 +22,9 @@ import { ModalLink } from '@inertiaui/modal-vue';
 import Dump from '@/Components/Dump.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { getDemandeStatutInfo } from '@/Utils/labels.js';
+import { usePermission } from '@/Utils/permission';
+
+const { can } = usePermission();
 
 const props = defineProps({
     demandes: Object,
@@ -105,6 +108,7 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
                         <ModalLink
+                            v-if="can('create_demandes')"
                             :href="route('demandes.create')"
                             class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
                         >
@@ -259,6 +263,7 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
                                         <ModalLink
+                                            v-if="can('show_demandes')"
                                             :href="route('demandes.show', demande.id)"
                                             class="text-blue-600 hover:text-blue-900 p-1"
                                             title="Voir détails"
@@ -312,6 +317,7 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
 
                                         <!-- Approve -->
                                         <Link
+                                            v-if="can('validate_demandes') && demande.statut === 'en_attente_validation'"
                                             :href="route('demandes.show.approve', demande.id)"
                                             class="text-orange-600 hover:text-orange-900 p-1"
                                             title="Approuver la demande"

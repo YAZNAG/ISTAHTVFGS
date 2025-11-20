@@ -21,13 +21,27 @@ use App\Models\User;
 use App\Rules\InStockRule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
-class DemandeController extends Controller
+class DemandeController extends Controller implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_demandes', only: ['index']),
+            new Middleware('permission:show_demandes', only: ['show']),
+            new Middleware('permission:create_demandes', only: ['create', 'store']),
+            new Middleware('permission:validate_demandes', only: ['showApprove', 'approve', 'reject']),
+
+        ];
+    }
     use AuthorizesRequests;
 
     public function index(Request $request)
@@ -156,7 +170,10 @@ class DemandeController extends Controller
 
     public function submit(Demande $demande)
     {
-
+        if ($demande->statut != DemandeStatut::CREE->value && $demande->statut != DemandeStatut::EN_ATTENTE_VALIDATION->value) {
+            return redirect()->back()->with('error', 'Impossible de modifier ce demande.');
+        }
+        
         $demande->update([
             'statut' => DemandeStatut::EN_ATTENTE_VALIDATION,
         ]);
@@ -241,7 +258,9 @@ class DemandeController extends Controller
     }
 
     public function cancel(Demande $demande) {
-        $this->authorize('cancel', $demande);
+        if ($demande->statut != DemandeStatut::CREE->value && $demande->statut != DemandeStatut::EN_ATTENTE_VALIDATION->value) {
+            return redirect()->back()->with('error', 'Impossible de modifier ce demande.');
+        }
 
         $demande->update(['statut' => DemandeStatut::ANNULEE]);
         return redirect()->back();
@@ -256,7 +275,9 @@ class DemandeController extends Controller
     } 
 
     public function approve(Request $request, Demande $demande) {
-        $this->authorize('approve', $demande);
+        if ($demande->statut != DemandeStatut::EN_ATTENTE_VALIDATION->value) {
+            return redirect()->back()->with('error', 'Impossible de modifier ce demande. ' . $demande->statut);
+        }
 
         $request->validate([
             'commentaire_validation' => 'nullable|string|max:500',
@@ -310,7 +331,9 @@ class DemandeController extends Controller
 
 
     public function reject(Request $request, Demande $demande) {
-        $this->authorize('approve', $demande);
+        if ($demande->statut != DemandeStatut::EN_ATTENTE_VALIDATION->value) {
+            return redirect()->back()->with('error', 'Impossible de modifier ce demande.');
+        }
 
          $request->validate([
             'commentaire_validation' => 'nullable|string|max:500',
