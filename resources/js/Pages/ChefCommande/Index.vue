@@ -19,6 +19,10 @@ import { ModalLink } from '@inertiaui/modal-vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { getChefCommandeStatutInfo } from '@/Utils/labels.js'; 
 import Dump from '@/Components/Dump.vue';
+import { usePermission } from '@/Utils/permission';
+
+const { can } = usePermission();
+
 
 const props = defineProps({
   chefCommandes: Object,
@@ -118,6 +122,7 @@ const commandeStatus = [
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <ModalLink
+              v-if="can('create_chefCommandes')"
               :href="route('chef-commandes.create')"
               class="bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
             >
@@ -239,6 +244,7 @@ const commandeStatus = [
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
                     <ModalLink
+                      v-if="can('show_chefCommandes')"
                       :href="route('chef-commandes.show', commande.id)"
                       class="text-blue-600 hover:text-blue-900 p-1"
                       title="Voir détails"
@@ -247,15 +253,16 @@ const commandeStatus = [
                     </ModalLink>
 
                     <ModalLink
+                      v-if="can('validate_chefCommandes') && commande.statut === 'en_attente_validation'"
                       :href="route('chef-commandes.showApprove', commande.id)"
                       class="text-orange-600 hover:text-orange-900 p-1"
                       title="Approuver la commande"
-                      v-if="commande.statut === 'en_attente_validation'"
                     >
                       <QuestionMarkCircleIcon class="h-5 w-5" />
                     </ModalLink>
                     
                     <ModalLink
+                      v-if="can('edit_chefCommandes') && (commande.statut === 'cree' || commande.statut === 'en_attente_validation')"
                       :href="route('chef-commandes.edit', commande.id)"
                       class="text-green-600 hover:text-green-900 p-1"
                       title="Modifier"
@@ -312,6 +319,7 @@ const commandeStatus = [
             <p class="mt-1 text-sm text-gray-500">Commencez par créer votre premier bon de commande.</p>
             <div class="mt-6">
               <ModalLink
+                v-if="can('create_chefCommandes')"
                 :href="route('chef-commandes.create')"
                 class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
               >

@@ -14,12 +14,25 @@ use App\Models\ChefCommande;
 use App\Models\ChefCommandeItem;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
-class ChefCommandeController extends Controller
+class ChefCommandeController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_chefCommandes', only: ['index']),
+            new Middleware('permission:show_chefCommandes', only: ['show']),
+            new Middleware('permission:create_chefCommandes', only: ['create', 'store']),
+            new Middleware('permission:edit_chefCommandes', only: ['update', 'edit']),
+            new Middleware('permission:validate_chefCommandes', only: ['showApprove', 'approve', 'reject']),
+
+        ];
+    }
     public function index(Request $request)
     {
         $user = $request->user();
@@ -117,6 +130,10 @@ class ChefCommandeController extends Controller
 
     public function update(StoreChefCommandeRequest $request, ChefCommande $chefCommande)
     {
+        if ($chefCommande->statut !== ChefCommande::STATUS_CREE || $chefCommande->statut !== ChefCommande::STATUS_EN_ATTENTE_VALIDATION) {
+            return redirect()->back()
+                ->with('error', 'Impossible de modifier ce bon de commande.');
+        }
 
         $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
 
@@ -143,6 +160,11 @@ class ChefCommandeController extends Controller
     public function submit(ChefCommande $chefCommande)
     {
 
+        if ($chefCommande->statut !== ChefCommande::STATUS_CREE) {
+            return redirect()->back()
+                ->with('error', 'Impossible de modifier ce bon de commande.');
+        }
+
         $chefCommande->update([
             'statut' => ChefCommande::STATUS_EN_ATTENTE_VALIDATION,
         ]);
@@ -152,6 +174,11 @@ class ChefCommandeController extends Controller
 
     public function cancel(ChefCommande $chefCommande)
     {
+        
+        if ($chefCommande->statut !== ChefCommande::STATUS_CREE) {
+            return redirect()->back()
+                ->with('error', 'Impossible de modifier ce bon de commande.');
+        }
 
         $chefCommande->update([
             'statut' => ChefCommande::STATUS_ANNULEE  ,
@@ -176,6 +203,11 @@ class ChefCommandeController extends Controller
 
     public function approve(Request $request, ChefCommande $chefCommande) {
         // $this->authorize('approve', $demande);
+
+        if ($chefCommande->statut !== ChefCommande::STATUS_EN_ATTENTE_VALIDATION) {
+            return redirect()->back()
+                ->with('error', 'Impossible de modifier ce bon de commande.');
+        }
 
         $request->validate([
             'validation_note' => 'nullable|string|max:500',
@@ -235,6 +267,10 @@ class ChefCommandeController extends Controller
 
     public function reject(Request $request, ChefCommande $chefCommande) {
         // $this->authorize('approve', $chefCommande);
+        if ($chefCommande->statut !== ChefCommande::STATUS_EN_ATTENTE_VALIDATION) {
+            return redirect()->back()
+                ->with('error', 'Impossible de modifier ce bon de commande.');
+        }
 
          $request->validate([
             'validation_note' => 'nullable|string|max:500',
