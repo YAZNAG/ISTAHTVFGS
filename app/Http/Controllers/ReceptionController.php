@@ -8,11 +8,28 @@ use App\Models\BonLivraison;
 use App\Models\MouvementStock;
 use App\Models\Reception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
-class ReceptionController extends Controller
+class ReceptionController extends Controller implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_bonReceptions', only: ['index']),
+            new Middleware('permission:show_bonReceptions', only: ['show']),
+            new Middleware('permission:create_bonReceptions', only: ['create', 'store']),
+            new Middleware('permission:destroy_bonReceptions', only: ['destroy']),
+            new Middleware('permission:pdf_bonReceptions', only: ['export']),
+
+
+        ];
+    }
+    
     public function index(Request $request)
     {
         $search = $request->search;

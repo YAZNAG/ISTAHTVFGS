@@ -12,6 +12,7 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <ModalLink
+              v-if="can('create_bonReceptions')"
               :href="route('bon-receptions.create')"
               class="bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
             >
@@ -118,7 +119,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex justify-center items-center gap-1">
                     <button
-                          
+                          v-if="can('destroy_bonReceptions')"
                           @click="openDeleteModal(bon.id)"
                           class="text-red-600 hover:text-red-800"
                           title="supprimer le bon"
@@ -130,6 +131,7 @@
                       </button>
                     
                     <Link
+                      v-if="can('show_bonReceptions')"
                       :href="route('bon-receptions.show', bon.id)"
                       class="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-all duration-200 group/tooltip relative"
                       title="Voir détails du bon"
@@ -143,6 +145,7 @@
                     </Link>
 
                     <a
+                      v-if="can('pdf_bonReceptions')"
                       :href="route('bon-receptions.pdf', bon.id)"
                       class="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-all duration-200 group/tooltip relative"
                       title="Télécharger PDF"
@@ -175,13 +178,7 @@
                 : 'Créez votre premier bon de réception pour enregistrer les marchandises reçues.'
             }}
           </p>
-          <button
-            @click="showCreateModal = true"
-            class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
-          >
-            <PlusIcon class="h-5 w-5" />
-            Créer un bon de réception
-          </button>
+          
         </div>
 
         <!-- Pagination -->
@@ -247,8 +244,9 @@ import {
 } from '@heroicons/vue/24/outline'
 
 import ConfirmationModal from '@/Components/ConfirmationModal.vue'
+import { usePermission } from '@/Utils/permission'
 
-// ✅ You can later replace with getBonReceptionInfo if needed
+const { can } = usePermission();
 
 const props = defineProps({
   bonReceptions: Object,
