@@ -61,6 +61,8 @@ const getSortieStatutInfo = (statut) => {
       return { label: 'En attente d\'approbation', color: 'bg-yellow-100 text-yellow-800' }
     case 'attente_livraison':
       return { label: 'En attente de livraison', color: 'bg-blue-100 text-blue-800' }
+    case 'valide':
+      return { label: 'Validée', color: 'bg-green-100 text-green-800' }
     case 'livree':
       return { label: 'Livrée', color: 'bg-green-100 text-green-800' }
     case 'annulee':

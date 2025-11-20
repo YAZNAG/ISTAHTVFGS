@@ -8,13 +8,29 @@ use App\Models\BonCommandeArticle;
 use App\Models\MouvementStock;
 use App\Models\SortieStock;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-class BonSortieController extends Controller
+class BonSortieController extends Controller implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_bonSorties', only: ['index']),
+            new Middleware('permission:show_bonSorties', only: ['show']),
+            new Middleware('permission:pdf_bonSorties', only: ['downloadPdf']),
+            new Middleware('permission:validate_bonSorties', only: ['showApprove', 'approve', 'reject']),
+
+        ];
+    }
+
+    
     public function index(Request $request)
     {
         $query = SortieStock::with([
@@ -66,7 +82,7 @@ class BonSortieController extends Controller
             'createdBy'
         ]);
 
-        return Inertia::render('Stock/SortieStocks/ShowSortieModal', [
+        return Inertia::render('BonSortie/ShowSortieModal', [
             'sortie' => ShowBonSortieResource::make($bonSortie)
         ]);
     }
@@ -80,6 +96,10 @@ class BonSortieController extends Controller
 
     public function approve(Request $request, SortieStock $bonSortie) {
         // $this->authorize('approve', $demande);
+        if ($bonSortie->statut != SortieStock::STATUT_ATTENTE_VALIDATION) {
+            return redirect()->back()->with('error', 'Impossible de modifier ce bon de sortie.');
+        }
+        
 
         $request->validate([
             'commentaire_validation' => 'nullable|string|max:500',
@@ -126,6 +146,9 @@ class BonSortieController extends Controller
 
     public function reject(Request $request, SortieStock $bonSortie) {
         // $this->authorize('approve', $bonSortie);
+        if ($bonSortie->statut != SortieStock::STATUT_ATTENTE_VALIDATION) {
+            return redirect()->back()->with('error', 'Impossible de modifier ce bon de sortie.');
+        }
 
          $request->validate([
             'commentaire_validation' => 'nullable|string|max:500',

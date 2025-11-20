@@ -33,6 +33,7 @@ const statutLabels = {
   valide: 'Validée',
   annule: 'Annulée',
 }
+
 </script>
 
 <template>

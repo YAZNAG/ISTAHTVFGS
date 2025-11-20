@@ -17,6 +17,10 @@ import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { getSortieStatutInfo, getSortieTypeInfo } from '@/Utils/labels';
+import { usePermission } from '@/Utils/permission';
+
+const { can } = usePermission();
+
 
 const props = defineProps({
   sorties: Object,
@@ -174,6 +178,7 @@ const sortieIdToDelivred = ref(null)
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex items-center space-x-2">
                     <ModalLink
+                      v-if="can('show_bonSorties')"
                         :href="route('bon-sorties.show', sortie.id)"
                       class="text-blue-600 hover:text-blue-900 p-1"
                       title="Voir les détails"
@@ -182,6 +187,7 @@ const sortieIdToDelivred = ref(null)
                     </ModalLink>
                   
                     <a
+                      v-if="can('pdf_bonSorties')"
                       :href="route('bon-sorties.download-pdf', sortie.id)"
                       target="_blank"
                       class="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-100 rounded-xl transition-all duration-200 group/tooltip relative"
@@ -203,10 +209,10 @@ const sortieIdToDelivred = ref(null)
                     </button> -->
 
                     <Link
+                      v-if="can('validate_bonSorties') && sortie.statut === 'attente_validation'"
                       :href="route('bon-sorties.showApprove', sortie.id)"
                       class="text-orange-600 hover:text-orange-900 p-1"
                       title="Approuver le bon"
-                      v-if="sortie.statut === 'attente_validation'"
                     >
                       <QuestionMarkCircleIcon class="h-5 w-5" />
                     </Link>
