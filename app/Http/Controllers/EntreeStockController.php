@@ -15,6 +15,8 @@ use App\Models\BonReception;
 use App\Models\MouvementStock;
 use App\Models\Reception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
@@ -22,8 +24,17 @@ use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-class EntreeStockController extends Controller
+class EntreeStockController extends Controller implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:entree_stocks', only: ['index', 'export', 'createExport']),
+        ];
+    }
+    
     /**
      * Display a listing of the resource.
      */

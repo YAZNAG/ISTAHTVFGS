@@ -15,6 +15,8 @@ use App\Models\Demande;
 use App\Models\MouvementStock;
 use App\Models\Reception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -22,8 +24,17 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-class SortieStockController extends Controller
+class SortieStockController extends Controller implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:sortie_stocks', only: ['index', 'export', 'createExport']),
+        ];
+    }
+    
     /**
      * Display a listing of the resource.
      */
