@@ -13,7 +13,10 @@ import {
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
+import { usePermission } from '@/Utils/permission';
 // import Modal from '@/Components/Modal.vue';
+
+const { can } = usePermission();
 
 const props = defineProps({ users: Object, filters: Object })
 
@@ -78,6 +81,7 @@ function applyFilters() {
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
                         <ModalLink
+                            v-if="can('create_utilisateurs')"
                             :href="route('users.create')"
                             class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
                         >
@@ -192,25 +196,28 @@ function applyFilters() {
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
                                 <!-- Voir -->
-                                <Link
+                                <ModalLink
+                                    v-if="can('show_utilisateurs')"
                                     :href="route('users.show', user.id)"
                                     class="text-blue-600 hover:text-blue-900 p-1"
                                     title="Voir détails"
                                 >
                                     <EyeIcon class="h-4 w-4" />
-                                </Link>
+                                </ModalLink>
 
                                 <!-- Modifier -->
-                                <Link
+                                <ModalLink
+                                    v-if="can('edit_utilisateurs')"
                                     :href="route('users.edit', user.id)"
                                     class="text-orange-600 hover:text-orange-900 p-1"
                                     title="Modifier"
                                 >
                                     <PencilIcon class="h-4 w-4" />
-                                </Link>
+                                </ModalLink>
 
                                 <!-- Activer / Désactiver -->
                                 <Link
+                                    v-if="can('edit_utilisateurs')"
                                     as="button"
                                     method="patch"
                                     :href="route('users.toggle-status', user.id)"

@@ -7,12 +7,28 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 
-class UserManagementController extends Controller
+class UserManagementController extends Controller implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_utilisateurs', only: ['index']),
+            new Middleware('permission:show_utilisateurs', only: ['show']),
+            new Middleware('permission:create_utilisateurs', only: ['create', 'store']),
+            new Middleware('permission:edit_utilisateurs', only: ['edit', 'update']),
+
+        ];
+    }
+
+    
     public function index(Request $request)
     {
         $search = $request->get('search');
