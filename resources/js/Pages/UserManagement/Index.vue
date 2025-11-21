@@ -84,12 +84,12 @@ function applyFilters() {
                             <PlusIcon class="h-5 w-5" />
                             Ajouter un utilisateur
                         </ModalLink>
-                        <Link
+                        <!-- <Link
                             class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 transition-all duration-200 font-semibold border border-blue-400"
                         >
                             <DocumentArrowDownIcon class="h-5 w-5" />
                             Exporter
-                        </Link>
+                        </Link> -->
                     </div>
                 </div>
             </div>
@@ -136,7 +136,6 @@ function applyFilters() {
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rôle</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vérifié</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé le</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     </tr>
@@ -162,14 +161,11 @@ function applyFilters() {
                         <!-- Rôle -->
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span
-                                :class="[
-                                    'px-2 py-1 text-xs font-medium rounded-full',
-                                    user.role === 'MAGASINIER'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-purple-100 text-purple-800'
-                                ]"
+                                v-for="role in user.roles"
+                                :key="role.id"  
+                                class='px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800'
                             >
-                                {{ user.role }}
+                                {{ role.name }}
                             </span>
                         </td>
 
@@ -184,20 +180,6 @@ function applyFilters() {
                                 ]"
                             >
                                 {{ user.status ? 'Actif' : 'Inactif' }}
-                            </span>
-                        </td>
-
-                        <!-- Vérifié -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                :class="[
-                                    'px-2 py-1 text-xs font-medium rounded-full',
-                                    user.email_verified_at
-                                        ? 'bg-green-50 text-green-700'
-                                        : 'bg-gray-100 text-gray-500'
-                                ]"
-                            >
-                                {{ user.email_verified_at ? 'Oui' : 'Non' }}
                             </span>
                         </td>
 

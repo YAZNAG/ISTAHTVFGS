@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UserManagementController extends Controller
 {
@@ -16,6 +18,7 @@ class UserManagementController extends Controller
         $search = $request->get('search');
 
         $users = User::query()
+            ->with('roles')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -28,7 +31,7 @@ class UserManagementController extends Controller
             ->withQueryString(); // keeps ?search= in pagination links
 
         return Inertia::render('UserManagement/Index', [
-            'users' => $users,
+            'users' => UserResource::collection($users),
             'filters' => [
                 'search' => $search,
             ],
@@ -37,33 +40,39 @@ class UserManagementController extends Controller
 
     public function create()
     {
-        return Inertia::modal('UserManagement/CreateUser')->baseRoute('users.index');
+        $roles = Role::all(['id', 'name']);
+        return Inertia::modal('UserManagement/CreateUser', [
+            'roles' => $roles
+        ])->baseRoute('users.index');
     }
 
     public function store(StoreUserRequest $request)
     {
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
             'status' => $request->status,
         ]);
 
-        return redirect()->route('users.index');
+        $user->assignRole($request->role);
+
+        return redirect()->route('users.index')->with('success', 'L\'utilisateur a été créé avec succès');
     }
 
     public function show(User $user)
     {
         return Inertia::modal('UserManagement/ShowUser', [
-            'user' => $user,
+            'user' => UserResource::make($user),
         ])->baseRoute('users.index');
     }
 
     public function edit(User $user)
     {
+        $roles = Role::all(['id', 'name']);
         return Inertia::modal('UserManagement/EditUser', [
-            'user' => $user,
+            'user' =>  UserResource::make($user),
+            'roles' => $roles,
         ])->baseRoute('users.index');
     }
 
@@ -73,7 +82,6 @@ class UserManagementController extends Controller
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
             'status' => $request->status,
         ]);
 
@@ -83,7 +91,9 @@ class UserManagementController extends Controller
             ]);
         }
 
-        return redirect()->route('users.index');
+        $user->syncRoles($request->role);
+
+        return redirect()->route('users.index')->with('success', 'L\'utilisateur a été mis à jour avec succès');
     }
 
 

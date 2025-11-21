@@ -32,7 +32,7 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users')->ignore($this->route('user')),
             ],
             'password' => 'nullable|string|min:8',
-            'role' => 'required|string|in:ADMIN,DEMANDEUR,MAGASINIER',
+            'role' => 'required|exists:roles,id',
             'status' => 'required|boolean',
         ];
     }

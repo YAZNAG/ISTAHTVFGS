@@ -4,6 +4,10 @@ import { useForm } from '@inertiajs/vue3'
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { Modal } from '@inertiaui/modal-vue';
 
+const props = defineProps({
+  roles: Array
+});
+
 // Props from InertiaUI modal
 const createUserModal = ref(null);
 const showPassword = ref(false);
@@ -15,12 +19,6 @@ const form = useForm({
   role: '',
   status: true,
 })
-
-const roles = [
-  { label: 'Administrateur', value: 'ADMIN' },
-  { label: 'Magasinier', value: 'MAGASINIER' },
-  { label: 'Demandeur', value: 'DEMANDEUR' },
-]
 
 // Submit handler
 const submit = () => {
@@ -89,8 +87,9 @@ const submit = () => {
         <div>
           <label class="block text-sm font-medium text-gray-700">Rôle</label>
           <select v-model="form.role" class="w-full border-gray-300 rounded-lg p-2 mt-1">
-            <option v-for="r in roles" :key="r.value" :value="r.value">
-              {{ r.label }}
+            <option value="" disabled>-- Choisir un rôle --</option>
+            <option v-for="role in roles" :key="role.id" :value="role.id">
+              {{ role.name }}
             </option>
           </select>
           <div v-if="form.errors.role" class="text-red-600 text-sm mt-1">

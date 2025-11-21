@@ -3,9 +3,11 @@ import { ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { Modal } from '@inertiaui/modal-vue'
+import Dump from '@/Components/Dump.vue'
 
 const props = defineProps({
-  user: Object
+  user: Object,
+  roles: Array,
 })
 
 const updateUserModal = ref(null)
@@ -15,15 +17,9 @@ const form = useForm({
   name: props.user.name,
   email: props.user.email,
   password: null,
-  role: props.user.role,
+  role: props.user.roles?.length > 0 ? props.user.roles[0].id : null,
   status: props.user.status,
 })
-
-const roles = [
-  { label: 'Administrateur', value: 'ADMIN' },
-  { label: 'Magasinier', value: 'MAGASINIER' },
-  { label: 'Demandeur', value: 'DEMANDEUR' },
-]
 
 const submit = () => {
     form.put(route('users.update', props.user.id), {
@@ -86,16 +82,17 @@ const submit = () => {
 
       <!-- Rôle -->
       <div>
-        <label class="block text-sm font-medium text-gray-700">Rôle</label>
-        <select v-model="form.role" class="w-full border-gray-300 rounded-lg p-2 mt-1">
-          <option v-for="r in roles" :key="r.value" :value="r.value">
-            {{ r.label }}
-          </option>
-        </select>
-        <div v-if="form.errors.role" class="text-red-600 text-sm mt-1">
-          {{ form.errors.role }}
+          <label class="block text-sm font-medium text-gray-700">Rôle</label>
+          <select v-model="form.role" class="w-full border-gray-300 rounded-lg p-2 mt-1">
+            <option value="" disabled>-- Choisir un rôle --</option>
+            <option v-for="role in roles" :key="role.id" :value="role.id">
+              {{ role.name }}
+            </option>
+          </select>
+          <div v-if="form.errors.role" class="text-red-600 text-sm mt-1">
+            {{ form.errors.role }}
+          </div>
         </div>
-      </div>
 
       <!-- Statut -->
       <div class="flex items-center">

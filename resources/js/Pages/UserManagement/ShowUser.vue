@@ -47,13 +47,8 @@ function formatDate(date) {
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-gray-50 rounded-lg p-3 text-center shadow-sm">
                     <span class="block text-xs text-gray-500">Rôle</span>
-                    <span :class="[
-                        'mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium',
-                        user.role === 'MAGASINIER'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-purple-100 text-purple-800'
-                    ]">
-                        {{ user.role }}
+                    <span v-for="role in roles" :key="role.id" class= 'mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800'>
+                        {{ role.name }}
                     </span>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-3 text-center shadow-sm">
