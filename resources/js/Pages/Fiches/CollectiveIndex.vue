@@ -13,6 +13,9 @@ import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { usePermission } from '@/Utils/permission';
+
+const { can } = usePermission();
 
 const props = defineProps({
     fiches: Object, // paginated fiches techniques
@@ -71,6 +74,7 @@ function formatDate(date) {
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
                         <ModalLink :href="route('fiches-techniques.create')"
+                            v-if="can('create_ficheTechniques')"
                             class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl">
                             <PlusIcon class="h-5 w-5" />
                             Nouvelle Fiche
@@ -136,19 +140,22 @@ function formatDate(date) {
                             <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(fiche.created_at) }}</td>
                             <td class="px-6 py-4 text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <ModalLink 
+                                    <ModalLink
+                                        v-if="can('show_ficheTechniques')"
                                         :href="route('fiches-techniques.show', fiche.id)" 
                                         class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
                                         <EyeIcon class="h-5 w-5" />
                                     </ModalLink>
 
                                     <ModalLink 
+                                        v-if="can('edit_ficheTechniques')"
                                         :href="route('fiches-techniques.edit', fiche.id)" 
                                         class="text-blue-600 hover:text-blue-900 p-1" title="Modifier">
                                         <PencilIcon class="h-5 w-5" />
                                     </ModalLink>
 
                                     <a
+                                        v-if="can('pdf_ficheTechniques')"
                                         :href="route('fiches-techniques.export', fiche.id)"
                                         target="_blank"
                                         class="text-purple-600 hover:text-purple-900 p-1"
@@ -158,6 +165,7 @@ function formatDate(date) {
                                     </a>
                                     
                                     <button @click="openDeleteModal(fiche.id)"
+                                        v-if="can('delete_ficheTechniques')"
                                         class="text-red-600 hover:text-red-900 p-1" title="Supprimer">
                                         <TrashIcon class="h-5 w-5" />
                                     </button>
@@ -177,6 +185,7 @@ function formatDate(date) {
                         collectivite.</p>
                     <div class="mt-6">
                         <ModalLink :href="route('fiches-techniques.create')"
+                            v-if="can('create_ficheTechniques')"
                             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                             <PlusIcon class="h-4 w-4 mr-2" />
                             Nouvelle fiche

@@ -14,13 +14,28 @@ use App\Models\FicheTechnique;
 use App\Models\MouvementStock;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-class FicheTechniqueController extends Controller
+class FicheTechniqueController extends Controller implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_ficheTechniques', only: ['pedagogique', 'collectivite']),
+            new Middleware('permission:show_ficheTechniques', only: ['show']),
+            new Middleware('permission:create_ficheTechniques', only: ['create', 'store']),
+            new Middleware('permission:edit_ficheTechniques', only: ['edit', 'update']),
+            new Middleware('permission:delete_ficheTechniques', only: ['destroy']),
+            new Middleware('permission:pdf_ficheTechniques', only: ['export']),
+        ];
+    }
+    
     public function pedagogique(Request $request)
     {
         $search = $request->search;
