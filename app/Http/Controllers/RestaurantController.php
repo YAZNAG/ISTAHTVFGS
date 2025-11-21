@@ -12,11 +12,26 @@ use App\Models\FicheTechnique;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
-class RestaurantController extends Controller
+class RestaurantController extends Controller implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_restaurants', only: ['index']),
+            new Middleware('permission:show_restaurants', only: ['show']),
+            new Middleware('permission:create_restaurants', only: ['create', 'store']),
+            new Middleware('permission:edit_restaurants', only: ['edit', 'update']),
+            new Middleware('permission:delete_restaurants', only: ['destroy']),
+
+        ];
+    }
+
     public function index(Request $request)
     {
         $search = $request->search;
