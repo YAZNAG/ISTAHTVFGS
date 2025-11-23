@@ -5,6 +5,9 @@ import { ModalLink } from '@inertiaui/modal-vue'
 import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import ConfirmationModal from '@/Components/ConfirmationModal.vue'
+import { usePermission } from '@/Utils/permission'
+
+const { can, canAny } = usePermission();
 
 const props = defineProps({
   roles: {
@@ -81,6 +84,7 @@ const deleteRole = (role) => {
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <ModalLink :href="route('roles.create')"
+              v-if="can('create_roles')"
               class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl">
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
@@ -108,6 +112,7 @@ const deleteRole = (role) => {
             <!-- Dropdown Actions -->
             <div class="relative">
               <button @click="toggleDropdown(role.id)"
+                v-if="canAny(['edit_roles', 'delete_roles'])"
                 class="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-50 rounded-lg transition-colors">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
@@ -119,10 +124,12 @@ const deleteRole = (role) => {
               <div v-if="openDropdown === role.id" :ref="el => setupDropdownRef(el, role.id)"
                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10 overflow-hidden">
                 <ModalLink :href="route('roles.edit', role.id)"
+                  v-if="can('edit_roles')"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
                   Modifier le rôle
                 </ModalLink>
                 <button @click="openDeleteModal(role.id)"
+                  v-if="can('delete_roles')"
                   class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium">
                   Supprimer le rôle
                 </button>
@@ -177,6 +184,7 @@ const deleteRole = (role) => {
         <h3 class="mt-4 text-xl font-semibold text-gray-800">Aucun rôle configuré</h3>
         <div class="mt-6">
           <ModalLink :href="route('roles.create')"
+            v-if="can('create_roles')"
             class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl inline-flex items-center gap-3">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />

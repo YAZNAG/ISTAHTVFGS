@@ -15,7 +15,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 
-class RoleController extends Controller
+class RoleController extends Controller implements HasMiddleware
 {
     public function index()
     {
@@ -88,7 +88,6 @@ class RoleController extends Controller
     {
         return [
             new Middleware('permission:list_roles', only: ['index']),
-            new Middleware('permission:show_roles', only: ['show']),
             new Middleware('permission:create_roles', only: ['create', 'store']),
             new Middleware('permission:edit_roles', only: ['edit', 'update']),
             new Middleware('permission:delete_roles', only: ['destroy']),
