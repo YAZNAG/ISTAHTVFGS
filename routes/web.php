@@ -89,7 +89,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'destroy' => 'bon-commandes.destroy',
         ]);
         Route::post('marches/{bonCommande}/statut', [BonCommandeController::class, 'updateStatut'])->name('bon-commandes.statut');
-        Route::post('marches/fournisseurs/store', [BonCommandeController::class, 'storeFournisseur'])->name('bon-commandes.fournisseurs.store');
         Route::get('marches/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
         // Route::get('/marches/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
 
@@ -144,7 +143,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('fournisseurs/{fournisseur}', [FournisseurController::class, 'update'])->name('fournisseurs.update');
         Route::delete('fournisseurs/{fournisseur}', [FournisseurController::class, 'destroy'])->name('fournisseurs.destroy');
         Route::patch('fournisseurs/{fournisseur}/toggle-statut', [FournisseurController::class, 'toggleStatut'])->name('fournisseurs.toggle-statut');
-        Route::get('fournisseurs/stats', [FournisseurController::class, 'stats'])->name('fournisseurs.stats');
+        // Route::get('fournisseurs/stats', [FournisseurController::class, 'stats'])->name('fournisseurs.stats');
     });
 
     // Routes pour la Gestion du Stock
@@ -228,7 +227,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     #### Bon Livraison ####
     Route::get('/bon-livraisons', [BonLivraisonController::class, 'index'])->name('bon-livraisons.index');
-    Route::get('/bon-livraisons/create', [BonLivraisonController::class, 'create'])->name('bon-livraisons.create');
+    // Route::get('/bon-livraisons/create', [BonLivraisonController::class, 'create'])->name('bon-livraisons.create');
     // Route::post('/bon-livraisons', [BonLivraisonController::class, 'store'])->name('bon-livraisons.store');
     Route::get('/bon-livraisons/{bonLivraison}/edit', [BonLivraisonController::class, 'edit'])->name('bon-livraisons.edit');
     Route::put('/bon-livraisons/{bonLivraison}', [BonLivraisonController::class, 'update'])->name('bon-livraisons.update');
