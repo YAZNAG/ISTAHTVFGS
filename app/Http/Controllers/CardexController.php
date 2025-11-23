@@ -5,15 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\MouvementStock;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Enums\Orientation;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-class CardexController extends Controller
+class CardexController extends Controller implements HasMiddleware
 {
 
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_raports', only: ['create', 'export']),
+        ];
+    }
+
+    
     public function create(Request $request) {
         $articles = Article::all(['id', 'designation']);
         return Inertia::render('Cardex/Create', ['articles' => $articles]);
