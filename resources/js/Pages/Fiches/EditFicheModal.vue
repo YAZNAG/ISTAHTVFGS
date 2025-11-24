@@ -111,10 +111,11 @@ const articleErrors = computed(() => {
                 </div>
 
                 <!-- Demandeur (admin only) -->
-                <div v-if="$page.props.auth.user.role === 'ADMIN'">
+                <div v-if="$page.props.auth.role === 'manager'">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Demandeur</label>
                     <select v-model="form.demandeur"
                         class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option disabled value="">Sélectionnez un demandeur</option>
                         <option v-for="demandeur in demandeurs" :key="demandeur.id" :value="demandeur.id">{{ demandeur.name }}</option>
                     </select>
                     <p v-if="form.errors.demandeur" class="text-sm text-red-600 mt-1">{{ form.errors.demandeur }}</p>

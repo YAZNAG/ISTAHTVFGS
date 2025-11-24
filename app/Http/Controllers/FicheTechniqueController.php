@@ -104,7 +104,9 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
 
         if (auth()->user()->isAdmin()) {
-            $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
+            $data['demandeurs'] = User::permission('create_ficheTechniques')
+                        ->withoutRole('manager')
+                        ->get(['id', 'name']);
         }
 
         return Inertia::modal('Fiches/CreateFicheModal', $data)->baseUrl(url()->previous());
@@ -177,7 +179,9 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
 
         if (auth()->user()->isAdmin()) {
-            $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
+            $data['demandeurs'] = User::permission('create_ficheTechniques')
+                        ->withoutRole('manager')
+                        ->get(['id', 'name']);
         }
 
         return Inertia::render('Fiches/EditFicheModal', $data);
