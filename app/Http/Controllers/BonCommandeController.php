@@ -40,8 +40,9 @@ class BonCommandeController extends Controller implements HasMiddleware
             new Middleware('permission:list_marches', only: ['index']),
             new Middleware('permission:show_marches', only: ['show']),
             new Middleware('permission:create_marches', only: ['create', 'store']),
-            new Middleware('permission:edit_marches', only: ['edit', 'updateStatut', 'annuler']),
+            new Middleware('permission:validate_marches', only: ['edit', 'updateStatut', 'annuler']),
             new Middleware('permission:pdf_marches', only: ['generatePdf']),
+            new Middleware('permission:export_marches', only: ['export']),
 
         ];
     }

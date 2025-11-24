@@ -14,6 +14,7 @@
                 <div class="flex items-center gap-4">
 
                     <ModalLink as="button" href="#export-modal"
+                        v-if="can('export_marches')"
                         class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-400 flex items-center justify-center gap-2 ">
                         <DocumentArrowDownIcon class="h-5 w-5" />
                         Exporter
@@ -21,6 +22,7 @@
                     <CreateExportModal name="export-modal" />
 
                     <ModalLink :href="route('bon-commandes.create')"
+                        v-if="can('create_marches')"
                         class="bg-blue-600 text-white  px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2">
                         <PlusIcon class="h-5 w-5" />
                         Nouveau Marché
@@ -166,16 +168,17 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
                                         <Link :href="route('bon-commandes.show', marche.id)"
+                                            v-if="can('show_marches')"
                                             class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
                                         <EyeIcon class="h-4 w-4" />
                                         </Link>
                                         <ModalLink :href="route('bon-commandes.edit', marche.id)"
                                             class="text-green-600 hover:text-green-900 p-1" title="Modifier statut"
-                                            v-if="marche.statut === 'cree'">
+                                            v-if="marche.statut === 'cree' || can('validate_marches')">
                                             <ArrowPathIcon class="h-4 w-4" />
                                         </ModalLink>
                                         <!-- Bouton PDF - N'apparaît que pour les statuts différents de "cree" et "annule" -->
-                                        <a v-if="marche.statut !== 'cree' && marche.statut !== 'annule'"
+                                        <a v-if="marche.statut !== 'cree' && marche.statut !== 'annule' && can('pdf_marches')"
                                             :href="route('bon-commandes.pdf', marche.id)" target="_blank"
                                             class="text-purple-600 hover:text-purple-900 p-1" title="Télécharger PDF">
                                             <DocumentTextIcon class="h-4 w-4" />
@@ -196,11 +199,6 @@
                             Commencez par créer votre premier marché.
                         </p>
                         <div class="mt-6">
-                            <button @click="openMarcheForm()"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                <PlusIcon class="h-4 w-4 mr-2" />
-                                Nouveau marché
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -255,6 +253,9 @@ import InputError from '@/Components/InputError.vue';
 import CreateExportModal from './CreateExportModal.vue';
 import Dump from '@/Components/Dump.vue';
 import { getBonCommandeStatutInfo } from '@/Utils/labels';
+import { usePermission } from '@/Utils/permission';
+
+const { can } = usePermission();
 
 // Props avec valeurs par défaut pour éviter les erreurs
 const props = defineProps({
