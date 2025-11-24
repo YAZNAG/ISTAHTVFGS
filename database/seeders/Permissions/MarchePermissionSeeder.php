@@ -23,14 +23,11 @@ class MarchePermissionSeeder extends Seeder
 
         // Explicit permissions covering all routes
         $permissions = [
-            ['name' => 'bon-commandes.index',    'display_name' => 'Voir la liste des bons de commande'],
-            ['name' => 'bon-commandes.show',     'display_name' => 'Voir le détail d\'un bon de commande'],
-            ['name' => 'bon-commandes.create',   'display_name' => 'Créer des bons de commande'],
-            ['name' => 'bon-commandes.edit',     'display_name' => 'Modifier des bons de commande'],
-            ['name' => 'bon-commandes.delete',   'display_name' => 'Supprimer des bons de commande'],
-            ['name' => 'bon-commandes.export',   'display_name' => 'Exporter les bons de commande'],
-            ['name' => 'bon-commandes.pdf',      'display_name' => 'Générer PDF d\'un bon de commande'],
-            ['name' => 'bon-commandes.validate', 'display_name' => 'Valider un bon de commande'],
+            ['name' => 'list_marches',    'display_name' => 'Voir la liste des marches'],
+            ['name' => 'show_marches',     'display_name' => 'Voir le détail d\'un marche'],
+            ['name' => 'create_marches',   'display_name' => 'Créer des bons de commande'],
+            ['name' => 'validate_marches', 'display_name' => 'Valider un marche'],
+            ['name' => 'pdf_marches',      'display_name' => 'Générer PDF d\'un marche'],
         ];
 
         // Create permissions

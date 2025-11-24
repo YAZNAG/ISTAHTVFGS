@@ -14,6 +14,8 @@ use App\Models\HistoriqueStatutBc;
 use App\Models\BonCommandeArticle;
 use App\Models\Categorie;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -25,11 +27,24 @@ use Illuminate\Support\Facades\Log;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf as FacadesPdf;
 
-class BonCommandeController extends Controller
+class BonCommandeController extends Controller implements HasMiddleware
 {
+
     // Ajouter cette propriété pour les taux de TVA
    
     private $tauxTVA = [0, 5, 7, 10, 14, 20];
+    
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_marches', only: ['index']),
+            new Middleware('permission:show_marches', only: ['show']),
+            new Middleware('permission:create_marches', only: ['create', 'store']),
+            new Middleware('permission:edit_marches', only: ['edit', 'updateStatut', 'annuler']),
+            new Middleware('permission:pdf_marches', only: ['generatePdf']),
+
+        ];
+    }
 
 
  public function index(Request $request)
