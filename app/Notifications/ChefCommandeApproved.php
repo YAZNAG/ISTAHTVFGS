@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewChefCommadeCreated extends Notification
+class ChefCommandeApproved extends Notification
 {
     use Queueable;
 
@@ -38,9 +38,10 @@ class NewChefCommadeCreated extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $num = $this->chefCommande->numero;
         $data = [
             'object_id' => $this->chefCommande->id,
-            'message' => "Nouveau bon de commande <strong class='underline'>#{$this->chefCommande->numero}</strong>",
+            'message' => "Votre bon de commande <strong class='underline'>#{$num}</strong> vient d’être approuvé",
             'url' => route('chef-commandes.index'),
         ];
 

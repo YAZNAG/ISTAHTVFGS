@@ -13,6 +13,9 @@ use App\Models\Categorie;
 use App\Models\ChefCommande;
 use App\Models\ChefCommandeItem;
 use App\Models\User;
+use App\Notifications\ChefCommandeApproved;
+use App\Notifications\ChefCommandeRejected;
+use App\Notifications\NewChefCommadeCreated;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -105,6 +108,14 @@ class ChefCommandeController extends Controller implements HasMiddleware
             ]);
 
         }
+        
+        if ($request->type == 'submit') {
+            $usersToNotify = User::permission('validate_chefCommandes')->get();
+
+            foreach ($usersToNotify as $user) {
+                $user->notify(new NewChefCommadeCreated($chefCommande));
+            }
+        }
 
         return redirect()->back()->with('success', 'Commande crée avec succès.');
     }
@@ -176,6 +187,12 @@ class ChefCommandeController extends Controller implements HasMiddleware
         $chefCommande->update([
             'statut' => ChefCommande::STATUS_EN_ATTENTE_VALIDATION,
         ]);
+
+        $usersToNotify = User::permission('validate_chefCommandes')->get();
+
+        foreach ($usersToNotify as $user) {
+            $user->notify(new NewChefCommadeCreated($chefCommande));
+        }
 
         return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
     }
@@ -268,7 +285,8 @@ class ChefCommandeController extends Controller implements HasMiddleware
             
     });
           
-        
+        $chefCommande->user->notify(new ChefCommandeApproved($chefCommande));
+
         return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
     } 
 
@@ -289,6 +307,8 @@ class ChefCommandeController extends Controller implements HasMiddleware
             'validation_note' => $request->input('validation_note'),
             'validation_date' => now(),
         ]);
+
+        $chefCommande->user->notify(new ChefCommandeRejected($chefCommande));
 
         return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
     } 
