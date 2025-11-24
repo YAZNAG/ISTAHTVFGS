@@ -61,6 +61,7 @@ class DatabaseSeeder extends Seeder
             UserPermissionSeeder::class,
             RaportPermissionSeeder::class,
             RolePermissionSeeder::class,
+            MarchePermissionSeeder::class,
 
         ]);
     }

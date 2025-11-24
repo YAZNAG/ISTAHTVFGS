@@ -456,7 +456,7 @@ onMounted(() => {
             </div>
             <div v-show="!sidebarCollapsed || mobileViewport" class="flex-1 min-w-0">
               <p class="text-sm font-medium text-gray-900 truncate">{{ user?.name || 'Guest' }}</p>
-              <p class="text-xs text-gray-500 truncate">{{ user?.role || 'Unknown' }}</p>
+              <p class="text-xs text-gray-500 truncate capitalize">{{ $page.props.auth.role || 'Unknown' }}</p>
             </div>
           </div>
         </div>
