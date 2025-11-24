@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user ? CurrentUserResource::make($user) : null,
                 'permissions' => $user?->getAllPermissions()->pluck('name') ?? [],
-                'role' => $user?->roles->first()->name
+                'role' => $user?->roles->first()?->name
             ],
             'flash' => [
                 'success' => session('success'),
