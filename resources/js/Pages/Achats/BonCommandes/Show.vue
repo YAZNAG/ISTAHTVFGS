@@ -182,7 +182,6 @@ import { Head, Link } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
 import { getBonCommandeStatutInfo } from '@/Utils/labels';
-import Dump from '@/Components/Dump.vue';
 
 // Props
 const props = defineProps({

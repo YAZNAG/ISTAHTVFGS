@@ -37,9 +37,6 @@ const submit = () => {
             </p>
         </div>
 
-        <Dump :data="form.data()" />
-
-
         <form class="mt-8 space-y-4">
 
             <div>

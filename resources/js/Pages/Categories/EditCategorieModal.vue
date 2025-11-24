@@ -38,8 +38,6 @@ const submit = () => {
       </p>
     </div>
 
-    <Dump :data="form.data()" />
-
     <form class="mt-8 space-y-4" @submit.prevent="submit">
       <div>
         <label class="block text-sm font-medium text-gray-700">Nom *</label>

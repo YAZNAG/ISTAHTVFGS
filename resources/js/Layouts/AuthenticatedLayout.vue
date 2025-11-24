@@ -46,7 +46,6 @@ import {
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
-import Dump from '@/Components/Dump.vue'
 import { usePermission } from '@/Utils/permission'
 
 const { can, canAny } = usePermission();

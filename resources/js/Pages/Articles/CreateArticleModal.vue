@@ -47,8 +47,6 @@ const submit = () => {
             </p>
         </div>
 
-        <Dump :data="form.data()" />
-
         <!-- Form -->
         <form class="mt-8">
 

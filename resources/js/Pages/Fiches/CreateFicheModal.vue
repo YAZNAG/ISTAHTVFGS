@@ -175,8 +175,6 @@ const articleErrors = computed(() => {
                     </div>
                 </div>
 
-<!-- <Dump :data="articles" /> -->
-
                 <!-- Etapes -->
                 <div class="space-y-6">
                     <h3 class="text-md font-semibold">Etapes</h3>
@@ -221,8 +219,6 @@ const articleErrors = computed(() => {
                                 </ul>
                             </div>
 
-                            <!-- <Dump :data="articles" /> -->
-                            
                             <!-- Selected Articles Table -->
                             <table class="w-full border border-gray-200 text-sm rounded-lg overflow-hidden">
                                 <thead class="bg-gray-50 text-gray-700">

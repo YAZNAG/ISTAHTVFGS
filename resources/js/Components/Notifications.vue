@@ -13,7 +13,6 @@ import {
   BanknotesIcon
 } from '@heroicons/vue/24/outline'
 import { InfiniteScroll, Link, usePage } from '@inertiajs/vue3'
-import Dump from './Dump.vue'
 
 const page = usePage();
 // State

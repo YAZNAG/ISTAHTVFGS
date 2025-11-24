@@ -133,7 +133,6 @@ function formatCurrency(val) {
             </p>
         </div>
 
-        <Dump :data="marche" />
         <form @submit.prevent="submitUpdateStatut" class="p-6 space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-slate-700">Nouveau statut *</label>

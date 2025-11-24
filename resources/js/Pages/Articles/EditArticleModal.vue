@@ -47,8 +47,6 @@ const submit = () => {
       </p>
     </div>
 
-    <Dump :data="form.data()" />
-
     <!-- Form -->
     <form class="mt-8" @submit.prevent="submit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

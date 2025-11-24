@@ -251,7 +251,6 @@ import { ModalLink } from '@inertiaui/modal-vue';
 
 import InputError from '@/Components/InputError.vue';
 import CreateExportModal from './CreateExportModal.vue';
-import Dump from '@/Components/Dump.vue';
 import { getBonCommandeStatutInfo } from '@/Utils/labels';
 import { usePermission } from '@/Utils/permission';
 

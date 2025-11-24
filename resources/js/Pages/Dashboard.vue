@@ -185,7 +185,6 @@ import * as HeroIcons from '@heroicons/vue/24/outline'
 import KpiCard from '@/Components/KpiCard.vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head } from '@inertiajs/vue3'
-import Dump from '@/Components/Dump.vue'
 
 const props = defineProps({
   stats: Object,
