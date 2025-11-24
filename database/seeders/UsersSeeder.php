@@ -21,7 +21,6 @@ class UsersSeeder extends Seeder
                 'email' => 'test@example.com',
                 'email_verified_at' => '2025-09-27 18:57:20',
                 'password' => Hash::make('123456789'),
-                'role' => 'DEMANDEUR',
                 'status' => 1,
                 'remember_token' => 'SnOdK3sWsC',
                 'created_at' => '2025-09-27 18:57:21',
@@ -33,7 +32,6 @@ class UsersSeeder extends Seeder
                 'email' => 'aznagy09@gmail.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
-                'role' => 'DEMANDEUR',
                 'status' => 1,
                 'remember_token' => null,
                 'created_at' => '2025-09-27 18:58:50',
@@ -45,7 +43,6 @@ class UsersSeeder extends Seeder
                 'email' => 'jean.dupont@entreprise.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
-                'role' => 'MAGASINIER',
                 'status' => 1,
                 'remember_token' => null,
                 'created_at' => '2025-10-05 19:17:47',
@@ -57,7 +54,6 @@ class UsersSeeder extends Seeder
                 'email' => 'marie.martin@entreprise.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
-                'role' => 'MAGASINIER',
                 'status' => 1,
                 'remember_token' => null,
                 'created_at' => '2025-10-05 19:17:47',
@@ -69,7 +65,6 @@ class UsersSeeder extends Seeder
                 'email' => 'pierre.durand@entreprise.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
-                'role' => 'MAGASINIER',
                 'status' => 1,
                 'remember_token' => null,
                 'created_at' => '2025-10-05 19:17:47',
@@ -81,12 +76,12 @@ class UsersSeeder extends Seeder
                 'email' => 'sophie.leroy@entreprise.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
-                'role' => 'MAGASINIER',
                 'status' => 1,
                 'remember_token' => null,
                 'created_at' => '2025-10-05 19:17:47',
                 'updated_at' => '2025-10-05 19:17:47'
             ]
         ]);
+
     }
 }
