@@ -101,7 +101,7 @@ function submit() {
         <InputError :message="form.errors.date_livraison" />
       </div>
 
-      <div>
+      <div v-if="$page.props.auth.role == 'manager'">
         <label class="block text-sm font-medium text-gray-700 mb-1">
           Responsable
         </label>

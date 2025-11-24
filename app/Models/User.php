@@ -56,7 +56,7 @@ class User extends Authenticatable
 
     public function isMagasinier()
     {
-        return $this->role === 'MAGASINIER';
+        return $this->hasRole('magasinier');
     }
 
     public function isDemandeur()
@@ -86,7 +86,7 @@ class User extends Authenticatable
    // Dans app/Models/User.php
     public function scopeMagasiniers($query)
     {
-        return $query->where('role', self::MAGASINIER);
+        return $query->role('magasinier');
     }
 
     public function scopeChefs($query)

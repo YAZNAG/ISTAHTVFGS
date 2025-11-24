@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -58,10 +59,14 @@ class BonLivraisonController extends Controller implements HasMiddleware
             })
         ->get();
 
+        $magasiniers = User::permission('validate_bonLivraisons')
+                    ->withoutRole('manager')
+                    ->get(['id', 'name']);
+
         return Inertia::render('BonLivraisons/Index', [
             'bonLivraisons' => IndexBonLivraisonResource::collection($bonLivraisons),
             'pendingLivraisons' => IndexBonLivraisonResource::collection($pendingLivraisons),
-            'magasiniers' => User::magasiniers()->get(['id', 'name']),
+            'magasiniers' => $magasiniers,
             'filtres' => [
                 'search' => $search,
                 'responsable_id' => $responsable_id
@@ -101,10 +106,14 @@ class BonLivraisonController extends Controller implements HasMiddleware
             ];
         });
 
+        $users = User::permission('validate_bonLivraisons')
+                    ->withoutRole('manager')
+                    ->get(['id', 'name']);
+
         return Inertia::modal('BonLivraisons/Edit', [
             'bonLivraison' => EditBonLivraisonResource::make($bonLivraison),
             'articles' => $articles,
-            'users' => User::magasiniers()->get(['id', 'name'])
+            'users' => $users,
         ]);
     }
 
@@ -112,19 +121,21 @@ class BonLivraisonController extends Controller implements HasMiddleware
     {
         $request->validate([
             'date_livraison' => 'required|date',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
             'items' => 'required|array',
             'items.*.article_id' => 'required|exists:articles,id',
             'items.*.quantite' => 'required|numeric',
         ]);
 
-        DB::transaction(function () use ($request, $bonLivraison) {
+        $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
+
+        DB::transaction(function () use ($request, $bonLivraison, $user_id) {
 
 
             $bonLivraison->update([
                 'date_livraison' => $request->date_livraison,
                 'statut' => BonLivraison::STATUS_LIVREE,
-                'responsable_id' => $request->user_id
+                'responsable_id' => $user_id
             ]);
 
             $bonLivraison->items()->delete();
