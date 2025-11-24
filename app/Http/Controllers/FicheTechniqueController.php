@@ -99,7 +99,10 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
         $data = [
             'articles' => $articles,
-            'types' => FicheType::toSelect()
+            'types' => array_filter(
+                        FicheType::toSelect(),
+                        fn ($item) => $item['value'] !== FicheType::RESTAURANT->value
+            ),
         ];
 
 
@@ -173,8 +176,11 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
         $data = [
             'articles' => $articles,
-            'types' => FicheType::toSelect(),
-            'fiche' => EditFicheTechniqueResource::make($fiche)
+            'fiche' => EditFicheTechniqueResource::make($fiche),
+            'types' => array_filter(
+                        FicheType::toSelect(),
+                        fn ($item) => $item['value'] !== FicheType::RESTAURANT->value
+            ),
         ];
 
 
