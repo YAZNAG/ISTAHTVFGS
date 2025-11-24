@@ -18,7 +18,6 @@ import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { getChefCommandeStatutInfo } from '@/Utils/labels.js'; 
-import Dump from '@/Components/Dump.vue';
 import { usePermission } from '@/Utils/permission';
 
 const { can } = usePermission();
@@ -118,13 +117,13 @@ const commandeStatus = [
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div class="flex-1">
             <h1 class="text-3xl font-bold mb-2">Bons de Commande</h1>
-            <p class="text-indigo-100 text-lg opacity-90">Gérez et suivez tous vos bons de commande</p>
+            <p class="text-blue-100 text-lg opacity-90">Gérez et suivez tous vos bons de commande</p>
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <ModalLink
               v-if="can('create_chefCommandes')"
               :href="route('chef-commandes.create')"
-              class="bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+              class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
             >
               <PlusIcon class="h-5 w-5" />
               Nouveau Bon
@@ -145,7 +144,7 @@ const commandeStatus = [
                 v-model="filters.search"
                 type="text"
                 placeholder="N° de bon ou fournisseur..."
-                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
@@ -155,7 +154,7 @@ const commandeStatus = [
             <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
             <select
               v-model="filters.status"
-              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
+              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Tous</option>
               <option :value="status.value" v-for="status in commandeStatus" :key="status.value">{{ status.label }}</option>
@@ -167,7 +166,7 @@ const commandeStatus = [
             <input
               v-model="filters.start_date"
               type="date"
-              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
+              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
@@ -176,7 +175,7 @@ const commandeStatus = [
             <input
               v-model="filters.end_date"
               type="date"
-              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
+              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -191,7 +190,7 @@ const commandeStatus = [
 
           <button
             @click="applyFilters"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all flex items-center gap-2"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
           >
             <MagnifyingGlassIcon class="w-4 h-4" />
             Rechercher
@@ -321,7 +320,7 @@ const commandeStatus = [
               <ModalLink
                 v-if="can('create_chefCommandes')"
                 :href="route('chef-commandes.create')"
-                class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <PlusIcon class="h-4 w-4 mr-2" />
                 Nouveau bon
@@ -331,20 +330,20 @@ const commandeStatus = [
         </div>
 
         <!-- Pagination -->
-        <div v-if="chefCommandes.links && chefCommandes.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
+        <div v-if="chefCommandes.meta.links && chefCommandes.meta.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
           <div class="flex justify-between items-center">
             <div class="text-sm text-gray-700">
               Affichage de {{ chefCommandes.from }} à {{ chefCommandes.to }} sur {{ chefCommandes.total }} résultats
             </div>
             <div class="flex space-x-2">
-              <template v-for="link in chefCommandes.links" :key="link.label">
+              <template v-for="link in chefCommandes.meta.links" :key="link.label">
                 <Link
                   v-if="link.url"
                   :href="link.url"
                   :class="[
                     'px-3 py-1 rounded-lg text-sm font-medium',
                     link.active 
-                      ? 'bg-indigo-600 text-white' 
+                      ? 'bg-blue-600 text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   ]"
                   v-html="link.label"
