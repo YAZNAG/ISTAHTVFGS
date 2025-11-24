@@ -15,7 +15,7 @@ class SyncAdminPermissions extends Command
 
     public function handle(): int
     {
-        $role = Role::firstWhere('name', 'super admin');
+        $role = Role::firstWhere('name', 'admin');
 
         if (! $role) {
             $this->error('Role “admin” does not exist.');
