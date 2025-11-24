@@ -351,13 +351,13 @@ const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="demandes.links && demandes.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
+                <div v-if="demandes.meta.links && demandes.meta.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
                     <div class="flex justify-between items-center">
                         <div class="text-sm text-gray-700">
                             Affichage de {{ demandes.from }} à {{ demandes.to }} sur {{ demandes.total }} résultats
                         </div>
                         <div class="flex space-x-2">
-                            <template v-for="link in demandes.links" :key="link.label">
+                            <template v-for="link in demandes.meta.links" :key="link.label">
                                 <Link
                                     v-if="link.url"
                                     :href="link.url"

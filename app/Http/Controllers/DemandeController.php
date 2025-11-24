@@ -18,6 +18,9 @@ use App\Models\MouvementStock;
 use App\Models\Restaurant;
 use App\Models\SortieStock;
 use App\Models\User;
+use App\Notifications\DemandeApproved;
+use App\Notifications\DemandeRejected;
+use App\Notifications\NewDemandeCreated;
 use App\Rules\InStockRule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -127,7 +130,6 @@ class DemandeController extends Controller implements HasMiddleware
         DB::transaction(function () use ($request) {
             
             $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
-            ds($user_id);
 
             $model = $request->demandable_type == FicheType::RESTAURANT->value ? Restaurant::class : FicheTechnique::class;
             $demandable = $model::findOrFail($request->demandable_id);
@@ -168,7 +170,7 @@ class DemandeController extends Controller implements HasMiddleware
             
         });
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Demande ajoutée avec succès.');
     }
 
     public function submit(Demande $demande)
@@ -180,6 +182,11 @@ class DemandeController extends Controller implements HasMiddleware
         $demande->update([
             'statut' => DemandeStatut::EN_ATTENTE_VALIDATION,
         ]);
+
+        $usersToNotify = User::permission('validate_demandes')->get();
+        foreach ($usersToNotify as $user) {
+            $user->notify(new NewDemandeCreated($demande));
+        }
 
         return redirect()->back()->with('success', 'Demande mise à jour avec succès.');
     }
@@ -326,10 +333,12 @@ class DemandeController extends Controller implements HasMiddleware
                     'taux_tva' => $lastEntreeArticle->taux_tva
                 ]);
             }
+
+            $demande->demandeur->notify(new DemandeApproved($demande));
             
         });
         
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Demande mise à jour avec succès.');
     } 
 
 
@@ -348,8 +357,9 @@ class DemandeController extends Controller implements HasMiddleware
             'date_validation' => now(),
         ]);
 
+        $demande->demandeur->notify(new DemandeRejected($demande));
         
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Demande mise à jour avec succès.');
     } 
 
 }
