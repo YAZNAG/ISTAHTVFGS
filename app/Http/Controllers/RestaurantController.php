@@ -63,7 +63,9 @@ class RestaurantController extends Controller implements HasMiddleware
 
     public function create()
     {
-        $articles = Article::actives()->get(['id', 'designation', 'unite_mesure']);
+        $articles = Article::actives()
+            ->with('currentBonCommandeArticle')
+            ->get(['id', 'designation', 'unite_mesure']);
 
 
         $articles = $articles->map(function ($article) {
@@ -71,7 +73,7 @@ class RestaurantController extends Controller implements HasMiddleware
                 'id' => $article->id,
                 'designation' => $article->designation,
                 'unite_mesure' => $article->unite_mesure,
-                'prix_unitaire' => $article->price ?? 'Prix indisponible'
+                'prix_unitaire' => $article->currentBonCommandeArticle->prix_unitaire_ht ?? 'Prix indisponible'
             ];
         });
 

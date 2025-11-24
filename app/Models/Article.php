@@ -33,8 +33,6 @@ class Article extends Model
         'seuil_maximal' => 'integer'
     ];
 
-    protected $appends = ['price'];
-
     protected static function booted()
     {
         static::addGlobalScope(new IsExistsInMarcheScope);
@@ -122,12 +120,12 @@ class Article extends Model
             })->first()?->prix_unitaire_ht;
     }
 
-    public function isLastMarche()
+    public function currentBonCommandeArticle()
     {
-        return BonCommandeArticle::where('article_id', $this->id)
-            ->whereHas('bonCommande', function ($query) {
-                $query->whereDate('date_debut', '<=', now())
-                        ->whereDate('date_fin', '>=', now());
-            })->first();
+        return $this->hasOne(BonCommandeArticle::class)
+            ->whereHas('bonCommande', function ($q) {
+                $q->whereDate('date_debut', '<=', today())
+                ->whereDate('date_fin',   '>=', today());
+            })->ofMany(['created_at' => 'max'], '>=');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ListBonCommandesExport;
+use App\Http\Resources\MarcheValidateResource;
 use App\Http\Resources\ShowBonCommandeResource;
 use App\Models\BonCommande;
 use App\Models\Fournisseur;
@@ -37,10 +38,6 @@ class BonCommandeController extends Controller
     $query = BonCommande::with([
         'categorie',
         'fournisseur', 
-        'articles.article.categorie',
-        'articles.article.categoriePrincipale',
-        'articles.article.naturePrestation',
-        'articles.article.images'
     ])->orderBy('created_at', 'desc');
 
     if ($request->has('statut') && $request->statut) {
@@ -73,75 +70,16 @@ class BonCommandeController extends Controller
         
         return $bonCommande;
     });
-
-    $articles = Article::with(['categorie', 'categoriePrincipale', 'naturePrestation'])
-        ->withNonExists()
-        ->where('est_actif', true)
-        ->get();
+    
 
     return Inertia::render('Achats/BonCommandes/Index', [
         'marches' => $bonCommandes,
-        'categoriesPrincipales' => CategoriePrincipale::where('est_actif', true)->get(),
         'categories' => Categorie::where('est_actif', true)->get(),
-        'naturesPrestation' => NaturePrestation::where('est_actif', true)->get(),
-        'articles' => $articles,
-        'articlesGroupes' => $articles->groupBy('categorie_principale_id'),
-        'fournisseurs' => Fournisseur::where('est_actif', true)->get(),
-        'tauxTVA' => $this->tauxTVA,
+        
         'filters' => $request->only(['statut', 'categorie_principale_id', 'date_limite', 'reference']),
         'stats' => $this->getStats(),
     ]);
 }
-
-    
-//    public function index(Request $request)
-// {
-//     // CORRECTION : Charger toutes les relations nécessaires pour les articles
-//     $query = BonCommande::with([
-//         'categoriePrincipale', 
-//         'naturePrestation', 
-//         'fournisseur', 
-//         'articles.article.categorie',
-//         'articles.article.categoriePrincipale',
-//         'articles.article.naturePrestation',
-//         'articles.article.images'
-//     ])->orderBy('created_at', 'desc');
-
-//     if ($request->has('statut') && $request->statut) {
-//         $query->where('statut', $request->statut);
-//     }
-
-//     if ($request->has('categorie_principale_id') && $request->categorie_principale_id) {
-//         $query->where('categorie_principale_id', $request->categorie_principale_id);
-//     }
-
-//     if ($request->has('date_limite') && $request->date_limite) {
-//         $query->where('date_limite_reception', '<=', $request->date_limite);
-//     }
-
-//     if ($request->has('reference') && $request->reference) {
-//         $query->where('reference', 'like', '%' . $request->reference . '%');
-//     }
-
-//     $bonCommandes = $query->paginate(10);
-
-//     $articles = Article::with(['categorie', 'categoriePrincipale', 'naturePrestation'])
-//         ->where('est_actif', true)
-//         ->get();
-
-//     // CORRECTION : Ajouter les statistiques et les filtres
-//     return Inertia::render('Achats/BonCommandes/Index', [
-//         'bonCommandes' => $bonCommandes,
-//         'categoriesPrincipales' => CategoriePrincipale::where('est_actif', true)->get(),
-//         'naturesPrestation' => NaturePrestation::where('est_actif', true)->get(),
-//         'articles' => $articles,
-//         'articlesGroupes' => $articles->groupBy('categorie_principale_id'),
-//         'fournisseurs' => Fournisseur::where('est_actif', true)->get(),
-//         'tauxTVA' => $this->tauxTVA,
-//         'filters' => $request->only(['statut', 'categorie_principale_id', 'date_limite', 'reference']),
-//         'stats' => $this->getStats(),
-//     ]);
-// }
 
 /**
  * Récupère les statistiques des bons de commande
@@ -149,10 +87,9 @@ class BonCommandeController extends Controller
 private function getStats()
 {
     return [
-        'cree' => BonCommande::where('statut', 'cree')->count(),
-        'attente_livraison' => BonCommande::where('statut', 'attente_livraison')->count(),
-        'livre_completement' => BonCommande::where('statut', 'livre_completement')->count(),
-        'livre_partiellement' => BonCommande::where('statut', 'livre_partiellement')->count(),
+        'total' => BonCommande::count(),
+        'livre_completement' => BonCommande::where('statut', BonCommande::STATUT_LIVRE_COMPLETEMENT)->count(),
+        'attente_livraison' => BonCommande::where('statut', BonCommande::STATUT_ATTENTE_LIVRAISON)->count(),
         'montant_total' => BonCommande::whereIn('statut', ['attente_livraison', 'livre_completement', 'livre_partiellement'])
             ->withSum('articles as total_ttc_sum', 'montant_ttc')
             ->get()
@@ -161,23 +98,20 @@ private function getStats()
 }
     public function create()
     {
-        $articles = Article::with(['categorie', 'categoriePrincipale', 'naturePrestation'])
-            ->where('est_actif', true)
-            ->get();
+        $articles = Article::withNonExists()->where('est_actif', true)->get();
+        $categories = Categorie::all(['id', 'nom']);
 
-        return Inertia::render('Achats/BonCommandes/Create', [
-            'categoriesPrincipales' => CategoriePrincipale::where('est_actif', true)->get(),
-            'naturesPrestation' => NaturePrestation::where('est_actif', true)->get(),
-            'articles' => $articles,
-            'articlesGroupes' => $articles->groupBy('categorie_principale_id'),
+        return Inertia::modal('Achats/BonCommandes/CreateModal', [
             'tauxTVA' => $this->tauxTVA,
-        ]);
+            'articles' => $articles,
+            'categories' => $categories, 
+        ])->baseRoute('bon-commandes.index');
     }
 
       public function store(Request $request)
     {
         Log::info('Données reçues pour création bon de commande:', $request->all());
-        
+
         $request->validate([
             'reference' => 'required|unique:bon_commandes',
             'objet' => 'required|string|max:255',
@@ -249,6 +183,16 @@ private function getStats()
             ->with('success', 'Le Marché créé avec succès.');
     }
 
+    public function edit(BonCommande $bonCommande)
+    {
+        $bonCommande->loadMissing('articles.article');
+        $fournisseurs = Fournisseur::all();
+        return Inertia::modal('Achats/BonCommandes/ValidateMarcheModal', [
+            'marche' => MarcheValidateResource::make($bonCommande),
+            'fournisseurs' => $fournisseurs,
+        ])->baseRoute('bon-commandes.index');
+    }
+
  public function updateStatut(Request $request, BonCommande $bonCommande)
 {
     Log::info('Début updateStatut', $request->all());
@@ -284,7 +228,7 @@ private function getStats()
 
     try {
         DB::beginTransaction();
-
+        
         $ancienStatut = $bonCommande->statut;
 
         if ($request->statut === 'annule') {
@@ -452,44 +396,6 @@ public function show(BonCommande $bonCommande)
     ]);
 }
 
-/**
- * Méthode de débogage pour vérifier les données des articles
- * (À supprimer en production)
- */
-public function debugBonCommande(BonCommande $bonCommande)
-{
-    $bonCommande->load([
-        'articles.article.categoriePrincipale',
-        'articles.article.naturePrestation',
-        'articles.article.categorie'
-    ]);
-
-    $debugData = [
-        'bon_commande' => [
-            'id' => $bonCommande->id,
-            'reference' => $bonCommande->reference,
-            'statut' => $bonCommande->statut,
-        ],
-        'articles' => $bonCommande->articles->map(function($articlePivot) {
-            return [
-                'pivot_id' => $articlePivot->id,
-                'article_id' => $articlePivot->article_id,
-                'quantite_commandee' => $articlePivot->quantite_commandee,
-                'taux_tva' => $articlePivot->taux_tva,
-                'prix_unitaire_ht' => $articlePivot->prix_unitaire_ht,
-                'article' => $articlePivot->article ? [
-                    'id' => $articlePivot->article->id,
-                    'reference' => $articlePivot->article->reference,
-                    'designation' => $articlePivot->article->designation,
-                    'unite_mesure' => $articlePivot->article->unite_mesure,
-                ] : null
-            ];
-        })
-    ];
-
-    return response()->json($debugData);
-}
-
 private function processAnnulation(BonCommande $bonCommande, string $raison)
 {
     \Log::info('Début processAnnulation simplifiée', ['bon_commande_id' => $bonCommande->id]);
@@ -532,82 +438,6 @@ private function processAnnulation(BonCommande $bonCommande, string $raison)
 }
 
 
-
-private function processStatutLivraison(BonCommande $bonCommande, Request $request)
-{
-    // Mettre à jour les prix des articles
-    foreach ($request->articles as $articleData) {
-        $article = $bonCommande->articles()->find($articleData['id']);
-        if ($article) {
-            $montantHT = $articleData['prix_unitaire_ht'] * $article->quantite_commandee;
-            
-            // UTILISER LE TAUX TVA ORIGINAL DE L'ARTICLE, PAS CELUI ENVOYÉ
-            $tauxTVA = $article->taux_tva;
-            $montantTVA = $montantHT * ($tauxTVA / 100);
-            
-            $article->update([
-                'prix_unitaire_ht' => $articleData['prix_unitaire_ht'],
-                // NE PAS METTRE À JOUR LE TAUX TVA - garder celui de la création
-                'montant_ht' => $montantHT,
-                'montant_tva' => $montantTVA,
-                'montant_ttc' => $montantHT + $montantTVA,
-            ]);
-        }
-    }
-
-    // Mettre à jour le bon de commande
-    $bonCommande->update([
-        'statut' => $request->statut,
-        'fournisseur_id' => $request->fournisseur_id,
-    ]);
-}
-/**
- * Envoie des notifications pour l'annulation
- */
-private function notifyAnnulation(BonCommande $bonCommande, string $raison)
-{
-    // Exemple d'envoi de notification par email
-    try {
-        $usersToNotify = \App\Models\User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['admin', 'responsable_achats']);
-        })->get();
-
-        foreach ($usersToNotify as $user) {
-            // Utiliser votre système de notification
-            $user->notify(new \App\Notifications\BonCommandeAnnule(
-                $bonCommande, 
-                $raison, 
-                auth()->user()
-            ));
-        }
-    } catch (\Exception $e) {
-        \Log::error('Erreur lors de l\'envoi des notifications d\'annulation: ' . $e->getMessage());
-    }
-}
-
-
-// public function downloadPdf(BonCommande $bon_commande)
-// {
-//     dd($bon_commande);
-//     // Vérifier que le statut n'est pas "cree" ou "annule"
-//     if ($bon_commande->statut === 'cree' || $bon_commande->statut === 'annule') {
-//         abort(403, 'PDF non disponible pour ce statut');
-//     }
-
-//     $data = [
-//         'bonCommande' => $bon_commande,
-//         'articles' => $bon_commande->articles,
-//         'fournisseur' => $bon_commande->fournisseur,
-//     ];
-
-//     $pdf = PDF::loadView('bon-commandes.pdf', $data);
-    
-//     return $pdf->download("bon-commande-{$bon_commande->reference}.pdf");
-// }
-/**
- * Méthode spécifique pour annuler sans passer par updateStatut
- * (Optionnel - pour une annulation directe)
- */
 public function annuler(Request $request, BonCommande $bonCommande)
 {
     $request->validate([
@@ -642,101 +472,6 @@ public function annuler(Request $request, BonCommande $bonCommande)
         ->with('success', 'Bon de commande annulé avec succès.');
 }
 
-
-private function generateAndStorePdf(BonCommande $bonCommande)
-{
-    try {
-        // Vérifier si la classe PDF existe
-        if (!class_exists('PDF')) {
-            \Log::warning('Classe PDF non disponible');
-            return null;
-        }
-        
-        $bonCommande->load([
-            'articles.article.categoriePrincipale', 
-            'articles.article.naturePrestation',
-            'fournisseur', 
-            'categoriePrincipale', 
-            'naturePrestation'
-        ]);
-        
-        $pdf = PDF::loadView('pdf.bon-commande', compact('bonCommande'));
-        
-        // Stocker le PDF
-        $fileName = "bon-commande-{$bonCommande->reference}.pdf";
-        Storage::disk('public')->put("bon-commandes-pdf/{$fileName}", $pdf->output());
-        
-        return $fileName;
-    } catch (\Exception $e) {
-        \Log::error('Erreur génération PDF', [
-            'bon_commande_id' => $bonCommande->id,
-            'erreur' => $e->getMessage()
-        ]);
-        return null;
-    }
-}
-
-public function storeFournisseur(Request $request)
-{
-    $request->validate([
-        'nom' => 'required|string|max:255',
-        'raison_sociale' => 'nullable|string|max:255',
-        'contact' => 'nullable|string|max:255',
-        'telephone' => 'nullable|string|max:20',
-        'email' => 'nullable|email|max:255',
-        'adresse' => 'nullable|string',
-        'ville' => 'nullable|string|max:255',
-        'ice' => 'nullable|string|max:50',
-        'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    try {
-        DB::beginTransaction();
-
-        $fournisseurData = [
-            'nom' => $request->nom,
-            'raison_sociale' => $request->raison_sociale,
-            'contact' => $request->contact,
-            'telephone' => $request->telephone,
-            'email' => $request->email,
-            'adresse' => $request->adresse,
-            'ville' => $request->ville,
-            'ice' => $request->ice,
-            'est_actif' => true,
-            'notes' => $request->notes,
-        ];
-
-        $fournisseur = Fournisseur::create($fournisseurData);
-
-        // Gérer l'upload du logo
-        if ($request->hasFile('logo')) {
-            $fournisseur->uploadLogo($request->file('logo'));
-        }
-
-        DB::commit();
-
-        return response()->json($fournisseur);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Erreur création fournisseur', ['error' => $e->getMessage()]);
-        return response()->json(['error' => 'Erreur lors de la création du fournisseur'], 500);
-    }
-}
-// Ajouter une méthode pour mettre à jour le logo
-public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur)
-{
-    $request->validate([
-        'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    if ($request->hasFile('logo')) {
-        $path = $fournisseur->uploadLogo($request->file('logo'));
-        return response()->json(['logo_url' => $fournisseur->logo_url]);
-    }
-
-    return response()->json(['error' => 'Aucun fichier uploadé'], 400);
-}
 
 
 
