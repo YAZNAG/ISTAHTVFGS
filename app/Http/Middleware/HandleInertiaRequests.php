@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\CurrentUserResource;
 use App\Http\Resources\NotificationResource;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -35,8 +36,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $user,
+                'user' => $user ? CurrentUserResource::make($user) : null,
                 'permissions' => $user?->getAllPermissions()->pluck('name') ?? [],
+                'role' => $user?->roles->first()->name
             ],
             'flash' => [
                 'success' => session('success'),

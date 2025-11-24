@@ -51,7 +51,7 @@ class User extends Authenticatable
     // Méthodes pour vérifier les rôles
     public function isAdmin()
     {
-        return $this->role === 'ADMIN';
+        return $this->hasRole('manager');
     }
 
     public function isMagasinier()

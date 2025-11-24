@@ -70,10 +70,14 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
     public function create()
     {
+        $users = User::permission('create_chefCommandes')
+                    ->withoutRole('manager')
+                    ->get(['id', 'name']);
+
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
             'articles' => Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']),
             'categories' => Categorie::all(['id', 'nom']),
-            'users' => User::chefs()->get(['id', 'name']),
+            'users' => $users,
         ])->baseRoute('chef-commandes.index');
     }
 
@@ -118,11 +122,15 @@ class ChefCommandeController extends Controller implements HasMiddleware
     public function edit(ChefCommande $chefCommande)
     {
         $articles = Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']);
+        $users = User::permission('create_chefCommandes')
+                    ->withoutRole('manager')
+                    ->get(['id', 'name']);
+
         return Inertia::modal('ChefCommande/EditCommandeModal', [
             'chefCommande' => EditChefCommandeResource::make($chefCommande),
             'articles' => $articles,
             'categories' => Categorie::all(['id', 'nom']),
-            'users' => User::chefs()->get(['id', 'name']),
+            'users' => $users,
         ])
         ->baseRoute('chef-commandes.index');
         ;
@@ -130,7 +138,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
     public function update(StoreChefCommandeRequest $request, ChefCommande $chefCommande)
     {
-        if ($chefCommande->statut !== ChefCommande::STATUS_CREE || $chefCommande->statut !== ChefCommande::STATUS_EN_ATTENTE_VALIDATION) {
+        if ($chefCommande->statut !== ChefCommande::STATUS_CREE && $chefCommande->statut !== ChefCommande::STATUS_EN_ATTENTE_VALIDATION) {
             return redirect()->back()
                 ->with('error', 'Impossible de modifier ce bon de commande.');
         }

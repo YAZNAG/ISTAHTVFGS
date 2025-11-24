@@ -89,7 +89,7 @@ function onCategorieChange(event)
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
-        <div v-if="$page.props.auth.user.role == 'ADMIN'">
+        <div v-if="$page.props.auth.role == 'manager'">
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Chef
           </label>
