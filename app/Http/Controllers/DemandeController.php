@@ -105,7 +105,9 @@ class DemandeController extends Controller implements HasMiddleware
 
 
         if (auth()->user()->isAdmin()) {
-            $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
+            $data['demandeurs'] = User::permission('create_demandes')
+                                        ->withoutRole('manager')
+                                        ->get(['id', 'name']);
         }
 
         return Inertia::render('Demandes/CreateDemandeModal', $data);
@@ -125,6 +127,7 @@ class DemandeController extends Controller implements HasMiddleware
         DB::transaction(function () use ($request) {
             
             $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
+            ds($user_id);
 
             $model = $request->demandable_type == FicheType::RESTAURANT->value ? Restaurant::class : FicheTechnique::class;
             $demandable = $model::findOrFail($request->demandable_id);
