@@ -20,10 +20,12 @@ use App\Models\SortieStock;
 use App\Models\User;
 use App\Notifications\DemandeApproved;
 use App\Notifications\DemandeRejected;
+use App\Notifications\NewBonSortieCreated;
 use App\Notifications\NewDemandeCreated;
 use App\Rules\InStockRule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
@@ -333,6 +335,9 @@ class DemandeController extends Controller implements HasMiddleware
                     'taux_tva' => $lastEntreeArticle->taux_tva
                 ]);
             }
+
+            $usersToNotify = User::permission('validate_bonSorties')->get();
+            Notification::send($usersToNotify, new NewBonSortieCreated($sortieStock));
 
             $demande->demandeur->notify(new DemandeApproved($demande));
             
