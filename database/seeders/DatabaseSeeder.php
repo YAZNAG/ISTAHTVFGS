@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Permissions\ApplicationRolesSeeder;
 use Database\Seeders\Permissions\ArticlePermissionSeeder;
 use Database\Seeders\Permissions\BonLivraisonPermissionSeeder;
 use Database\Seeders\Permissions\BonReceptionPermissionSeeder;
@@ -47,6 +48,7 @@ class DatabaseSeeder extends Seeder
             // EntreeStocksSeeder::class,
             // LigneEntreeStocksSeeder::class,
             // HistoriqueStatutBcsSeeder::class,
+            ApplicationRolesSeeder::class,
             ArticlePermissionSeeder::class,
             ChefCommandePermissionSeeder::class,
             FournisseurPermissionSeeder::class,
