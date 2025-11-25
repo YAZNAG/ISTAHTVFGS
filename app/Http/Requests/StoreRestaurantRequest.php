@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRestaurantRequest extends FormRequest
 {
@@ -28,6 +29,8 @@ class StoreRestaurantRequest extends FormRequest
             'articles'             => ['required', 'array', 'min:1'],
             'articles.*.article_id'=> ['required', 'integer', 'exists:articles,id'],
             'articles.*.quantite' => ['required', 'integer', 'min:1'],
+            'chef'        => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
+
         ];
     }
 }

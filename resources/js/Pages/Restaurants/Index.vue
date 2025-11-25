@@ -133,7 +133,7 @@ function formatDate(date) {
                         <tr v-for="restaurant in restaurants.data" :key="restaurant.id" class="hover:bg-gray-50">
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ restaurant.id }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ restaurant.nom }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ restaurant.responsable }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ restaurant.responsable?.name || '-' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ restaurant.effectif }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(restaurant.created_at) }}</td>
                             <td class="px-6 py-4 text-sm font-medium">

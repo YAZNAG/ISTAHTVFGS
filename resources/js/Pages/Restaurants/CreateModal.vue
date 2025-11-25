@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
   articles: Array,   
+  chefs: Array,
 })
 
 const search = ref('');
@@ -18,6 +19,7 @@ const form = useForm({
   effectif: 1,
   articles: [],
   motif: '',
+  chef: '',
 })
 
 /* ---------- article helpers ---------- */
@@ -77,6 +79,18 @@ function closeIdle() {
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
+        <!-- Select Chef -->
+        <div v-if="$page.props.auth.role === 'manager'">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Chef</label>
+            <select v-model="form.chef"
+                class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option disabled value="">Sélectionnez un Chef</option>
+                <option v-for="chef in chefs" :key="chef.id" :value="chef.id">{{ chef.name }}
+                </option>
+            </select>
+            <p v-if="form.errors.chef" class="text-sm text-red-600 mt-1">{{ form.errors.chef }}</p>
+        </div>
+        
         <!-- Nom -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Nom du restaurant</label>

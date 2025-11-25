@@ -18,4 +18,9 @@ class Restaurant extends Model
     {
         return $this->hasMany(RestaurantItem::class);
     }
+
+    public function responsable() 
+    {
+        return $this->belongsTo(User::class, 'responsable', 'id');
+    }
 }

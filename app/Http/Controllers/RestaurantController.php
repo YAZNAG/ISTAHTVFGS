@@ -36,7 +36,7 @@ class RestaurantController extends Controller implements HasMiddleware
     {
         $search = $request->search;
 
-        $restaurants = Restaurant::query()
+        $restaurants = Restaurant::query()->with(['responsable:id,name'])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nom', 'like', "%{$search}%")
@@ -83,9 +83,11 @@ class RestaurantController extends Controller implements HasMiddleware
         ];
 
 
-        // if (auth()->user()->isAdmin()) {
-        //     $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
-        // }
+        if (auth()->user()->isAdmin()) {
+            $data['chefs'] = User::permission('create_restaurants')
+                                        ->withoutRole('manager')
+                                        ->get(['id', 'name']);
+        }
 
         return Inertia::modal('Restaurants/CreateModal', $data)->baseRoute('restaurants.index');
     }
@@ -95,11 +97,12 @@ class RestaurantController extends Controller implements HasMiddleware
 
         DB::transaction(function () use ($request) {
 
-            // $created_by = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
+            $responsable = auth()->user()->isAdmin() ? $request->chef : auth()->user()->id;
+
             ## Create Reastaurant
             $restaurant = Restaurant::create([
                 'nom' => $request->nom,
-                'responsable' => $request->responsable ?? 'Unkown',
+                'responsable' => $responsable,
                 'effectif' => $request->effectif,
                 'created_by' => auth()->user()->id
             ]);
