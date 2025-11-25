@@ -244,7 +244,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/bon-receptions', [ReceptionController::class, 'store'])->name('bon-receptions.store');
     Route::get('/bon-receptions/{reception}', [ReceptionController::class, 'show'])->name('bon-receptions.show');
     Route::delete('/bon-receptions/{reception}', [ReceptionController::class, 'destroy'])->name('bon-receptions.destroy');
-    Route::get('/bon-receptions/{bonReception}/pdf', [ReceptionController::class, 'export'])->name('bon-receptions.pdf');
+    Route::get('/bon-receptions/{reception}/pdf', [ReceptionController::class, 'export'])->name('bon-receptions.pdf');
 
     #### Bon Sortie ####
     Route::get('/bon-sorties', [BonSortieController::class, 'index'])->name('bon-sorties.index');

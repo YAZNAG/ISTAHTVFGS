@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Bon de Réception {{ $bonReception->numero }}</title>
+    <title>Bon de Réception {{ $reception->numero }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
@@ -12,14 +12,14 @@
 
         <!-- DOCUMENT INFO -->
         <div class="mb-6">
-            <div class="text-center font-bold text-lg underline uppercase mb-4">Bon de réception N° {{ $bonReception->numero }}</div>
+            <div class="text-center font-bold text-lg underline uppercase mb-4">Bon de réception N° {{ $reception->numero }}</div>
         </div>
 
         <!-- Fournisseur -->
         <div class="mb-6">
-            <div class="font-bold text-base mb-1">Fournisseur: {{ $bonReception->fournisseur->raison_sociale ?? $bonReception->fournisseur->nom ?? '........................................' }}</div>
+            <div class="font-bold text-base mb-1">Fournisseur: {{ $reception->BonLivraison->fournisseur->nom ?? $reception->BonLivraison->fournisseur->raison_sociale ?? '........................................' }}</div>
             <div class="font-bold">
-                Date : {{ \Carbon\Carbon::parse($bonReception->date_reception)->format('d/m/Y') }}
+                Date : {{ \Carbon\Carbon::parse($reception->date_reception)->format('d/m/Y') }}
             </div>
         </div>
 
@@ -27,7 +27,7 @@
         <div class="overflow-x-auto mb-6">
             <table class="w-full border border-black border-collapse text-xs">
                 <thead>
-                    <tr class="bg-gray-200 text-center font-bold">
+                    <tr class="text-center font-bold">
                         <th class=" border border-black p-1">Code d'article</th>
                         <th class=" border border-black p-1">Désignation</th>
                         <th class="border border-black p-1">Quantité</th>
@@ -37,34 +37,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php
-                        $totalHT = $totalTVA = $totalTTC = $totalQuantite = 0;
-                    @endphp
-
-                    @foreach($bonReception->lignesReception as $ligne)
-                        @php
-                            $montantHT = $ligne->quantite_receptionnee * $ligne->prix_unitaire;
-                            $montantTVA = $montantHT * ($ligne->taux_tva / 100);
-                            $montantTTC = $montantHT + $montantTVA;
-
-                            $totalHT += $montantHT;
-                            $totalTVA += $montantTVA;
-                            $totalTTC += $montantTTC;
-                            $totalQuantite += $ligne->quantite_receptionnee;
-                        @endphp
+                    @foreach($reception->BonLivraison->items as $item)
                         <tr>
-                            <td class="border border-black text-center p-1">{{ $ligne->article->reference ?? 'N/A' }}</td>
-                            <td class="border border-black p-1">{{ $ligne->article->designation ?? 'Article non trouvé' }}</td>
-                            <td class="border border-black text-center p-1">{{ number_format($ligne->quantite_receptionnee, 2) }}</td>
-                            <td class="border border-black text-right p-1">{{ number_format($ligne->prix_unitaire, 2, ',', ' ') }} DH</td>
-                            <td class="border border-black text-right p-1">{{ number_format($montantTVA, 2, ',', ' ') }} DH</td>
-                            <td class="border border-black text-right p-1">{{ number_format($montantTTC, 2, ',', ' ') }} DH</td>
+                            <td class="border border-black text-center p-1">{{ $item->article->reference ?? 'N/A' }}</td>
+                            <td class="border border-black p-1">{{ $item->article->designation ?? 'Article non trouvé' }}</td>
+                            <td class="border border-black text-center p-1">{{ number_format($item->quantite, 2) }}</td>
+                            <td class="border border-black text-right p-1">{{ number_format($item->prix_unitaire, 2, ',', ' ') }} DH</td>
+                            <td class="border border-black text-right p-1">{{ number_format($item->montant_tva, 2, ',', ' ') }} DH</td>
+                            <td class="border border-black text-right p-1">{{ number_format($item->montant_ttc, 2, ',', ' ') }} DH</td>
                         </tr>
                     @endforeach
 
-                    <tr class="bg-gray-200 font-bold">
+                    <tr class="font-bold">
                         <td colspan="5" class="border border-black text-right p-1">Total</td>
-                        <td class="border border-black text-right p-1">{{ number_format($totalTTC, 2, ',', ' ') }} DH</td>
+                        <td class="border border-black text-right p-1">{{ number_format($reception->BonLivraison->total_ttc, 2, ',', ' ') }} DH</td>
                     </tr>
                 </tbody>
             </table>

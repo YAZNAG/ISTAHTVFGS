@@ -12,6 +12,8 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Enums\Format;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class ReceptionController extends Controller implements HasMiddleware
 {
@@ -127,4 +129,24 @@ class ReceptionController extends Controller implements HasMiddleware
 
         return redirect()->back()->with('success', 'Bon de reception supprimé avec succès');
     }
+
+    public function export(Reception $reception)
+{
+        $reception->load([
+            'BonLivraison.items.article', 
+            'BonLivraison.fournisseur:id,nom,raison_sociale',
+        ]);
+
+        $fileName = "bon-reception-{$reception->numero}.pdf";
+
+        // return view('pdf.bon-reception', compact('reception'));
+
+        return Pdf::view('pdf.bon-reception', compact('reception'))->name($fileName)
+            ->headerView('pdf.H')
+            ->footerView('pdf.F')
+            ->margins(45, 5, 40,5)
+            ->format(Format::A4)
+            // ->download();
+            ;
+}
 }

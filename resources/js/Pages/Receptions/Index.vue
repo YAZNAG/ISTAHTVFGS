@@ -149,6 +149,7 @@
                       :href="route('bon-receptions.pdf', bon.id)"
                       class="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-all duration-200 group/tooltip relative"
                       title="Télécharger PDF"
+                      target="_blank"
                     >
                       <DocumentArrowDownIcon class="h-5 w-5" />
                       <div
