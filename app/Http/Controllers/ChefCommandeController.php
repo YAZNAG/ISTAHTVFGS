@@ -43,6 +43,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
         $status = $request->get('status');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
+        $canListAll = $user->hasPermissionTo('validate_chefCommandes');
 
         $chefCommandes = ChefCommande::withCount('articles')
             ->when($search, function ($query, $search) {
@@ -51,7 +52,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
                     ;
                 });
             })
-            ->when(!$user->isAdmin(), fn($query) => $query->where('user_id', $user->id))
+            ->when(!$canListAll, fn($query) => $query->where('user_id', $user->id))
             ->when($status, fn($query) => $query->where('statut', $status))
             ->when($startDate, fn($query) => $query->whereDate('created_at', '>=', $startDate))
             ->when($endDate, fn($query) => $query->whereDate('created_at', '<=', $endDate))

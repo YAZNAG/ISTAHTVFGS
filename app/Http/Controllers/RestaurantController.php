@@ -35,6 +35,7 @@ class RestaurantController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         $search = $request->search;
+        $user = $request->user();
 
         $restaurants = Restaurant::query()->with(['responsable:id,name'])
             ->when($search, function ($query, $search) {
@@ -43,6 +44,7 @@ class RestaurantController extends Controller implements HasMiddleware
                         ->orWhere('responsable', 'like', "%{$search}%");
                 });
             })
+            ->when(!$user->isAdmin(), fn($query) => $query->where('responsable', $user->id))
             ->paginate(10)
             ->withQueryString();
 

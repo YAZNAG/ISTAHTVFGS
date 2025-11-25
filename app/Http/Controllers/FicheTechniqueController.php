@@ -39,6 +39,7 @@ class FicheTechniqueController extends Controller implements HasMiddleware
     public function pedagogique(Request $request)
     {
         $search = $request->search;
+        $user = $request->user();
 
         $fiches = FicheTechnique::pedagogique()
         ->when($search, function ($query, $search) {
@@ -48,6 +49,7 @@ class FicheTechniqueController extends Controller implements HasMiddleware
                     ->orWhere('responsable', 'like', "%{$search}%");
                 });
             })
+        ->when(!$user->isAdmin(), fn($query) => $query->where('created_by', $user->id))
         ->paginate(10)
         ->withQueryString();
 
@@ -61,6 +63,7 @@ class FicheTechniqueController extends Controller implements HasMiddleware
     public function collectivite(Request $request)
     {
         $search = $request->search;
+        $user = $request->user();
 
         $fiches = FicheTechnique::collectivite()
         ->when($search, function ($query, $search) {
@@ -70,6 +73,7 @@ class FicheTechniqueController extends Controller implements HasMiddleware
                     ->orWhere('responsable', 'like', "%{$search}%");
                 });
             })
+        ->when(!$user->isAdmin(), fn($query) => $query->where('created_by', $user->id))
         ->paginate(10)
         ->withQueryString();
 

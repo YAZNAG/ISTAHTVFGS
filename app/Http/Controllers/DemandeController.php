@@ -59,11 +59,13 @@ class DemandeController extends Controller implements HasMiddleware
         $status = $request->get('status');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
+
+        $canListAll = $user->hasPermissionTo('validate_demandes');
         
         $demandes = Demande::query()
             ->with(['valideur'])
             ->withCount('articles')
-            ->when(!$user->isAdmin(), function ($query) use ($user) {
+            ->when(!$canListAll, function ($query) use ($user) {
                 $query->where('demandeur_id', $user->id);
             })
             ->when($search, function ($query, $search) {
