@@ -146,14 +146,14 @@ function getStatutLabel(st) {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2" v-if="canAny(['show_articles', 'edit_articles'])">
-                    <ModalLink
+                    <Link
                       v-if="can('show_articles')"
                       :href="route('articles.show', article.id)"
                       class="text-blue-600 hover:text-blue-900 p-1"
                       title="Voir détails"
                     >
                       <EyeIcon class="h-5 w-5" />
-                    </ModalLink>
+                    </Link>
                     <ModalLink
                       v-if="can('edit_articles')"
                       :href="route('articles.edit', article.id)"
