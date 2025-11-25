@@ -224,7 +224,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/chef-commandes/{chefCommande}/approve', [ChefCommandeController::class, 'showApprove'])->name('chef-commandes.showApprove');
     Route::put('/chef-commandes/{chefCommande}/approve', [ChefCommandeController::class, 'approve'])->name('chef-commandes.approve');
     Route::put('/chef-commandes/{chefCommande}/reject', [ChefCommandeController::class, 'reject'])->name('chef-commandes.reject');
+    Route::get('/chef-commandes/{chefCommande}/pdf', [ChefCommandeController::class, 'generatePdf'])->name('chef-commandes.download-pdf');
     
+
     #### Bon Livraison ####
     Route::get('/bon-livraisons', [BonLivraisonController::class, 'index'])->name('bon-livraisons.index');
     // Route::get('/bon-livraisons/create', [BonLivraisonController::class, 'create'])->name('bon-livraisons.create');

@@ -22,6 +22,8 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Enums\Format;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class ChefCommandeController extends Controller implements HasMiddleware
 {
@@ -33,6 +35,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
             new Middleware('permission:create_chefCommandes', only: ['create', 'store']),
             new Middleware('permission:edit_chefCommandes', only: ['update', 'edit']),
             new Middleware('permission:validate_chefCommandes', only: ['showApprove', 'approve', 'reject']),
+            new Middleware('permission:pdf_chefCommandes', only: ['generatePdf']),
 
         ];
     }
@@ -313,4 +316,37 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
         return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
     } 
+
+    public function generatePdf(ChefCommande $chefCommande)
+    {
+        $notAllowedStatus = [
+            ChefCommande::STATUS_CREE,
+            ChefCommande::STATUS_ANNULEE,
+            ChefCommande::STATUS_REJET,
+        ];
+
+        if (in_array($chefCommande->statut, $notAllowedStatus)) {
+            abort(403, 'PDF non disponible pour ce statut');
+        }
+
+        $chefCommande->load([
+            'items.article',
+            'items.article.currentBonCommandeArticle',
+        ]);
+
+        $data = [
+            'chefCommande' => $chefCommande,
+        ];
+
+        
+        $cleanReference = preg_replace('/[\/\\\\]/', '-', $chefCommande->reference);
+        $fileName = "chef-commande-{$cleanReference}.pdf";
+        
+        return Pdf::view('pdf.chef-commande.chef-commande', $data)
+            ->headerView('pdf.H')
+            ->footerView('pdf.chef-commande.chef-commande-footer')
+            ->margins(45, 5, 40,5)
+            ->format(Format::A4);
+            // ->download($fileName);
+    }
 }

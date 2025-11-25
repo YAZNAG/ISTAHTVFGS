@@ -24,7 +24,7 @@ class ChefCommandePermissionSeeder extends Seeder
             ['name' => 'edit_chefCommandes',       'display_name' => 'Modifier des bons de commande'],
             // ['name' => 'delete_chefCommandes',     'display_name' => 'Supprimer des bons de commande'],
             ['name' => 'validate_chefCommandes',   'display_name' => 'Valider un bon de commande'],
-            // ['name' => 'pdf_chefCommandes',        'display_name' => 'Générer PDF d\'un bon de commande'],
+            ['name' => 'pdf_chefCommandes',        'display_name' => 'Générer PDF d\'un bon de commande'],
         ];
 
         foreach ($permissions as $permission) {

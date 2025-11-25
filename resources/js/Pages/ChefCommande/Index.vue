@@ -295,9 +295,10 @@ const commandeStatus = [
                     </template>
 
                     <a
+                      v-if="can('pdf_chefCommandes')"
                       class="text-purple-600 hover:text-purple-900 p-1 cursor-pointer"
-                      :href="commande.pdf_url"
-                      :class="!commande.pdf_url ? '!cursor-not-allowed opacity-50 pointer-events-none' : ''"
+                      :href="route('chef-commandes.download-pdf', commande.id )"
+                      :class="['cree', 'rejet', 'annulee'].includes(commande.statut) ? '!cursor-not-allowed opacity-50 pointer-events-none' : ''"
                       title="Télécharger PDF"
                       target="_blank"
                     >
