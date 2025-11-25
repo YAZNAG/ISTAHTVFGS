@@ -4,6 +4,7 @@ import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
 import { MagnifyingGlassIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import Dump from '@/Components/Dump.vue';
+import { onClickOutside } from '@vueuse/core';
 
 const props = defineProps({
     bonLivraisons: Array,
@@ -12,6 +13,7 @@ const props = defineProps({
 const search = ref('')
 const isOpen = ref(false)
 const createReceptionModal = ref(null)
+const dropdownRef = ref(null)
 
 const form = useForm({
     bon_livraison_id: '',
@@ -44,6 +46,9 @@ function submit() {
 
 }
 
+onClickOutside(dropdownRef, () => {
+  isOpen.value = false
+})
 </script>
 
 <template>
@@ -72,6 +77,7 @@ function submit() {
 
                         <!-- Dropdown -->
                         <div
+                            ref="dropdownRef"
                             v-if="isOpen"
                             class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto"
                         >
