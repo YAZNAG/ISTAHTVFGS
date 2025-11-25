@@ -40,7 +40,7 @@ class Fournisseur extends Model implements HasMedia
         'deleted_at' => 'datetime',
     ];
 
-    public function registerMediaConversions(?Media $media = null): void
+    public function registerMediaCollections(): void
     {
         $this
             ->addMediaCollection('logo')
