@@ -2,9 +2,9 @@
   <Modal ref="exportModalRef">
     <!-- Header -->
     <div class="mb-2">
-      <h2 class="text-lg font-semibold text-gray-900">Exporter les demandes</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Exporter les sorties de stock</h2>
       <p class="text-sm text-gray-500 mt-1">
-        Sélectionnez une plage de dates pour exporter les demandes correspondantes.
+        Sélectionnez une plage de dates pour exporter les sorties de stock correspondantes.
       </p>
     </div>
 

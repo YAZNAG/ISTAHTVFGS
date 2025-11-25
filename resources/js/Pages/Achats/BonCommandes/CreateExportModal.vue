@@ -2,9 +2,9 @@
   <Modal name="export-modal">
     <!-- Header -->
     <div class="mb-2">
-      <h2 class="text-lg font-semibold text-gray-900">Exporter les demandes</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Exporter les marchés</h2>
       <p class="text-sm text-gray-500 mt-1">
-        Sélectionnez une plage de dates pour exporter les demandes correspondantes.
+        Sélectionnez une plage de dates pour exporter les marchés correspondants.
       </p>
     </div>
 
