@@ -40,7 +40,7 @@ class Demande extends Model implements HasMedia
         return $numero;
     }
 
-    public function registerMediaConversions(?Media $media = null): void
+    public function registerMediaCollections(): void
     {
         $this
             ->addMediaCollection('fiche-technique')

@@ -19,7 +19,7 @@ class Reception extends Model implements HasMedia
         'bon_livraison_id',
     ];
 
-    public function registerMediaConversions(?Media $media = null): void
+    public function registerMediaCollections(?Media $media = null): void
     {
         $this
             ->addMediaCollection('bon')
