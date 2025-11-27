@@ -26,6 +26,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RapportsController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\ReturnStockController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserManagementController;
 use Spatie\LaravelPdf\Enums\Format;
@@ -297,6 +298,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
     Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
+    #### Returns ####
+    Route::get('stock/returns', [ReturnStockController::class, 'index'])->name('returns.index');
+    Route::get('stock/returns/create', [ReturnStockController::class, 'create'])->name('returns.create');
+    Route::post('stock/returns', [ReturnStockController::class, 'store'])->name('returns.store');
+    Route::get('stock/returns/{returnStock}/edit', [ReturnStockController::class, 'edit'])->name('returns.edit');
+    Route::put('stock/returns/{returnStock}', [ReturnStockController::class, 'update'])->name('returns.update');
+    Route::get('stock/returns/{returnStock}', [ReturnStockController::class, 'show'])->name('returns.show');
+    Route::delete('stock/returns/{returnStock}', [ReturnStockController::class, 'destroy'])->name('returns.destroy');
 
     
     ##### Exports #####

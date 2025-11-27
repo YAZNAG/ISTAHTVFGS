@@ -42,7 +42,8 @@ import {
   CubeIcon,
   ClipboardDocumentListIcon,
   ShieldCheckIcon,
-  TagIcon
+  TagIcon,
+  ArrowUturnLeftIcon
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
@@ -175,6 +176,15 @@ const menuGroups = [
         icon: ArrowUpTrayIcon,
         bgColor: 'bg-amber-100 text-amber-600',
         permission: 'sortie_stocks',
+      },
+      {
+        name: 'Retours Stock',
+        title: 'Les Retours Stock',
+        href: '/stock/returns',
+        match: '/stock/returns',
+        icon: ArrowUturnLeftIcon,
+        bgColor: 'bg-orange-100 text-orange-600',
+        permission: 'returns_stocks',
       },
     ]
   },
