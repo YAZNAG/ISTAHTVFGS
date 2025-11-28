@@ -156,7 +156,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium" >
-                                        ---
+                                        {{ formatCurrency(marche.total_ttc) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
