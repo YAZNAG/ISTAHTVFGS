@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Bon de Commande </title>
+    <title>Fiche des entrées </title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -11,14 +11,11 @@
     <!-- Main Content -->
     <div class="flex-1 p-5">
 
-        <!-- HEADER -->
-        @include('pdf.header')
-
         <!-- TITLE -->
-        <div class="text-center font-bold text-4xl uppercase underline mb-4">
+        <div class="text-center font-bold text-2xl uppercase underline mb-2">
             Fiche des entrées
         </div>
-        <div class="text-center font-bold text-lg mb-4">
+        <div class="text-center font-bold mb-4">
             @if ($endDate)
                 {{ 'de ' . \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') . ' à ' . \Carbon\Carbon::parse($endDate)->translatedFormat('F Y') }}
             @else
@@ -37,10 +34,10 @@
                         <th class="border border-black p-1">Désignation d'article</th>
                         <th class="border border-black p-1">Stock initial</th>
                         <th class="border border-black p-1">Quantité entrée</th>
-                        <th class="border border-black p-1">Référence du bon de réception</th>
+                        <th class="border border-black p-1">Réf bon de récep</th>
                         <th class="border border-black p-1">Stock actuel</th>
                         <th class="border border-black p-1">Unité</th>
-                        <th class="border border-black p-1">Prix unitaire (Dhs)</th>
+                        <th class="border border-black p-1">Prix unitaire</th>
                         <th class="border border-black p-1">TVA appliqué</th>
                         <th class="border border-black p-1">Montant total</th>
                     </tr>
@@ -57,9 +54,9 @@
                             <td class="border border-black text-center p-1">{{ $article['reference_bon_reception'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['stock_actuel'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['unite'] }}</td>
-                            <td class="border border-black text-center p-1">{{ $article['prix_unitaire'] }}</td>
+                            <td class="border border-black text-center p-1">{{ number_format($article['prix_unitaire'], 2) }} DH</td>
                             <td class="border border-black text-center p-1">{{ $article['tva_appliquee'] }}</td>
-                            <td class="border border-black text-center p-1">{{ $article['total_ttc'] }}</td>
+                            <td class="border border-black text-center p-1">{{ number_format($article['total_ttc'], 2) }} DH</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -71,13 +68,10 @@
 
         <!-- Signatures -->
         <div class="flex justify-end" style="margin-top: 36px;">
-            <div class="font-bold text-base">Le responsable </div>
+            <div class=" ">Le responsable </div>
         </div>
 
     </div>
-
-    <!-- FOOTER -->
-    @include('pdf.footer')
 
 </body>
 </html>

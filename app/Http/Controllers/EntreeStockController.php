@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class EntreeStockController extends Controller implements HasMiddleware
@@ -87,8 +88,11 @@ class EntreeStockController extends Controller implements HasMiddleware
     public function export(Request $request) 
     {
         $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date',
+            'start_date' => 'required|date_format:Y-m',
+            'end_date' => 'nullable|date_format:Y-m',
+        ], [
+            'start_date.date_format' => 'La date doit avoir le format YYYY-MM.',
+            'end_date.date_format' => 'La date doit avoir le format YYYY-MM.',
         ]);
 
         $startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -98,7 +102,8 @@ class EntreeStockController extends Controller implements HasMiddleware
             'referenceable',
         ]);
 
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+        $endDate = $request->end_date ? Carbon::parse($request->end_date . '-01')->endOfMonth() : null;
+
         if ($request->end_date) {
             $data = $query->whereBetween('created_at', [$startDate, $endDate])->get();
         } else {
@@ -110,12 +115,12 @@ class EntreeStockController extends Controller implements HasMiddleware
 
         $articles = ExportEntreeStockRecource::collection($data)->toArray($request);
 
-        return view('pdf.fiche-entree', 
-                    compact('articles', 'startDate', 'endDate')
-    );
-
         return Pdf::view('pdf.fiche-entree', 
                     compact('articles', 'startDate', 'endDate')
-                )->download('fiche-entree.pdf');
+    )->headerView('pdf.H')
+            ->footerView('pdf.F')
+            ->margins(45, 5, 40,5)
+            ->format(Format::A4)
+            ->download('fiche-entree.pdf');
     }
 }
