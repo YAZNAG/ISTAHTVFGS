@@ -231,9 +231,7 @@ function onCategorieChange() {
 }
 
 function filteredArticles(search) {
-    const s = (search ?? '').toLowerCase()
-  if (!s) return props.articles
-
+    const s = search.toLowerCase();
   // ids already present in the form
   const picked = new Set(marcheForm.articles.map(r => r.article_id).filter(Boolean))
 
