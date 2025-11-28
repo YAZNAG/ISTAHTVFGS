@@ -67,7 +67,19 @@ class Article extends Model
     {
         return $this->hasMany(MouvementStock::class, 'article_id', 'id');
     }
-    
+
+    public function mouvementsStockEntree()
+    {
+        return $this->hasMany(MouvementStock::class)
+            ->where('type_mouvement', MouvementStock::TYPE_ENTREE);
+    }
+
+    public function mouvementsStockSortie()
+    {
+        return $this->hasMany(MouvementStock::class)
+            ->where('type_mouvement', MouvementStock::TYPE_SORTIE);
+    }
+        
     public function lastEntryStock()
     {
         return $this->hasOne(MouvementStock::class)
@@ -127,5 +139,24 @@ class Article extends Model
                 $q->whereDate('date_debut', '<=', today())
                 ->whereDate('date_fin',   '>=', today());
             })->ofMany(['created_at' => 'max'], '>=');
+    }
+
+    /* opening stock : last movement BEFORE the month */
+    public function lastMouvementBefore()
+    {
+        return $this->hasOne(MouvementStock::class)
+            ->latest('date_mouvement');
+    }
+
+    public function entreesPeriode()
+    {
+        return $this->hasMany(MouvementStock::class)
+            ->where('type_mouvement', MouvementStock::TYPE_ENTREE);
+    }
+
+    public function sortiesPeriode()
+    {
+        return $this->hasMany(MouvementStock::class)
+            ->where('type_mouvement', MouvementStock::TYPE_SORTIE);
     }
 }

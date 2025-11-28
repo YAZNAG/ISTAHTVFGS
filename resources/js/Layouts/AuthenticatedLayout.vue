@@ -43,7 +43,8 @@ import {
   ClipboardDocumentListIcon,
   ShieldCheckIcon,
   TagIcon,
-  ArrowUturnLeftIcon
+  ArrowUturnLeftIcon,
+  ClipboardDocumentCheckIcon
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
@@ -247,6 +248,24 @@ const menuGroups = [
     label: 'Utilisateurs & Rapports',
     items: [
       {
+        name: 'Inventaires',
+        title: 'Les Inventaires',
+        href: '/inventaires',
+        match: '/inventaires',
+        icon: ClipboardDocumentCheckIcon,
+        bgColor: 'bg-indigo-100 text-indigo-600',
+        permission: 'list_inventaire',
+      },
+      {
+        name: 'Rapports',
+        title: 'Les Rapports',
+        href: '/rapports',
+        match: '/rapports',
+        icon: ChartBarIcon,
+        bgColor: 'bg-slate-100 text-slate-600',
+        permission: 'list_raports',
+      },
+      {
         name: 'Utilisateurs',
         title: 'Les Utilisateurs',
         href: '/users',
@@ -263,15 +282,6 @@ const menuGroups = [
         icon: ShieldCheckIcon,
         bgColor: 'bg-purple-100 text-purple-600',
         permission: 'list_roles',
-      },
-      {
-        name: 'Rapports',
-        title: 'Les Rapports',
-        href: '/rapports',
-        match: '/rapports',
-        icon: ChartBarIcon,
-        bgColor: 'bg-slate-100 text-slate-600',
-        permission: 'list_raports',
       },
     ]
   },

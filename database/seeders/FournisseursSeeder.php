@@ -52,6 +52,6 @@ class FournisseursSeeder extends Seeder
         //     ]
         // ]);
 
-        Fournisseur::factory()->count(50)->create();
+        Fournisseur::factory()->count(2)->create();
     }
 }

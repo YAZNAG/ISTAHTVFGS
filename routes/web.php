@@ -20,6 +20,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\FicheTechniqueController;
+use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\NotificationController;
@@ -316,6 +317,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     Route::get('cardex/{article}', [CardexController::class, 'export'])->name('cardex.export');
+
+    #### Inventaire ####
+    Route::get('inventaires', [InventaireController::class, 'index'])->name('inventaires.index');
+    Route::post('inventaires', [InventaireController::class, 'store'])->name('inventaires.store');
+    Route::get('inventaires/{inventaire}/edit', [InventaireController::class, 'edit'])->name('inventaires.edit');
+    Route::get('inventaires/{inventaire}/pdf', [InventaireController::class, 'generatePdf'])->name('inventaires.pdf');
+    Route::patch('inventaires/{inventaire}/unlock', [InventaireController::class, 'unlock'])->name('inventaires.unlock');
+
+    Route::patch('/inventaires/{inventaire}/finalise', [InventaireController::class, 'finalize'])->name('inventaires.finalize');
+    Route::patch('/inventaires/ligne/{ligne}', [InventaireController::class, 'updateLingne'])->name('inventaires.ligne.update');
+
 
 
     #### API ####
