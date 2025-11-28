@@ -41,16 +41,6 @@ class FournisseurController extends Controller implements HasMiddleware
             $query = Fournisseur::withCount(['bonCommandes as bon_commandes_count'])
                 ->orderBy('created_at', 'desc');
 
-            // Filtrage par statut
-            if ($request->has('est_actif') && $request->est_actif !== '') {
-                $query->where('est_actif', $request->boolean('est_actif'));
-            }
-
-            // Filtrage par ville
-            if ($request->filled('ville')) {
-                $query->where('ville', 'like', '%' . $request->ville . '%');
-            }
-
             // Recherche globale
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -75,19 +65,11 @@ class FournisseurController extends Controller implements HasMiddleware
                 'bons_commande' => DB::table('bon_commandes')->count(),
             ];
 
-            // Villes distinctes pour les filtres
-            $villes = Fournisseur::whereNotNull('ville')
-                ->distinct()
-                ->pluck('ville')
-                ->sort()
-                ->values()
-                ->toArray();
 
             return inertia('Achats/Fournisseurs/Index', [
                 'fournisseurs' => $fournisseurs,
                 'stats' => $stats,
-                'villes' => $villes,
-                'filters' => $request->only(['est_actif', 'ville', 'search'])
+                'filters' => $request->only(['search'])
             ]);
 
         } catch (\Exception $e) {

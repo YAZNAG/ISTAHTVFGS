@@ -53,7 +53,7 @@
                     </div>
                 </div>
                 <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-                    <div class="text-gray-500">Bons de Commande</div>
+                    <div class="text-gray-500">Marchés</div>
                     <div class="mt-2 flex items-center justify-between">
                         <div class="text-3xl font-bold text-indigo-700">{{ stats?.bons_commande || 0 }}</div>
                         <DocumentTextIcon class="w-6 h-6 text-indigo-600" />
@@ -62,32 +62,13 @@
             </section>
 
             <!-- Filtres et Recherche -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                        <select v-model="filters.est_actif" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Tous les statuts</option>
-                            <option value="1">Actifs</option>
-                            <option value="0">Inactifs</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
-                        <select v-model="filters.ville" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Toutes les villes</option>
-                            <option v-for="ville in villes" :key="ville" :value="ville">
-                                {{ ville }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
-                        <div class="relative">
-                            <input v-model="filters.search" type="text" placeholder="Rechercher par nom, raison sociale, contact..." 
-                                class="w-full border border-gray-300 rounded-lg p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                        </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex justify-between items-end">
+                <div class="w-1/3">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
+                    <div class="relative">
+                        <input v-model="filters.search" type="text" placeholder="Rechercher par nom, raison sociale, contact..." 
+                            class="w-full border border-gray-300 rounded-lg p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                     </div>
                 </div>
                 <div class="flex justify-end mt-4">
@@ -249,7 +230,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Localisation</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ICE</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bons de Commande</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marchés</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
@@ -490,10 +471,6 @@ const props = defineProps({
         type: Object,
         default: () => ({ data: [], links: [] })
     },
-    villes: {
-        type: Array,
-        default: () => []
-    },
     filters: {
         type: Object,
         default: () => ({})
@@ -518,8 +495,6 @@ const toast = ref({
 
 // Filtres
 const filters = ref({
-    est_actif: props.filters?.est_actif || '',
-    ville: props.filters?.ville || '',
     search: props.filters?.search || '',
 });
 

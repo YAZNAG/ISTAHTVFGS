@@ -134,7 +134,7 @@
                 <div class="flex gap-2 items-center px-6 py-4 border-b border-gray-100">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                         <ClipboardDocumentListIcon class="w-5 h-5 text-blue-600" />
-                        Bons de commande
+                        Les Marchés
                     </h3>
                     <span
                         class="bg-blue-100 text-blue-800 px-2 py-0.5 text-xs font-semibold rounded-full"
@@ -147,7 +147,7 @@
                     <table class="min-w-full text-sm text-left text-gray-600">
                         <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                             <tr>
-                                <th class="px-6 py-3 font-medium">N° Bon</th>
+                                <th class="px-6 py-3 font-medium">N° Marché</th>
                                 <th class="px-6 py-3 font-medium">Date mise ligne</th>
                                 <th class="px-6 py-3 font-medium">Date limite</th>
                                 <th class="px-6 py-3 font-medium">Articles</th>
@@ -178,7 +178,7 @@
 
                 <div v-else class="flex flex-col items-center justify-center py-12 text-gray-500">
                     <ClipboardDocumentListIcon class="w-10 h-10 mb-2 text-gray-300" />
-                    <p>Aucun bon de commande trouvé pour ce fournisseur.</p>
+                    <p>Aucun marché trouvé pour ce fournisseur.</p>
                 </div>
             </div>
         </div>

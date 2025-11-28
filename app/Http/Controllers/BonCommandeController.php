@@ -513,7 +513,7 @@ public function annuler(Request $request, BonCommande $bonCommande)
 
         
         $cleanReference = preg_replace('/[\/\\\\]/', '-', $bonCommande->reference);
-        $fileName = "bon-commande-{$cleanReference}.pdf";
+        $fileName = "appel-offre-{$cleanReference}.pdf";
         
         // return view('pdf.bon-commande.bon-commande', $data);
 
