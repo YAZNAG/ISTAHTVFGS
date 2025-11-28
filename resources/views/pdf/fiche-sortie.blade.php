@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Bon de Commande </title>
+    <title>Fiche des sorties </title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -11,14 +11,12 @@
     <!-- Main Content -->
     <div class="flex-1 p-5">
 
-        <!-- HEADER -->
-        @include('pdf.header')
 
         <!-- TITLE -->
-        <div class="text-center font-bold text-4xl uppercase underline mb-4">
-            Fiche des entrées
+        <div class="text-center font-bold text-2xl uppercase underline mb-2">
+            Fiche des sorties
         </div>
-        <div class="text-center font-bold text-lg mb-4">
+        <div class="text-center font-bold mb-4">
             @if ($endDate)
                 {{ 'de ' . \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') . ' à ' . \Carbon\Carbon::parse($endDate)->translatedFormat('F Y') }}
             @else
@@ -38,7 +36,7 @@
                         <th class="border border-black p-1">Stock actuel</th>
                         <th class="border border-black p-1">Quantité sortie</th>
                         <th class="border border-black p-1">Unité</th>
-                        <th class="border border-black p-1">Référence du bon de sortie</th>
+                        <th class="border border-black p-1">Réf bon de sortie</th>
                     </tr>
                 </thead>
 
@@ -63,13 +61,10 @@
 
         <!-- Signatures -->
         <div class="flex justify-end" style="margin-top: 36px;">
-            <div class="font-bold text-base">Le responsable </div>
+            <div class="">Le responsable </div>
         </div>
 
     </div>
-
-    <!-- FOOTER -->
-    @include('pdf.footer')
 
 </body>
 </html>

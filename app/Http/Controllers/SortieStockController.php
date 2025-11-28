@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class SortieStockController extends Controller implements HasMiddleware
@@ -98,7 +99,7 @@ class SortieStockController extends Controller implements HasMiddleware
             'referenceable',
         ]);
 
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfMonth() : null;
         if ($request->end_date) {
             $data = $query->whereBetween('created_at', [$startDate, $endDate])->get();
         } else {
@@ -110,8 +111,13 @@ class SortieStockController extends Controller implements HasMiddleware
 
         $articles = ExportSortieStockRecource::collection($data)->toArray($request);
 
-        return view('pdf.fiche-sortie', 
-                    compact('articles', 'startDate', 'endDate')
-    );
-}
+        return Pdf::view('pdf.fiche-sortie', 
+                        compact('articles', 'startDate', 'endDate')
+            )
+            ->headerView('pdf.H')
+            ->footerView('pdf.F')
+            ->margins(45, 5, 40,5)
+            ->format(Format::A4)
+            ->download('fiche-sortie.pdf');
+    }
 }
