@@ -43,8 +43,8 @@
             <span class="article_name">{{ $article->designation }}</span>
         </div>
         <div class="seuil">
-            <p  class="maximum"><span>Maximum :</span> {{ $article->seuil_maximal }}</p>
-            <p><span class="">Minimum : :</span> {{ $article->seuil_minimal }}</p>
+            <p  class="maximum"><span>Maximum :</span> </p>
+            <p><span class="">Minimum : :</span> </p>
         </div>
     </div>
     
