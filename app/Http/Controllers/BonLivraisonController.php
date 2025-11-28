@@ -166,6 +166,7 @@ class BonLivraisonController extends Controller implements HasMiddleware
         return Pdf::view('pdf.bon-livraison', [
             'livraison' => $bonLivraison
         ])->format(Format::A4)
-            ->margins(5, 5, 5, 5);
+            ->margins(5, 5, 5, 5)
+            ->download("bon-livraison-{$bonLivraison['reference']}.pdf");
     }
 }
