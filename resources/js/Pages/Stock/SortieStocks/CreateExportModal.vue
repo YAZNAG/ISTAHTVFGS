@@ -17,6 +17,7 @@
           <input
             id="start_date"
             type="month"
+            placeholder="2025-01"
             v-model="exportForm.start_date"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             required
@@ -30,6 +31,7 @@
           <input
             id="end_date"
             type="month"
+            placeholder="2025-03"
             v-model="exportForm.end_date"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
