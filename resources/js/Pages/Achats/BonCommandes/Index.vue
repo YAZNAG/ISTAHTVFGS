@@ -174,7 +174,7 @@
                                         </Link>
                                         <ModalLink :href="route('bon-commandes.edit', marche.id)"
                                             class="text-green-600 hover:text-green-900 p-1" title="Modifier statut"
-                                            v-if="marche.statut === 'cree' || can('validate_marches')">
+                                            v-if="marche.statut === 'cree' && can('validate_marches')">
                                             <ArrowPathIcon class="h-4 w-4" />
                                         </ModalLink>
                                         <!-- Bouton PDF - N'apparaît que pour les statuts différents de "cree" et "annule" -->
