@@ -18,7 +18,7 @@ const form = useForm({
 
 const showPassword = ref(false)
 const hasLogo = ref(true)
-const logoSrc = '/logo-istaht.png' // Placez un fichier public/logo-istaht.png
+const logoSrc = 'images/logo-istaht.png' // Placez un fichier public/logo-istaht.png
 
 const submit = () => {
   form.post(route('login'), {
@@ -33,9 +33,9 @@ const submit = () => {
   <div class="min-h-screen bg-gradient-to-br from-indigo-700 via-blue-600 to-cyan-500 grid place-items-center px-4 py-10">
     <div class="w-full max-w-md">
       <!-- Brand -->
-      <div class="flex items-center justify-center gap-3 mb-6 text-white">
+      <div class="flex flex-col items-center justify-center gap-3 mb-6 text-white">
         <div
-          class="w-14 h-14 rounded-2xl overflow-hidden shadow-lg ring-1 ring-white/20 bg-white/10 backdrop-blur-md grid place-items-center"
+          class="w-[120px] h-[120px] rounded-2xl overflow-hidden shadow-lg ring-1 ring-white/20 bg-white/10 backdrop-blur-md grid place-items-center"
         >
           <img
             v-if="hasLogo"
@@ -47,7 +47,6 @@ const submit = () => {
           <CubeIcon v-else class="w-7 h-7 text-white" />
         </div>
         <div class="text-center">
-          <div class="text-2xl font-bold tracking-tight">ISTAHT</div>
           <div class="text-white/80 text-sm">Gestion des stocks</div>
         </div>
       </div>

@@ -287,6 +287,9 @@ const menuGroups = [
   },
 ]
 
+const hasLogo = ref(true)          // will flip to false on error
+const logoSrc = '/images/logo-istaht.png'   // <-- NEW PATH
+
 const showItem = (item) => {
 
   if (!item.permission) return true
@@ -396,29 +399,37 @@ onMounted(() => {
     ]">
       <div class="flex flex-col h-full">
         <!-- Sidebar Header -->
-        <div class="flex items-center justify-between px-4 py-5 border-b border-gray-200">
+        <div class="flex items-center justify-between px-4 py-5 border-b border-gray-200 relative">
           <Link href="/" class="flex items-center space-x-2">
-          <!-- Logo/Brand -->
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span class="font-bold text-white">I</span>
-          </div>
-          <span v-show="!sidebarCollapsed || mobileViewport" class="text-xl font-semibold text-gray-900">
-            ISTHT
-          </span>
+          <div class="shrink-0 w-[50px] h-[50px] rounded-lg overflow-hidden bg-white/10">
+          <img
+            v-if="hasLogo"
+            :src="logoSrc"
+            class="w-full h-full object-contain"
+            @error="hasLogo = false"
+            alt="ISTAHT"
+          />
+          <CubeIcon v-else class="w-6 h-6 m-1 text-blue-600" />
+        </div>
+
+        <!-- Text (hidden when collapsed on desktop) -->
+        <span v-show="!sidebarCollapsed || mobileViewport" class="text-xl font-semibold text-gray-900">
+          ISTAHT
+        </span>
           </Link>
 
           <!-- Toggle button (desktop) -->
           <button v-if="!mobileViewport" @click="toggleSidebarCollapse"
-            class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            class="bg-slate-100 p-2 rounded-lg hover:bg-slate-200 transition-colors absolute left-1/2 transform -translate-x-1/2 -bottom-[18px]">
             <ChevronRightIcon :class="[
-              'w-5 h-5 text-gray-600 transition-transform',
-              { 'rotate-180': sidebarCollapsed }
+              'w-5 h-5 text-slate-600 transition-transform',
+              { 'rotate-180': !sidebarCollapsed }
             ]" />
           </button>
         </div>
 
         <!-- Sidebar Menu -->
-        <nav class="flex-1 px-3 py-4 overflow-y-auto">
+        <nav class="flex-1 px-3 py-6 overflow-y-auto">
           <template v-for="(group, groupIndex) in menuGroups" :key="groupIndex">
             <div v-if="showGroup(group)" class="mb-6">
               <!-- Group Label -->

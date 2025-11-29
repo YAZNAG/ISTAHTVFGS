@@ -14,6 +14,11 @@
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
+
+        <link rel="apple-touch-icon" sizes="180x180" href="images/favs/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="images/favs/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="images/favs/favicon-16x16.png">
+        <link rel="manifest" href="images/favs/site.webmanifest">
     </head>
     <body class="font-sans antialiased">
         @inertia
