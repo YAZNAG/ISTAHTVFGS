@@ -54,6 +54,11 @@ const props = defineProps({
                     </div>
 
                     <div class="space-y-1">
+                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Seuil Minimal</h3>
+                        <p class="text-base text-gray-900 font-medium">{{ article.seuil_minimal }}</p>
+                    </div>
+
+                    <div class="space-y-1">
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Seuil Maximal</h3>
                         <p class="text-base text-gray-900 font-medium">{{ article.seuil_maximal }}</p>
                     </div>

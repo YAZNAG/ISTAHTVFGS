@@ -78,6 +78,7 @@ class ArticleController extends Controller implements HasMiddleware
                 Rule::in(['kg', 'L', 'pièce', 'sachet', 'sac', 'boite', 'bidon', 'paquet', 'flacon', 'pot', 'bouteille']),
             ],
             'seuil_maximal' => 'required|integer|min:0',
+            'seuil_minimal' => 'required|integer|min:0',
             'est_actif' => 'boolean',
         ]);
 
@@ -92,7 +93,7 @@ class ArticleController extends Controller implements HasMiddleware
             'categorie_principale_id' => $categoryPrincipal->id,
             'nature_prestation_id' => $nature->id,
             'unite_mesure' => $request->unite_mesure,
-            'seuil_minimal' => -1,
+            'seuil_minimal' => $request->seuil_minimal,
             'seuil_maximal' => $request->seuil_maximal,
             'est_actif' => $request->boolean('est_actif'),
         ]);
@@ -123,6 +124,7 @@ class ArticleController extends Controller implements HasMiddleware
                 'max:20',
                 Rule::in(['kg', 'L', 'pièce', 'sachet', 'sac', 'boite', 'bidon', 'paquet', 'flacon', 'pot', 'bouteille']),
             ],
+            'seuil_minimal' => 'required|integer|min:0',
             'seuil_maximal' => 'required|integer|min:0',
             'est_actif' => 'boolean',
         ]);
@@ -133,6 +135,7 @@ class ArticleController extends Controller implements HasMiddleware
             'description' => $request->description,
             'categorie_id' => $request->categorie_id,
             'unite_mesure' => $request->unite_mesure,
+            'seuil_minimal' => $request->seuil_minimal,
             'seuil_maximal' => $request->seuil_maximal,
             'est_actif' => $request->boolean('est_actif'),
         ]);

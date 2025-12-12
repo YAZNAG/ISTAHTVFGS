@@ -121,6 +121,7 @@ function getStatutLabel(st) {
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seuil min</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seuil max</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -133,6 +134,7 @@ function getStatutLabel(st) {
                 <td class="px-6 py-4 text-sm text-gray-900">{{ article.designation }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ article.categorie?.nom || '-' }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ article.unite_mesure }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ article.seuil_minimal }}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">{{ article.seuil_maximal }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span

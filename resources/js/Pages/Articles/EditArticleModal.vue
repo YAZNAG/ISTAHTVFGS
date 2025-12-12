@@ -21,6 +21,7 @@ const form = useForm({
   unite_mesure:  props.article.unite_mesure,
   taux_tva:      props.article.taux_tva,
   seuil_maximal: props.article.seuil_maximal,
+  seuil_minimal: props.article.seuil_minimal,
   est_actif:     Boolean(props.article.est_actif),
 });
 
@@ -107,6 +108,13 @@ const submit = () => {
             <InputError :message="form.errors.unite_mesure" />
           </div>
 
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Seuil minimal</label>
+            <input v-model="form.seuil_minimal" type="number" min="0"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            <InputError :message="form.errors.seuil_minimal" />
+          </div>
+          
           <div>
             <label class="block text-sm font-medium text-gray-700">Seuil maximal</label>
             <input v-model="form.seuil_maximal" type="number" min="0"
