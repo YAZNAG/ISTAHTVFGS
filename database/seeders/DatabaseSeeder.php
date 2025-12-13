@@ -9,6 +9,7 @@ use Database\Seeders\Permissions\BonReceptionPermissionSeeder;
 use Database\Seeders\Permissions\BonSortiePermissionSeeder;
 use Database\Seeders\Permissions\ChefCommandePermissionSeeder;
 use Database\Seeders\Permissions\DemandePermissionSeeder;
+use Database\Seeders\Permissions\EditMarcheSeeder;
 use Database\Seeders\Permissions\FicheTechniquePermissionSeeder;
 use Database\Seeders\Permissions\FournisseurPermissionSeeder;
 use Database\Seeders\Permissions\InventaireSeederPermissionSeeder;
@@ -58,8 +59,9 @@ class DatabaseSeeder extends Seeder
             // RolePermissionSeeder::class,
             // MarchePermissionSeeder::class,
             // AdminUserSeeder::class,
-            ReturnStockPermissionSeeder::class,
-            InventaireSeederPermissionSeeder::class,
+            // ReturnStockPermissionSeeder::class,
+            // InventaireSeederPermissionSeeder::class,
+            EditMarcheSeeder::class,
         ]);
     }
 }

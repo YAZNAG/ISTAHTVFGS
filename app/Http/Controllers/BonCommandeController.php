@@ -41,6 +41,7 @@ class BonCommandeController extends Controller implements HasMiddleware
             new Middleware('permission:show_marches', only: ['show']),
             new Middleware('permission:create_marches', only: ['create', 'store']),
             new Middleware('permission:validate_marches', only: ['edit', 'updateStatut', 'annuler']),
+            new Middleware('permission:edit_marches', only: ['modify', 'updateModify']),
             new Middleware('permission:pdf_marches', only: ['generatePdf']),
             new Middleware('permission:export_marches', only: ['export']),
 
@@ -197,6 +198,95 @@ private function getStats()
 
         return redirect()->route('bon-commandes.index')
             ->with('success', 'Le Marché créé avec succès.');
+    }
+
+    public function modify(BonCommande $bonCommande)
+    {
+        $articles = Article::withNonExists()->where('est_actif', true)->get();
+        $categories = Categorie::all(['id', 'nom']);
+
+        $bonCommande->loadMissing('articles.article');
+
+        $bonCommande = [
+                'id' => $bonCommande->id,
+                'reference' => $bonCommande->reference,
+                'objet' => $bonCommande->objet,
+                'description' => $bonCommande->description,
+                'date_debut' => $bonCommande->date_debut,
+                'date_fin' => $bonCommande->date_fin,
+                'date_mise_ligne' => $bonCommande->date_mise_ligne->toDateString(),
+                'date_limite_reception' => $bonCommande->date_limite_reception->toDateString(),
+                'categorie_id' => $bonCommande->categorie_id,
+                'articles' => $bonCommande->articles->map(function ($articleLine) {
+                    return [
+                        'id' => $articleLine->article_id,
+                        'designation' => $articleLine->article->designation,
+                        'unite_mesure' => $articleLine->article->unite_mesure,
+                        'quantite_commandee' => $articleLine->quantite_commandee,
+                        'taux_tva' => $articleLine->taux_tva,
+                    ];
+                }),
+            ];
+
+        return Inertia::modal('Achats/BonCommandes/EditModal', [
+            'tauxTVA' => $this->tauxTVA,
+            'articles' => $articles,
+            'categories' => $categories,
+            'marche' => $bonCommande
+        ])->baseRoute('bon-commandes.index');
+    }
+
+    public function updateModify(Request $request, BonCommande $bonCommande)
+    {
+        if (!$bonCommande->statut == 'cree') {
+            return back()->withErrors([
+                'statut' => 'Impossible de modifier un bon de commande avec le statut "' . $bonCommande->statut_formate . '".'
+            ]);
+        }
+
+        $request->validate([
+            'reference' => 'required|unique:bon_commandes,id,'. $bonCommande->id,
+            'objet' => 'required|string|max:255',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'categorie_id' => 'required|exists:categories,id',
+            'date_mise_ligne' => 'required|date',
+            'date_limite_reception' => 'required|date|after_or_equal:date_mise_ligne',
+            'articles' => 'required|array|min:1',
+            'articles.*.article_id' => 'required|exists:articles,id',
+            'articles.*.quantite_commandee' => 'required|numeric|min:0.01',
+            'articles.*.taux_tva' => 'required|numeric|min:0',
+        ]);
+
+        # TODO: update updated_at and updated_by
+
+        DB::transaction(function () use ($request, $bonCommande) {
+            $bonCommande->update([
+                'reference' => $request->reference,
+                'objet' => $request->objet,
+                'description' => $request->description,
+                'date_debut' => $request->date_debut,
+                'date_fin' => $request->date_fin,
+                'categorie_id' => $request->categorie_id,
+                'date_mise_ligne' => $request->date_mise_ligne,
+                'date_limite_reception' => $request->date_limite_reception,
+            ]);
+
+            $bonCommande->articles()->delete();
+            foreach ($request->articles as $article) {
+                $bonCommande->articles()->create([
+                    'article_id' => $article['article_id'],
+                    'quantite_commandee' => $article['quantite_commandee'],
+                    'taux_tva' => $article['taux_tva'],
+                    'prix_unitaire_ht' => null,
+                    'montant_ht' => null,
+                    'montant_tva' => null,
+                    'montant_ttc' => null,
+                ]);
+            }
+        });
+        
+        return redirect()->route('bon-commandes.index')->with('success', 'Le Marché modifié avec succès.');
     }
 
     public function edit(BonCommande $bonCommande)

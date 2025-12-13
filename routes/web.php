@@ -92,6 +92,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
         Route::post('marches/{bonCommande}/statut', [BonCommandeController::class, 'updateStatut'])->name('bon-commandes.statut');
         Route::get('marches/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
+        Route::get('marches/{bonCommande}/modify', [BonCommandeController::class, 'modify'])->name('bon-commandes.modify');
+        Route::put('marches/{bonCommande}/modify', [BonCommandeController::class, 'updateModify'])->name('bon-commandes.updateModify');
+
         // Route::get('/marches/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
 
       // Routes pour les bons de réception

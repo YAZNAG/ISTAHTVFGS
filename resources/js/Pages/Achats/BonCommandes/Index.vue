@@ -167,6 +167,11 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
+                                        <ModalLink :href="route('bon-commandes.modify', marche.id)"
+                                            class="text-green-600 hover:text-green-900 p-1" title="Modifier statut"
+                                            v-if="marche.statut === 'cree' && can('edit_marches')">
+                                            <PencilIcon class="h-4 w-4" />
+                                        </ModalLink>
                                         <Link :href="route('bon-commandes.show', marche.id)"
                                             v-if="can('show_marches')"
                                             class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
@@ -244,7 +249,8 @@ import {
     ClockIcon,
     CheckCircleIcon,
     BanknotesIcon,
-    DocumentArrowDownIcon
+    DocumentArrowDownIcon,
+    PencilIcon
 }
     from '@heroicons/vue/24/outline';
 import { ModalLink } from '@inertiaui/modal-vue';
