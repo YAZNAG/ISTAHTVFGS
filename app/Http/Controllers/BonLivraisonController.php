@@ -9,6 +9,8 @@ use App\Http\Resources\ShowBonLivraisonResource;
 use App\Models\Article;
 use App\Models\BonCommande;
 use App\Models\BonLivraison;
+use App\Models\ChefCommande;
+use App\Models\ChefCommandeItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -138,8 +140,16 @@ class BonLivraisonController extends Controller implements HasMiddleware
                 'responsable_id' => $user_id
             ]);
 
-            $bonLivraison->items()->delete();
+            $chefCommandArticles = ChefCommandeItem::where('chef_commande_id', $bonLivraison->chef_commande_id)->pluck('article_id');
+            $newChefCommandStatus = $chefCommandArticles->diff(collect($request->items)->pluck('article_id'))->isEmpty() ? ChefCommande::STATUS_LIVRE_COMPLETEMNT : ChefCommande::STATUS_LIVRE_PARTIELLEMENT;
+
+            $bonLivraison->chefCommande->update([
+                'statut' => $newChefCommandStatus
+            ]);
+            
             $marche = BonCommande::find($bonLivraison->chefCommande->bon_commande_id)->load('articles');
+            
+            $bonLivraison->items()->delete();
 
             foreach ($request->items as $item) {
                 $marcheArticle = $marche->articles->where('article_id', $item['article_id'])->first();
