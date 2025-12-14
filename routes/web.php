@@ -280,6 +280,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     #### Articles Stock ####
     Route::get('/stock/articles', [ArticleStockController::class, 'index'])->name('articles-stocks.index');
+    Route::get('/stock/articles/export', [ArticleStockController::class, 'export'])->name('articles-stocks.export');
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
