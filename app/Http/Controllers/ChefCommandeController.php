@@ -346,7 +346,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
             ->headerView('pdf.H')
             ->footerView('pdf.chef-commande.chef-commande-footer')
             ->margins(45, 5, 40,5)
-            ->format(Format::A4);
-            // ->download($fileName);
+            ->format(Format::A4)
+            ->download($fileName);
     }
 }

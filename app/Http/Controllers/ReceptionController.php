@@ -146,7 +146,6 @@ class ReceptionController extends Controller implements HasMiddleware
             ->footerView('pdf.F')
             ->margins(45, 5, 40,5)
             ->format(Format::A4)
-            // ->download();
-            ;
+            ->download();
 }
 }
