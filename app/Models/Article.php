@@ -16,7 +16,8 @@ class Article extends Model
         'reference', 
         'designation', 
         'description', 
-        'categorie_id', 
+        'categorie_id',
+        'marche_category_id',
         'categorie_principale_id', 
         'nature_prestation_id', 
         'unite_mesure',
@@ -51,6 +52,11 @@ class Article extends Model
     public function categoriePrincipale(): BelongsTo
     {
         return $this->belongsTo(CategoriePrincipale::class);
+    }
+
+    public function marcheCategory(): BelongsTo
+    {
+        return $this->belongsTo(MarcheCategory::class);
     }
 
     public function naturePrestation(): BelongsTo

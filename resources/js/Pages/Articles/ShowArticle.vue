@@ -53,7 +53,7 @@ const props = defineProps({
                         <p class="text-base text-gray-900 font-medium">{{ article.categorie.nom }}</p>
                     </div>
 
-                    <div class="space-y-1">
+                    <!-- <div class="space-y-1">
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Seuil Minimal</h3>
                         <p class="text-base text-gray-900 font-medium">{{ article.seuil_minimal }}</p>
                     </div>
@@ -61,7 +61,7 @@ const props = defineProps({
                     <div class="space-y-1">
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Seuil Maximal</h3>
                         <p class="text-base text-gray-900 font-medium">{{ article.seuil_maximal }}</p>
-                    </div>
+                    </div> -->
 
                     <div class="space-y-1">
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Statut</h3>

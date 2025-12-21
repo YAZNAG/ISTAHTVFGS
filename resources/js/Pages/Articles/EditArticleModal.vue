@@ -9,7 +9,8 @@ import InputError from '@/Components/InputError.vue';
 /* ---------- props ---------- */
 const props = defineProps({
   article: Object,          // article to edit
-  categories: Array
+  categories: Array,
+  marche_categories: Array,
 });
 
 /* ---------- form (pre-filled) ---------- */
@@ -18,6 +19,7 @@ const form = useForm({
   designation:   props.article.designation,
   description:   props.article.description,
   categorie_id:  props.article.categorie_id,
+  marche_category_id: props.article.marche_category_id,
   unite_mesure:  props.article.unite_mesure,
   taux_tva:      props.article.taux_tva,
   seuil_maximal: props.article.seuil_maximal,
@@ -89,6 +91,18 @@ const submit = () => {
           </div>
 
           <div>
+                        <label class="block text-sm font-medium text-gray-700">Marché Catégorie *</label>
+                        <select v-model="form.marche_category_id" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Sélectionnez...</option>
+                            <option v-for="marche_cat in marche_categories" :key="marche_cat.id" :value="marche_cat.id">
+                                {{ marche_cat.nom }}
+                            </option>
+                        </select>
+                        <InputError :message="form.errors.marche_category_id" />
+                    </div>
+
+          <div>
             <label class="block text-sm font-medium text-gray-700">Unité *</label>
             <select v-model="form.unite_mesure" required
               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -107,7 +121,7 @@ const submit = () => {
             </select>
             <InputError :message="form.errors.unite_mesure" />
           </div>
-
+<!-- 
           <div>
             <label class="block text-sm font-medium text-gray-700">Seuil minimal</label>
             <input v-model="form.seuil_minimal" type="number" min="0"
@@ -120,7 +134,7 @@ const submit = () => {
             <input v-model="form.seuil_maximal" type="number" min="0"
               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
             <InputError :message="form.errors.seuil_maximal" />
-          </div>
+          </div> -->
 
           <div class="flex items-center">
             <input v-model="form.est_actif" type="checkbox" id="est_actif_edit"

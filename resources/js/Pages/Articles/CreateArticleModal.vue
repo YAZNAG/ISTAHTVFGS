@@ -8,7 +8,8 @@ import InputError from '@/Components/InputError.vue';
 
 
 const props = defineProps({
-    categories: Array
+    categories: Array,
+    marche_categories: Array,
 });
 
 const form = useForm({
@@ -16,6 +17,7 @@ const form = useForm({
     designation: '',
     description: '',
     categorie_id: '',
+    marche_category_id: '',
     unite_mesure: '',
     taux_tva: 0,
     seuil_maximal: 0,
@@ -91,6 +93,18 @@ const submit = () => {
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Marché Catégorie *</label>
+                        <select v-model="form.marche_category_id" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Sélectionnez...</option>
+                            <option v-for="marche_cat in marche_categories" :key="marche_cat.id" :value="marche_cat.id">
+                                {{ marche_cat.nom }}
+                            </option>
+                        </select>
+                        <InputError :message="form.errors.marche_category_id" />
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">Unité *</label>
                         <select v-model="form.unite_mesure" required
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -111,7 +125,7 @@ const submit = () => {
 
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <label class="block text-sm font-medium text-gray-700">Seuil minimal</label>
                         <input v-model="form.seuil_minimal" type="number" min="0"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -119,13 +133,14 @@ const submit = () => {
 
                     </div>
                     
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Seuil maximal</label>
                         <input v-model="form.seuil_maximal" type="number" min="0"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         <InputError :message="form.errors.seuil_maximal" />
 
-                    </div>
+                    </div> -->
 
                     <div class="flex items-center">
                         <input v-model="form.est_actif" type="checkbox" id="est_actif"

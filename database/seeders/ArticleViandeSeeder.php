@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Article;
 use App\Models\Categorie;
+use App\Models\MarcheCategory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,7 +16,7 @@ class ArticleViandeSeeder extends Seeder
     public function run(): void
     {
         $categoryId = Categorie::where('code', 'VIA')->firstOrFail()->id;
-
+        $marche_category_id = MarcheCategory::where('nom', 'viandes et abats')->firstOrFail()->id;
         
         $articles = [
 [
@@ -23,6 +24,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Cervelle de bœuf de 300 à 400 gr',
         'unite_mesure' => 'pc',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -36,6 +38,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Contre filet de bœuf ',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -49,6 +52,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Cuise de bœuf desossé',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -62,6 +66,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Cuise de bœuf aloyau',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -75,6 +80,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Filet de bœuf paré ',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -88,6 +94,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Foie de bœuf ',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -101,6 +108,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Gigot de mouton ',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -114,6 +122,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Saucisse de bœuf',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,
@@ -127,6 +136,7 @@ class ArticleViandeSeeder extends Seeder
         'designation' => 'Mouton entier',
         'unite_mesure' => 'kg',
         'categorie_id' => $categoryId,
+        'marche_category_id' => $marche_category_id,
         'categorie_principale_id' => 1,
         'nature_prestation_id' => 1,
         'taux_tva' => 0,

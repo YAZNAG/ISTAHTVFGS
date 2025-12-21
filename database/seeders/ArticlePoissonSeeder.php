@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Article;
 use App\Models\Categorie;
+use App\Models\MarcheCategory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,7 +16,7 @@ class ArticlePoissonSeeder extends Seeder
     public function run(): void
     {
         $categoryId = Categorie::where('code', 'POI')->firstOrFail()->id;
-
+        $marche_category_id = MarcheCategory::where('nom', 'poissons et fruits de mer')->firstOrFail()->id;
         
         $articles = [
 [
@@ -23,6 +24,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Anchoix frais',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -36,6 +38,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Calamar entier',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -49,6 +52,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Chinchard',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -62,6 +66,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Congre',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -75,6 +80,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Crevettes décortiqués',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -88,6 +94,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Crevettes non décortiqués',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -101,6 +108,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Espadon en filet',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -114,6 +122,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Filet de colin',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -127,6 +136,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Merlan ration',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -140,6 +150,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Ombrine ',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -153,6 +164,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Sardine',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -166,6 +178,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Sar ration (250 gr)',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
@@ -179,6 +192,7 @@ class ArticlePoissonSeeder extends Seeder
                 'designation' => 'Filet de Thon frais',
                 'unite_mesure' => 'kg',
                 'categorie_id' => $categoryId,
+                'marche_category_id' => $marche_category_id,
                 'categorie_principale_id' => 1,
                 'nature_prestation_id' => 1,
                 'taux_tva' => 0,
