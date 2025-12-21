@@ -124,6 +124,9 @@ function onCategorieChange(event)
             Articles Commandés
           </label>
 
+          <p v-if="$page.props.errors.articlesError" v-html="$page.props.errors.articlesError" class="text-sm text-red-600 mb-3">
+          </p>
+          
           <div class="relative mb-2">
             <input
               type="text"

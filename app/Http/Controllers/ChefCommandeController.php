@@ -94,6 +94,21 @@ class ChefCommandeController extends Controller implements HasMiddleware
     {
         $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
         
+        $marche = BonCommande::current()->where('categorie_id', $request->categorie_id)
+                              ->with('articles')->latest()->first();
+        
+        $missingArticles = collect($request->articles)->pluck('article_id')->diff(
+            $marche->articles->pluck('article_id')
+        );
+
+        if (!$missingArticles->isEmpty()) {
+            $articles = Article::whereIn('id', $missingArticles)->pluck('designation');
+            throw ValidationException::withMessages([
+                'articlesError' => "les articles suivants sont pas dans le marché actuel: " . "<strong>" . $articles->join(', ') . "<strong>",
+            ]);
+        }
+        
+        
         #FIX: it creates multiple chef commandes
         $chefCommande = ChefCommande::create([
             'numero' => ChefCommande::genererNumero(),
@@ -157,6 +172,20 @@ class ChefCommandeController extends Controller implements HasMiddleware
         if ($chefCommande->statut !== ChefCommande::STATUS_CREE && $chefCommande->statut !== ChefCommande::STATUS_EN_ATTENTE_VALIDATION) {
             return redirect()->back()
                 ->with('error', 'Impossible de modifier ce bon de commande.');
+        }
+
+        $marche = BonCommande::current()->where('categorie_id', $request->categorie_id)
+                              ->with('articles')->latest()->first();
+        
+        $missingArticles = collect($request->articles)->pluck('article_id')->diff(
+            $marche->articles->pluck('article_id')
+        );
+
+        if (!$missingArticles->isEmpty()) {
+            $articles = Article::whereIn('id', $missingArticles)->pluck('designation');
+            throw ValidationException::withMessages([
+                'articlesError' => "les articles suivants sont pas dans le marché actuel: " . "<strong>" . $articles->join(', ') . "<strong>",
+            ]);
         }
 
         $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
@@ -241,10 +270,12 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
         $request->validate([
             'validation_note' => 'nullable|string|max:500',
-            'marche_id' => 'required|integer|exists:bon_commandes,id',
+            // 'marche_id' => 'required|integer|exists:bon_commandes,id',
         ]);
         
-        $marche = BonCommande::where('id', $request->input('marche_id'))->with('articles')->first();
+        $marche = BonCommande::current()->where('categorie_id', $chefCommande->categorie_id)
+                              ->with('articles')->latest()->first();
+        
         $missingArticles = $chefCommande->items()->pluck('article_id')->diff(
             $marche->articles->pluck('article_id')
         );
@@ -252,7 +283,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
         if (!$missingArticles->isEmpty()) {
             $articles = Article::whereIn('id', $missingArticles)->pluck('designation');
             throw ValidationException::withMessages([
-                'articlesError' => "les articles suivants sont pas dans le marché $marche->reference: " . "<strong>" . $articles->join(', ') . "<strong>",
+                'articlesError' => "les articles suivants sont pas dans le marché actuel: " . "<strong>" . $articles->join(', ') . "<strong>",
             ]);
         }
         
@@ -262,7 +293,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
             $chefCommande->update([
             'statut' => ChefCommande::STATUS_EN_ATTENTE_LIVRAISON,
             'validation_note' => $request->input('validation_note'),
-            'bon_commande_id' => $request->input('marche_id'),
+            'bon_commande_id' => $marche->id,
             'validation_date' => now(),
         ]);
 

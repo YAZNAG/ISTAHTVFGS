@@ -4,6 +4,7 @@ import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
 import { FolderMinusIcon, XCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import InputError from '@/Components/InputError.vue';
+import Dump from '@/Components/Dump.vue';
 
 const props = defineProps({
   articles: Array,
@@ -121,6 +122,9 @@ function onCategorieChange(event)
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Articles Commandés
           </label>
+
+          <p v-if="$page.props.errors.articlesError" v-html="$page.props.errors.articlesError" class="text-sm text-red-600 mb-3">
+          </p>
 
           <div class="relative mb-2">
             <input

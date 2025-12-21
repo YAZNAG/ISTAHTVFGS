@@ -158,16 +158,6 @@ const statutInfo = getChefCommandeStatutInfo(props.chefCommande.statut);
             <form class="mt-8 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Marché
-                    </label>
-                    <select v-model="approveForm.marche_id" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Selectionner un marché</option>
-                        <option v-for="marche in marches" :key="marche.id" :value="marche.id">{{ marche.reference }}</option>
-                    </select>
-                    <InputError :message="approveForm.errors.marche_id" />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
                         Commentaire <span class="text-xs">(Optionnel)</span>
                     </label>
                     <textarea v-model="approveForm.validation_note"
