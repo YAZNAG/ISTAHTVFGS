@@ -29,7 +29,7 @@ const form = useForm({
 })
 
 const articles = computed(() => {
-  return props.articles.filter(a => a.categorie_id === form.categorie_id)
+  return props.articles.filter(a => a.marche_category_id === form.categorie_id)
 })
 
 

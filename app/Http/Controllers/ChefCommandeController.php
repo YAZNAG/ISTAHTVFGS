@@ -12,6 +12,7 @@ use App\Models\BonLivraison;
 use App\Models\Categorie;
 use App\Models\ChefCommande;
 use App\Models\ChefCommandeItem;
+use App\Models\MarcheCategory;
 use App\Models\User;
 use App\Notifications\ChefCommandeApproved;
 use App\Notifications\ChefCommandeRejected;
@@ -82,8 +83,8 @@ class ChefCommandeController extends Controller implements HasMiddleware
                     ->get(['id', 'name']);
 
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
-            'articles' => Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']),
-            'categories' => Categorie::all(['id', 'nom']),
+            'articles' => Article::all(['id', 'designation', 'marche_category_id', 'unite_mesure']),
+            'categories' => MarcheCategory::active()->get(['id', 'nom']),
             'users' => $users,
         ])->baseRoute('chef-commandes.index');
     }
@@ -136,7 +137,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
     public function edit(ChefCommande $chefCommande)
     {
-        $articles = Article::all(['id', 'designation', 'categorie_id', 'unite_mesure']);
+        $articles = Article::all(['id', 'designation', 'marche_category_id', 'unite_mesure']);
         $users = User::permission('create_chefCommandes')
                     ->withoutRole('manager')
                     ->get(['id', 'name']);
@@ -144,7 +145,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
         return Inertia::modal('ChefCommande/EditCommandeModal', [
             'chefCommande' => EditChefCommandeResource::make($chefCommande),
             'articles' => $articles,
-            'categories' => Categorie::all(['id', 'nom']),
+            'categories' => MarcheCategory::active()->get(['id', 'nom']),
             'users' => $users,
         ])
         ->baseRoute('chef-commandes.index');

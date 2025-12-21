@@ -2,7 +2,6 @@
 import { ref, reactive, computed } from 'vue'
 import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
-import Dump from '@/Components/Dump.vue';
 import { FolderMinusIcon, XCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import InputError from '@/Components/InputError.vue';
 
@@ -24,7 +23,7 @@ const form = useForm({
 });
 
 const articles = computed(() => {
-  return props.articles.filter(a => a.categorie_id === form.categorie_id)
+  return props.articles.filter(a => a.marche_category_id === form.categorie_id)
 })
 
 // Filter articles not yet added
