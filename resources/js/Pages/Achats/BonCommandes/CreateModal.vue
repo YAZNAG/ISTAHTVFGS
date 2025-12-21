@@ -117,7 +117,7 @@
                     <!-- Quantité -->
                     <div class="w-32">
                         <label class="block text-sm font-medium mb-1">
-                            Qté {{ row.unite_mesure ? `(${row.unite_mesure})` : '' }}
+                            Qté max {{ row.unite_mesure ? `(${row.unite_mesure})` : '' }}
                         </label>
                         <input v-model.number="row.quantite_commandee" type="number" min="1"
                             class="w-full border-gray-300 rounded-lg p-2" />
@@ -236,7 +236,7 @@ function filteredArticles(search) {
   const picked = new Set(marcheForm.articles.map(r => r.article_id).filter(Boolean))
 
   return props.articles.filter(
-    a => a.designation.toLowerCase().startsWith(s) && a.categorie_id == marcheForm.categorie_id && !picked.has(a.id)
+    a => a.designation.toLowerCase().startsWith(s) && a.marche_category_id == marcheForm.categorie_id && !picked.has(a.id)
   )
 }
 

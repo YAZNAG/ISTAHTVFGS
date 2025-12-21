@@ -13,6 +13,7 @@ use App\Models\Article;
 use App\Models\HistoriqueStatutBc;
 use App\Models\BonCommandeArticle;
 use App\Models\Categorie;
+use App\Models\MarcheCategory;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -91,9 +92,9 @@ class BonCommandeController extends Controller implements HasMiddleware
 
     return Inertia::render('Achats/BonCommandes/Index', [
         'marches' => $bonCommandes,
-        'categories' => Categorie::where('est_actif', true)->get(),
+        'categories' => MarcheCategory::active()->get(['id', 'nom']),
         
-        'filters' => $request->only(['statut', 'categorie_principale_id', 'date_limite', 'reference']),
+        'filters' => $request->only(['statut', 'categorie_id', 'date_limite', 'reference']),
         'stats' => $this->getStats(),
     ]);
 }
@@ -116,7 +117,7 @@ private function getStats()
     public function create()
     {
         $articles = Article::withNonExists()->where('est_actif', true)->get();
-        $categories = Categorie::all(['id', 'nom']);
+        $categories = MarcheCategory::active()->get(['id', 'nom']);
 
         return Inertia::modal('Achats/BonCommandes/CreateModal', [
             'tauxTVA' => $this->tauxTVA,
@@ -203,7 +204,7 @@ private function getStats()
     public function modify(BonCommande $bonCommande)
     {
         $articles = Article::withNonExists()->where('est_actif', true)->get();
-        $categories = Categorie::all(['id', 'nom']);
+        $categories = MarcheCategory::active()->get(['id', 'nom']);
 
         $bonCommande->loadMissing('articles.article');
 

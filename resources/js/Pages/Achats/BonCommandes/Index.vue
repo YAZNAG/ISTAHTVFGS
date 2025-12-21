@@ -303,7 +303,7 @@ const confirmationAnnulation = ref(false);
 // Filtres
 const filters = ref({
     statut: props.filters?.statut || '',
-    categorie_principale_id: props.filters?.categorie_principale_id || '',
+    categorie_id: props.filters?.categorie_id || '',
     date_limite: props.filters?.date_limite || '',
     reference: props.filters?.reference || '',
 });

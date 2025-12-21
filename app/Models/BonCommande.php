@@ -35,7 +35,7 @@ class BonCommande extends Model
 
     public function categorie(): BelongsTo
     {
-        return $this->belongsTo(Categorie::class, 'categorie_id', 'id');
+        return $this->belongsTo(MarcheCategory::class, 'categorie_id', 'id');
     }
 
     public function categoriePrincipale(): BelongsTo

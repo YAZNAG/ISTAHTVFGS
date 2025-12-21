@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('statut')->nullable();
             $table->longText('pieces_jointes')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('categorie_id')->constrained('categories');
+            $table->foreignId('categorie_id')->constrained('marche_categories');
             $table->foreignId('categorie_principale_id')->constrained('categorie_principales');
             $table->foreignId('nature_prestation_id')->constrained('nature_prestations');
             $table->foreignId('fournisseur_id')->nullable()->constrained('fournisseurs');
