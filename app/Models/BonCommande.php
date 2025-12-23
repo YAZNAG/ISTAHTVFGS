@@ -53,6 +53,11 @@ class BonCommande extends Model
         return $this->hasMany(BonCommandeArticle::class);
     }
 
+    public function decomptes(): HasMany
+    {
+        return $this->hasMany(Decompte::class, 'marche_id');
+    }
+
     public function fournisseur(): BelongsTo
     {
         return $this->belongsTo(Fournisseur::class);

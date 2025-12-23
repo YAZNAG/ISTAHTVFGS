@@ -56,4 +56,9 @@ class ChefCommande extends Model
         return $this->hasManyThrough(Article::class, ChefCommandeItem::class, 'chef_commande_id', 'id', 'id', 'article_id');
     }
 
+    public function bonCommande()
+    {
+        return $this->belongsTo(BonCommande::class);
+    }
+
 }

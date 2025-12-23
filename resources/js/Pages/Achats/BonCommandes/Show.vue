@@ -25,6 +25,11 @@
           <DocumentArrowDownIcon class="h-5 w-5" />
           PDF
         </a>
+
+        <ModalLink :href="route('decompte.create', marche.id)" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors">
+          <DocumentArrowDownIcon class="h-5 w-5" />
+          Créer un Decompte
+        </ModalLink>
       </div>
       
       <div class="flex justify-between items-start">
@@ -173,6 +178,7 @@
               </div>
           </div>
     </div>
+    <DecompteSection :decomptes="decomptes" v-if="decomptes.length > 0" class="mt-4"/>
   </AuthenticatedLayout>
 </template>
 
@@ -182,11 +188,17 @@ import { Head, Link } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
 import { getBonCommandeStatutInfo } from '@/Utils/labels';
+import DecompteSection from './Decompte/DecompteSection.vue';
+import Dump from '@/Components/Dump.vue';
 
 // Props
 const props = defineProps({
   marche: {
     type: Object,
+    required: true
+  },
+  decomptes: {
+    type: Array,
     required: true
   }
 });

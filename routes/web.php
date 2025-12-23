@@ -17,6 +17,7 @@ use App\Http\Controllers\CardexController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ChefCommandeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DecompteController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\FicheTechniqueController;
@@ -331,9 +332,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('/inventaires/{inventaire}/finalise', [InventaireController::class, 'finalize'])->name('inventaires.finalize');
     Route::patch('/inventaires/ligne/{ligne}', [InventaireController::class, 'updateLingne'])->name('inventaires.ligne.update');
+    
+    #### Decompte
+    Route::get('/marches/{bonCommande}/decompte/create', [DecompteController::class, 'create'])->name('decompte.create');
+    Route::post('/marches/{bonCommande}/decompte', [DecompteController::class, 'store'])->name('decompte.store');
 
-
-
+    
     #### API ####
     Route::get('/fiches/type/{type}', [ApiFicheController::class, 'getFicheByType'])->name('fiches.byType');
     

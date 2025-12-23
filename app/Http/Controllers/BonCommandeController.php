@@ -12,8 +12,11 @@ use App\Models\NaturePrestation;
 use App\Models\Article;
 use App\Models\HistoriqueStatutBc;
 use App\Models\BonCommandeArticle;
+use App\Models\BonReception;
 use App\Models\Categorie;
+use App\Models\Decompte;
 use App\Models\MarcheCategory;
+use App\Models\Reception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -497,9 +500,35 @@ public function show(BonCommande $bonCommande)
         })
     ]);
 
+    // Decompte List
+    $decomptes = Decompte::where('marche_id', $bonCommande->id)->get();
+
+    $receptions = Reception::with('bonLivraison')->whereHas('bonLivraison.chefCommande.bonCommande', function ($q) use ($bonCommande) {
+        $q->where('bon_commandes.id', $bonCommande->id);
+    })
+    ->get();
+
+    $decomtes =  $decomptes->map(function ($decompte) use ($receptions) {
+         $recsUpToDate = $receptions->where('created_at', '<=', $decompte->date->endOfDay());
+
+        // sum the accessor that lives on bonLivraison
+        $totalTtc = $recsUpToDate
+            ->pluck('bonLivraison')
+            ->unique('id')
+            ->sum('total_ttc');
+
+        return [
+            'id'          => $decompte->id,
+            'date'        => $decompte->date->toDateString(),
+            'final'       => $decompte->final,
+            'total_termine' => $totalTtc . ' DH',
+        ];
+    });
+
     return Inertia::render('Achats/BonCommandes/Show', [
         'marche' => ShowBonCommandeResource::make($bonCommande),
         'fournisseurs' => Fournisseur::where('est_actif', true)->get(),
+        'decomptes' => $decomtes,
     ]);
 }
 
