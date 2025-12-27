@@ -1,5 +1,5 @@
 <script setup>
-import { ClipboardDocumentListIcon } from '@heroicons/vue/24/outline';
+import { ClipboardDocumentListIcon, DocumentTextIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     decomptes: Array
@@ -37,7 +37,14 @@ const props = defineProps({
                         <td class="px-6 py-3">{{ decompte.total_termine }}</td>
 
                         <td class="px-6 py-3">
-
+                            <a
+                                class="text-purple-600 hover:text-purple-900 p-1 cursor-pointer"
+                                :href="route('decompte.download-pdf', decompte.id )"
+                                title="Télécharger PDF"
+                                target="_blank"
+                            >
+                            <DocumentTextIcon class="h-5 w-5" />
+                            </a>
                         </td>
                     </tr>
                 </tbody>

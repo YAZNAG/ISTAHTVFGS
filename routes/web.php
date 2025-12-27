@@ -336,6 +336,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     #### Decompte
     Route::get('/marches/{bonCommande}/decompte/create', [DecompteController::class, 'create'])->name('decompte.create');
     Route::post('/marches/{bonCommande}/decompte', [DecompteController::class, 'store'])->name('decompte.store');
+    Route::get('/marches/{decompte}/download', [DecompteController::class, 'download'])->name('decompte.download-pdf');
 
     
     #### API ####
