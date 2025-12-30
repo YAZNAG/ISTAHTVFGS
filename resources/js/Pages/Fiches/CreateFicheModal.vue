@@ -8,13 +8,13 @@ import Dump from '@/Components/Dump.vue';
 const props = defineProps({
     articles: Array,
     types: Object,
+    repas: Array,
     demandeurs: Array
 })
 
 const createFicheModal = ref(null)
 const etapes = ref([]) // list of steps
 const dropdownOpen = ref([]) // track dropdown for each etape
-
 
 const form = useForm({
     type: props.types[0].value,
@@ -101,6 +101,11 @@ const articleErrors = computed(() => {
     .filter(([key]) => /^etapes\.\d+\.articles\.\d+\.article_id$/.test(key)) // only etapes.*.articles.*.article_id
     .map(([_, message]) => message) // get just the messages
 })
+
+const plats = ref('');
+const updatePlats = () => {
+    plats.value = props.repas.find(repa => repa.id === form.nom).plats;
+}
 </script>
 
 <template>
@@ -142,16 +147,24 @@ const articleErrors = computed(() => {
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             {{ form.type === 'collectivite' ? 'Repas' : 'Nom de module' }}
                         </label>
-                        <input v-model="form.nom" type="text"
-                            class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                        <select v-model="form.nom" @change="updatePlats"
+                            class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option disabled value="">Sélectionnez un repas</option>
+                            <option v-for="repa in repas" :key="repa.id" :value="repa.id">{{ repa.nom }}
+                            </option>
+                        </select>
                         <p v-if="form.errors.nom" class="text-sm text-red-600 mt-1">{{ form.errors.nom }}</p>
                     </div>
 
                     <!-- Plat -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Plat</label>
-                        <input v-model="form.plat" type="text"
-                            class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                         <select v-model="form.plat"
+                            class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option disabled value="">Sélectionnez un plat</option>
+                            <option v-for="plat in plats" :key="plat.id" :value="plat.id">{{ plat.nom }}
+                            </option>
+                        </select>
                         <p v-if="form.errors.plat" class="text-sm text-red-600 mt-1">{{ form.errors.plat }}</p>
                     </div>
 

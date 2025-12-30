@@ -12,6 +12,7 @@ use App\Models\BonCommandeArticle;
 use App\Models\Etape;
 use App\Models\FicheTechnique;
 use App\Models\MouvementStock;
+use App\Models\Repas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -101,8 +102,11 @@ class FicheTechniqueController extends Controller implements HasMiddleware
             ];
         });
 
+        $repas = Repas::with('plats:id,nom,repas_id')->get();
+
         $data = [
             'articles' => $articles,
+            'repas' => $repas,
             'types' => array_filter(
                         FicheType::toSelect(),
                         fn ($item) => $item['value'] !== FicheType::RESTAURANT->value

@@ -26,11 +26,11 @@ class UpdateFicheTechniqueRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nom' => 'required|string|max:255',
+            'nom' => 'required|exists:repas,id',
             'type' => 'required|in:' . implode(',', FicheType::values()),
             'responsable' => 'required|string|max:255',
             'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
-            'plat' => 'required|string|max:255',
+            'plat' => 'required|exists:plats,id',
             'effectif' => 'required|integer|min:0',
             'etapes' => 'required|array|min:1',
             'etapes.*.title' => 'required|string|max:255',
