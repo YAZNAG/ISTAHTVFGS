@@ -13,6 +13,7 @@ class Etape extends Model
     
     protected $fillable = [
         'title',
+        'description',
         'fiche_id',
     ];
 
@@ -22,8 +23,4 @@ class Etape extends Model
         return $this->belongsTo(FicheTechnique::class, 'fiche_id');
     }
 
-    public function ingredients()
-    {
-        return $this->hasMany(Ingredient::class);
-    }
 }

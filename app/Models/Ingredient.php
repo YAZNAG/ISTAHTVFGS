@@ -18,7 +18,7 @@ class Ingredient extends Model
         'quantite',
         'taux_tva',
         'article_id',
-        'etape_id',
+        'fiche_id',
     ];
 
     public function casts()

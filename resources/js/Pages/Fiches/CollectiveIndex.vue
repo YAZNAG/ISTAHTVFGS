@@ -133,7 +133,7 @@ function formatDate(date) {
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr v-for="fiche in fiches.data" :key="fiche.id" class="hover:bg-gray-50">
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ fiche.id }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.nom }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.repas }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.plat }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.responsable }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.effectif }}</td>

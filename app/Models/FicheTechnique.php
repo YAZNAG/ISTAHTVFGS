@@ -14,8 +14,8 @@ class FicheTechnique extends Model
     
     protected $fillable = [
         'type',
-        'nom',
-        'plat',
+        'repas_id',
+        'plat_id',
         'responsable',
         'effectif',
         'created_by',
@@ -36,7 +36,16 @@ class FicheTechnique extends Model
         return $query->where('type', FicheType::PEDAGOGIQUE);
     }
 
+    public function repas()
+    {
+        return $this->belongsTo(Repas::class, 'repas_id');
+    }
 
+    public function plat()
+    {
+        return $this->belongsTo(Plat::class, 'plat_id');
+    }
+    
     public function etapes()
     {
         return $this->hasMany(Etape::class, 'fiche_id');
@@ -54,7 +63,8 @@ class FicheTechnique extends Model
 
     public function ingredients()
     {
-        return $this->hasManyThrough(Ingredient::class, Etape::class, 'fiche_id', 'etape_id', 'id', 'id');
+        // return $this->hasManyThrough(Ingredient::class, Etape::class, 'fiche_id', 'etape_id', 'id', 'id');
+        return $this->hasMany(Ingredient::class, 'fiche_id');
     }
     
 }
