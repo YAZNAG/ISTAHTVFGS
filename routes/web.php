@@ -21,6 +21,7 @@ use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\InventaireController;
+use App\Http\Controllers\MenuCollectiviteController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\NotificationController;
@@ -332,6 +333,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/inventaires/{inventaire}/finalise', [InventaireController::class, 'finalize'])->name('inventaires.finalize');
     Route::patch('/inventaires/ligne/{ligne}', [InventaireController::class, 'updateLingne'])->name('inventaires.ligne.update');
 
+    #### Menu Collectivite ####
+    Route::get('/menu-collectivite', [MenuCollectiviteController::class, 'index'])->name('menus.index');
+    Route::get('/menu-collectivite/create', [MenuCollectiviteController::class, 'create'])->name('menus.create');
+    Route::post('/menu-collectivite', [MenuCollectiviteController::class, 'store'])->name('menus.store');
+    Route::get('/menu-collectivite/{menu}/edit', [MenuCollectiviteController::class, 'edit'])->name('menus.edit');
+    Route::put('/menu-collectivite/{menu}', [MenuCollectiviteController::class, 'update'])->name('menus.update');
+
+    Route::delete('/menu-collectivite/{MenuCollectivite}', [MenuCollectiviteController::class, 'destroy'])->name('menus.destroy');
 
 
     #### API ####

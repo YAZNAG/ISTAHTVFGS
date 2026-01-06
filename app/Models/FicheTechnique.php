@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FicheType;
+use App\Enums\Meal;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,11 +19,14 @@ class FicheTechnique extends Model
         'plat_id',
         'responsable',
         'effectif',
+        'menu_id',
+        'meal',
         'created_by',
     ];
 
     protected $casts = [
         'type' => FicheType::class,
+        'meal' => Meal::class
     ];
 
 
@@ -65,6 +69,11 @@ class FicheTechnique extends Model
     {
         // return $this->hasManyThrough(Ingredient::class, Etape::class, 'fiche_id', 'etape_id', 'id', 'id');
         return $this->hasMany(Ingredient::class, 'fiche_id');
+    }
+
+    public function menu()
+    {
+        return $this->belongsTo(MenuCollectivite::class, 'menu_id');
     }
     
 }

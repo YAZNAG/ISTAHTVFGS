@@ -210,9 +210,9 @@ class FicheTechniqueController extends Controller implements HasMiddleware
             // Update fiche technique main fields
             $fiche->update([
                 'type' => $request->type,
-                'nom' => $request->nom,
+                'repas_id' => $request->repas_id,
                 'responsable' => $request->responsable,
-                'plat' => $request->plat,
+                'plat_id' => $request->plat_id,
                 'effectif' => $request->effectif,
                 'created_by' => $updated_by ?? auth()->user()->id,
             ]);

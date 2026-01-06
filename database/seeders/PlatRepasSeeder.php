@@ -14,7 +14,7 @@ class PlatRepasSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'Hors d\'œuvres' => [
+            'hors d\'oeuvres ' => [
                 'Asperges en sauce',
                 'Salade noix chèvre chaud',
                 'Quiche lorraine',
@@ -37,30 +37,30 @@ class PlatRepasSeeder extends Seeder
                 'Rillettes',
             ],
 
-            'Entrées' => [
-                'Asperges en sauce',
-                'Salade noix chèvre chaud',
-                'Quiche lorraine',
-                'Cœurs d\'artichaud',
-                'Assiette de charcuterie',
-                'Salade de tomates',
-                'Crevettes mayonnaise',
-                'Soupe de poisson',
-                'Soupe de légumes de saison',
-                'Velouté de potiron',
-                'Salade de brocolis',
-                'Taboulé',
-                'Œufs cocotte',
-                'Croque-monsieur',
-                'Salade de lentilles',
-                'Salade de melon jambon',
-                'Tielles sétoises',
-                'Betterave rouge',
-                'Gaspacho',
-                'Rillettes',
-            ],
+            // 'entrees' => [
+            //     'Asperges en sauce',
+            //     'Salade noix chèvre chaud',
+            //     'Quiche lorraine',
+            //     'Cœurs d\'artichaud',
+            //     'Assiette de charcuterie',
+            //     'Salade de tomates',
+            //     'Crevettes mayonnaise',
+            //     'Soupe de poisson',
+            //     'Soupe de légumes de saison',
+            //     'Velouté de potiron',
+            //     'Salade de brocolis',
+            //     'Taboulé',
+            //     'Œufs cocotte',
+            //     'Croque-monsieur',
+            //     'Salade de lentilles',
+            //     'Salade de melon jambon',
+            //     'Tielles sétoises',
+            //     'Betterave rouge',
+            //     'Gaspacho',
+            //     'Rillettes',
+            // ],
 
-            'Plats' => [
+            'plats' => [
                 'Lasagnes aux légumes',
                 'Tagliatelles à la carbonara',
                 'Pâtes au jambon',
@@ -91,7 +91,7 @@ class PlatRepasSeeder extends Seeder
                 'Raviolis',
             ],
 
-            'Plats Spéciaux pour invités' => [
+            'plats spéciaux' => [
                 'Moules frites',
                 'Saumon à la plancha',
                 'Magret de canard',
@@ -127,6 +127,29 @@ class PlatRepasSeeder extends Seeder
                 'Queue de lotte',
                 'Truites',
                 'Tartines de légumes frais',
+            ],
+
+            'desserts' => [
+                "Fondant au chocolat",
+                "Crêpes",
+                "Mousse au chocolat",
+                "Île flottante",
+                "Tarte aux pommes",
+                "Tiramisu",
+                "Crème brûlée",
+                "Profiteroles",
+                "Millefeuille",
+                "Tarte aux fraises",
+                "Perdu perdu",
+                "Gateau au yaourt",
+                "Gateau au citron",
+                "Crumble aux pommes",
+                "Salade de fruits de saison",
+                "Bananes au chocolat",
+                "Charlotte",
+                "Clafoutis",
+                "Compote",
+                "Pain d'épices"
             ],
         ];
 
