@@ -19,7 +19,7 @@ class FicheTechnique extends Model
         'plat_id',
         'responsable',
         'effectif',
-        'menu_id',
+        'menu_collectivite_id',
         'meal',
         'created_by',
     ];
@@ -73,7 +73,7 @@ class FicheTechnique extends Model
 
     public function menu()
     {
-        return $this->belongsTo(MenuCollectivite::class, 'menu_id');
+        return $this->belongsTo(MenuCollectivite::class, 'menu_collectivite_id');
     }
     
 }

@@ -340,6 +340,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/menu-collectivite/{menu}/edit', [MenuCollectiviteController::class, 'edit'])->name('menus.edit');
     Route::put('/menu-collectivite/{menu}', [MenuCollectiviteController::class, 'update'])->name('menus.update');
 
+    Route::get('/menu-collectivite/{menu}/download', [MenuCollectiviteController::class, 'download'])->name('menus.download');
+
     Route::delete('/menu-collectivite/{MenuCollectivite}', [MenuCollectiviteController::class, 'destroy'])->name('menus.destroy');
 
 

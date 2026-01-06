@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { FunnelIcon, PencilIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import { DocumentTextIcon, FunnelIcon, PencilIcon, PlusIcon } from '@heroicons/vue/24/outline';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -129,18 +129,18 @@ function openDeleteModal(id) {
                     <PencilIcon class="h-5 w-5" />
                   </Link>
 
-                  <!-- <a
-                     :href="route('menus.export', menu.id)"
+                  <a
+                     :href="route('menus.download', menu.id)"
                      target="_blank"
                      class="text-purple-600 hover:text-purple-900 p-1"
                      title="Télécharger PDF">
-                    <DocumentTextIcon class="h-4 w-4" />
-                  </a> -->
+                    <DocumentTextIcon class="h-5 w-5" />
+                  </a>
 
-                  <button @click="openDeleteModal(menu.id)" class="text-red-600 hover:text-red-900 p-1"
+                  <!-- <button @click="openDeleteModal(menu.id)" class="text-red-600 hover:text-red-900 p-1"
                     title="Supprimer">
                     <TrashIcon class="h-5 w-5" />
-                  </button>
+                  </button> -->
                 </div>
               </td>
             </tr>

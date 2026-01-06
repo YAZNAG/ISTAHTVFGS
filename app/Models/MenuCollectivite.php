@@ -14,6 +14,13 @@ class MenuCollectivite extends Model
         'effectif',
     ];
 
+    public function casts()
+    {
+        return [
+            'date' => 'date',
+        ];
+    }
+
     public function fiches()
     {
         return $this->hasMany(FicheTechnique::class, 'menu_collectivite_id');
