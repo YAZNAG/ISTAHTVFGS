@@ -93,31 +93,33 @@
                     @endphp
                     @foreach($data as $category => $d)
                     <tr >
-                        <td class="border border-black text-center p-1">{{$category}}</td>
+                        <td class="border border-black text-center p-1" rowspan="{{count($d) + 1}}">{{$category}}</td>
                         @foreach($d as $article)
-                        @php
-                            $total += $article['total_ttc'];
-                        @endphp
-                        <td class="border border-black text-center p-1">{{$article['article_code']}}</td>
+                        <tr>
+                            @php
+                                $total += $article['total_ttc'];
+                            @endphp
+                            <td class="border border-black text-center p-1">{{$article['article_code']}}</td>
 
-                        <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['hors_doeuvres']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['plats']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['desserts']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['plats_special']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['hors_doeuvres']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['plats']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['desserts']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['petit_dejeuner']['plats_special']}}</td>
 
-                        <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['hors_doeuvres']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['plats']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['desserts']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['plats_special']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['hors_doeuvres']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['plats']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['desserts']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['dejeuner']['plats_special']}}</td>
 
-                        <td class="border border-black text-center p-1">{{$article['quantites']['diner']['hors_doeuvres']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['diner']['plats']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['diner']['desserts']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['quantites']['diner']['plats_special']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['diner']['hors_doeuvres']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['diner']['plats']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['diner']['desserts']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['quantites']['diner']['plats_special']}}</td>
 
-                        <td class="border border-black text-center p-1">{{$article['article_unite_mesure']}}</td>
-                        <td class="border border-black text-center p-1">{{$article['article_prix']}} DH</td>
-                        <td class="border border-black text-center p-1">{{ number_format($article['total_ttc'], 2, '.', ' ')}} DH</td>
+                            <td class="border border-black text-center p-1">{{$article['article_unite_mesure']}}</td>
+                            <td class="border border-black text-center p-1">{{$article['article_prix']}} DH</td>
+                            <td class="border border-black text-center p-1">{{ number_format($article['total_ttc'], 2, '.', ' ')}} DH</td>
+                        </tr>
                         @endforeach
                     </tr>
                     @endforeach

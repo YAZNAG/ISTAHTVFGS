@@ -232,7 +232,7 @@ class MenuCollectiviteController extends Controller implements HasMiddleware
         return Pdf::view('pdf.menu-collectivite', compact('repas', 'menu', 'data'))
             ->headerView('pdf.H')
             ->footerView('pdf.F')
-            ->margins(45, 5, 40, 5)
+            ->margins(40, 0, 28, 0)
             ->orientation(Orientation::Landscape)
             ->format(Format::A4)
             ->download($fileName);
