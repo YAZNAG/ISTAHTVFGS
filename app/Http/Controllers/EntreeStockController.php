@@ -88,30 +88,17 @@ class EntreeStockController extends Controller implements HasMiddleware
     public function export(Request $request) 
     {
         $request->validate([
-            'start_date' => 'required|date_format:Y-m',
-            'end_date' => 'nullable|date_format:Y-m',
-        ], [
-            'start_date.date_format' => 'La date doit avoir le format YYYY-MM.',
-            'end_date.date_format' => 'La date doit avoir le format YYYY-MM.',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
         ]);
 
         $startDate = Carbon::parse($request->start_date)->startOfDay();
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
 
-        $query = MouvementStock::entrees()->with([
+        $data = MouvementStock::entrees()->with([
             'article',
             'referenceable',
-        ]);
-
-        $endDate = $request->end_date ? Carbon::parse($request->end_date . '-01')->endOfMonth() : null;
-
-        if ($request->end_date) {
-            $data = $query->whereBetween('created_at', [$startDate, $endDate])->get();
-        } else {
-            // get data for entire month of start_date
-            $data = $query->whereYear('created_at', $startDate->year)
-                        ->whereMonth('created_at', $startDate->month)
-                        ->get();
-        }
+        ])->whereBetween('created_at', [$startDate, $endDate])->get();
 
         $articles = ExportEntreeStockRecource::collection($data)->toArray($request);
 

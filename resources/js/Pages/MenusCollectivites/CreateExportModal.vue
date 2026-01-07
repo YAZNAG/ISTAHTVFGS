@@ -2,9 +2,9 @@
   <Modal ref="exportModalRef">
     <!-- Header -->
     <div class="mb-2">
-      <h2 class="text-lg font-semibold text-gray-900">Exporter les entrées en stock</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Exporter les menus collectivites</h2>
       <p class="text-sm text-gray-500 mt-1">
-        Sélectionnez une plage de dates pour exporter les entrées en stock correspondantes.
+        Sélectionnez une plage de dates pour exporter les menus collectivites correspondantes.
       </p>
     </div>
 
@@ -17,7 +17,6 @@
           <input
             id="start_date"
             type="date"
-            placeholder="2025-01"
             v-model="exportForm.start_date"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             required
@@ -31,8 +30,8 @@
           <input
             id="end_date"
             type="date"
-            placeholder="2025-03"
             v-model="exportForm.end_date"
+            required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
           <InputError :message="exportForm.errors.end_date" />
@@ -55,9 +54,9 @@
         </button> -->
 
         <a
-        :href="route('entree-stocks.export', exportForm.data())" 
+        :href="route('menus.export', exportForm.data())" 
         target="_blank"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" @click="exportPdf">
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
           Exporter
         </a>
         

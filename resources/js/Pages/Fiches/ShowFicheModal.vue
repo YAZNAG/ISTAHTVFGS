@@ -43,7 +43,7 @@ function closeModal() {
                             {{ fiche.type }}
                         </span>
                     </p>
-                    <p><span class="font-bold">{{ fiche.type_label == 'pedagogique' ? 'Module: ' : 'Repas: ' }}</span> {{ fiche.nom }}</p>
+                    <p><span class="font-bold">{{ fiche.type_label == 'pedagogique' ? 'Module: ' : 'Repas: ' }}</span> {{ fiche.repas }}</p>
                     <p><span class="font-bold">{{ fiche.type_label == 'pedagogique' ? 'Formatteur: ' : 'Chef de cuisine: ' }}</span> {{ fiche.responsable }}</p>
                     <p><span class="font-bold">Plat :</span> {{ fiche.plat }}</p>
                     <p><span class="font-bold">Effectif :</span> {{ fiche.effectif }}</p>
@@ -53,9 +53,15 @@ function closeModal() {
 
             <!-- Steps -->
             <div class="space-y-6">
-                <div v-for="etape in fiche.etapes" :key="etape.id" class="border rounded-lg p-5 bg-gray-50">
-                    <h4 class="font-semibold text-base mb-3">Étape : {{ etape.title }}</h4>
+                <div class="grid grid-cols-3 gap-2">
+                    <div v-for="(etape, index) in fiche.etapes" :key="etape.id" class="border rounded-lg p-5 bg-gray-50">
+                        <h4 class="font-semibold text-base mb-3">Étape {{ ++index }} : {{ etape.title }}</h4>
+                        <p>{{ etape.description }}</p>
+                    </div>
+                </div>
 
+                <div>
+                    <h4 class="font-semibold text-base mb-3">Ingrédients</h4>
                     <table class="min-w-full text-sm border">
                         <thead class="bg-gray-100 text-left">
                             <tr>
@@ -69,7 +75,7 @@ function closeModal() {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item in etape.ingredients" :key="item.id" class="hover:bg-gray-50">
+                            <tr v-for="item in fiche.ingredients" :key="item.id" class="hover:bg-gray-50">
                                 <td class="px-3 py-2 border">{{ item.code }}</td>  
                                 <td class="px-3 py-2 border">{{ item.designation }}</td>
                                 <td class="px-3 py-2 border">{{ item.unite_mesure }}</td>
@@ -83,6 +89,8 @@ function closeModal() {
                     </table>
                 </div>
             </div>
+
+            
 
             <!-- Footer -->
             <div class="flex justify-end border-t pt-4">

@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ingredients', function (Blueprint $table) {
+        Schema::create('menu_collectivites', function (Blueprint $table) {
             $table->id();
-            $table->decimal('prix_unitaire', 8, 2);
-            $table->decimal('quantite', 8, 2);
-            $table->decimal('taux_tva', 5, 2);
-            $table->foreignId('fiche_id')->constrained('fiches_techniques')->cascadeOnDelete();
-            $table->foreignId('article_id')->constrained('articles');
+            $table->date('date');
+            $table->string('responsable');
+            $table->integer('effectif');
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ingredients');
+        Schema::dropIfExists('menu_collectivites');
     }
 };

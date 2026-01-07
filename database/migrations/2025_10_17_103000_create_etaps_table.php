@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('etapes', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->string('description');
             $table->foreignId('fiche_id')->constrained('fiches_techniques')->cascadeOnDelete();
             $table->timestamps();
         });

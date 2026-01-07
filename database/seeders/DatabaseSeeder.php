@@ -14,6 +14,7 @@ use Database\Seeders\Permissions\FicheTechniquePermissionSeeder;
 use Database\Seeders\Permissions\FournisseurPermissionSeeder;
 use Database\Seeders\Permissions\InventaireSeederPermissionSeeder;
 use Database\Seeders\Permissions\MarchePermissionSeeder;
+use Database\Seeders\Permissions\MenuCollectivitePermissionsSeeder;
 use Database\Seeders\Permissions\RaportPermissionSeeder;
 use Database\Seeders\Permissions\RestaurantPermissionSeeder;
 use Database\Seeders\Permissions\ReturnStockPermissionSeeder;
@@ -62,6 +63,7 @@ class DatabaseSeeder extends Seeder
             InventaireSeederPermissionSeeder::class,
             EditMarcheSeeder::class,
             AdminUserSeeder::class,
+            MenuCollectivitePermissionsSeeder::class,
         ]);
     }
 }

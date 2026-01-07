@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\FicheType;
 use App\Rules\AlreadyEntree;
 use App\Rules\ExistsInStock;
+use App\Rules\InActiveMarche;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,18 +27,20 @@ class UpdateFicheTechniqueRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nom' => 'required|string|max:255',
+            'repas_id' => 'required|exists:repas,id',
             'type' => 'required|in:' . implode(',', FicheType::values()),
             'responsable' => 'required|string|max:255',
             'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
-            'plat' => 'required|string|max:255',
+            'plat_id' => 'required|exists:plats,id',
             'effectif' => 'required|integer|min:0',
             'etapes' => 'required|array|min:1',
             'etapes.*.title' => 'required|string|max:255',
-            'etapes.*.articles' => 'required|array|min:1',
-            // 'etapes.*.articles.*.article_id' => 'required|integer|exists:articles,id',
-            'etapes.*.articles.*.article_id' => ['required', 'integer', 'exists:articles,id', new AlreadyEntree],
-            'etapes.*.articles.*.quantite' => 'required|numeric|min:1',
+            'etapes.*.description' => 'required|string|max:255',
+
+            'articles' => 'required|array|min:1',
+            // 'articles.*.article_id' => 'required|integer|exists:articles,id',
+            'articles.*.article_id' => ['required', 'integer', 'exists:articles,id', new InActiveMarche],
+            'articles.*.quantite' => 'required|numeric|min:1',
         ];
     }
 
