@@ -6,9 +6,11 @@ use App\Enums\Meal;
 use App\Http\Requests\StoreMenuRequest;
 use App\Http\Resources\CreateMenuCollectiviteResource;
 use App\Http\Resources\EditMenuCollectiviteResource;
+use App\Http\Resources\ExportMenuCollectiviteResource;
 use App\Models\FicheTechnique;
 use App\Models\MenuCollectivite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Enums\Format;
@@ -219,5 +221,40 @@ class MenuCollectiviteController extends Controller
             ->orientation(Orientation::Landscape)
             ->format(Format::A4)
             ->download($fileName);
+    }
+
+    public function createExport()
+    {
+
+        return Inertia::modal('MenusCollectivites/CreateExportModal')->baseRoute('menus.index');
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+
+        $menus = MenuCollectivite::whereDate('date', '>=', $request->start_date)
+            ->with('fiches', 'fiches.plat', 'fiches.repas')
+            ->whereDate('date', '<=', $request->end_date)
+            ->orderBy('date')
+            ->get();
+
+
+        $fileName = "menu-collectivite-{$request->start_date}-{$request->end_date}.pdf";
+        return Pdf::view('pdf.export-menu-collectivite', [
+            'menus' => ExportMenuCollectiviteResource::collection($menus)->toArray($request),
+            'startDate' => Carbon::parse($request->start_date),
+            'endDate' => Carbon::parse($request->end_date),
+        ])
+            ->headerView('pdf.H')
+            ->footerView('pdf.F')
+            ->margins(45, 0, 40, 0)
+            ->orientation(Orientation::Landscape)
+            ->format(Format::A4)
+            ->download($fileName);
+
     }
 }

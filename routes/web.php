@@ -341,6 +341,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/menu-collectivite/{menu}', [MenuCollectiviteController::class, 'update'])->name('menus.update');
 
     Route::get('/menu-collectivite/{menu}/download', [MenuCollectiviteController::class, 'download'])->name('menus.download');
+    Route::get('/menu-collectivite/export/create', [MenuCollectiviteController::class, 'createExport'])->name('menus.createExport');
+    Route::get('/menu-collectivite/export', [MenuCollectiviteController::class, 'export'])->name('menus.export');
+
 
     Route::delete('/menu-collectivite/{MenuCollectivite}', [MenuCollectiviteController::class, 'destroy'])->name('menus.destroy');
 
