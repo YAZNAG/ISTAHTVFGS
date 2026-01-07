@@ -63,7 +63,9 @@ class DatabaseSeeder extends Seeder
             InventaireSeederPermissionSeeder::class,
             EditMarcheSeeder::class,
             AdminUserSeeder::class,
+            PlatRepasSeeder::class,
             MenuCollectivitePermissionsSeeder::class,
+            UsersSeeder::class,
         ]);
     }
 }
