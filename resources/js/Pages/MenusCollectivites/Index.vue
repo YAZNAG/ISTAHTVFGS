@@ -1,8 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { usePermission } from '@/Utils/permission';
 import { DocumentArrowDownIcon, DocumentTextIcon, FunnelIcon, PencilIcon, PlusIcon } from '@heroicons/vue/24/outline';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+
+const { can } = usePermission();
 
 const props = defineProps({
   menus: Object,
@@ -53,13 +56,14 @@ function openDeleteModal(id) {
         </div>
         <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           <!-- 6.  Creation link -->
-          <Link :href="route('menus.create')"
+          <Link v-if="can('create_menus')" :href="route('menus.create')"
             class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl">
             <PlusIcon class="h-5 w-5" />
             Nouveau Menu
           </Link>
 
           <ModalLink
+              v-if="can('export_menus')"
               as="button"
               :href="route('menus.createExport')"
               class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 transition-all duration-200 font-semibold border border-blue-400"
@@ -106,7 +110,7 @@ function openDeleteModal(id) {
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Chef de cuisine</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Responsable</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Effectif</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé le</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -134,12 +138,14 @@ function openDeleteModal(id) {
                   </ModalLink>
 -->
                   <Link :href="route('menus.edit', menu.id)" class="text-blue-600 hover:text-blue-900 p-1"
+                    v-if="can('edit_menus')"
                     title="Modifier">
                     <PencilIcon class="h-5 w-5" />
                   </Link>
 
                   <a
                      :href="route('menus.download', menu.id)"
+                     v-if="can('pdf_menus')"
                      target="_blank"
                      class="text-purple-600 hover:text-purple-900 p-1"
                      title="Télécharger PDF">
@@ -164,6 +170,7 @@ function openDeleteModal(id) {
         <p class="mt-1 text-sm text-gray-500">Commencez par créer votre premier menu collectivité.</p>
         <div class="mt-6">
           <Link :href="route('menus.create')"
+            v-if="can('create_menus')"
             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <PlusIcon class="h-4 w-4 mr-2" />
             Nouveau menu

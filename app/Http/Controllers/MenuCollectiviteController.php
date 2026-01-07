@@ -10,6 +10,8 @@ use App\Http\Resources\ExportMenuCollectiviteResource;
 use App\Models\FicheTechnique;
 use App\Models\MenuCollectivite;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -17,8 +19,21 @@ use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Enums\Orientation;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-class MenuCollectiviteController extends Controller
+class MenuCollectiviteController extends Controller implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:list_menus', only: ['index']),
+            new Middleware('permission:create_menus', only: ['create', 'store']),
+            new Middleware('permission:edit_menus', only: ['edit', 'update']),
+            new Middleware('permission:export_menus', only: ['createExport', 'export']),
+            new Middleware('permission:pdf_menus', only: ['download']),
+
+        ];
+    }
     public function index(Request $request)
     {
         $query = MenuCollectivite::query();
