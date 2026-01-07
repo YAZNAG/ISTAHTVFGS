@@ -14,7 +14,7 @@ class PlatRepasSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'hors d\'oeuvres ' => [
+            'hors d\'oeuvres' => [
                 'Asperges en sauce',
                 'Salade noix chèvre chaud',
                 'Quiche lorraine',
