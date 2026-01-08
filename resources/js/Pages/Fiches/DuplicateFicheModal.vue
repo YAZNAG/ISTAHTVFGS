@@ -3,7 +3,6 @@ import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
 import { MagnifyingGlassIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
-import Dump from '@/Components/Dump.vue';
 
 const props = defineProps({
     fiche: Object,        // fiche to edit
@@ -13,7 +12,7 @@ const props = defineProps({
     repas: Array,
 })
 
-const editFicheModal = ref(null)
+const duplicateFicheModal = ref(null)
 const etapes = ref([])
 
 const form = useForm({
@@ -80,10 +79,11 @@ function removeArticle(index) {
 
 
 function submit() {
-    form.put(route('fiches-techniques.update', props.fiche.id), {
+    form.post(route('fiches-techniques.store'), {
         onSuccess: () => {
-            editFicheModal.value.close()
-        }
+            form.reset()
+            duplicateFicheModal.value.close()
+        },
     })
 }
 
@@ -105,9 +105,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <Modal ref="editFicheModal" size="3xl" class="overflow-y-scroll">
+    <Modal ref="duplicateFicheModal" size="3xl" class="overflow-y-scroll">
         <div class="mb-4">
-            <h2 class="text-lg font-semibold">Modifier la fiche technique</h2>
+            <h2 class="text-lg font-semibold">Créer une fiche technique</h2>
         </div>
         
          <form @submit.prevent="submit" class="space-y-6">
@@ -259,7 +259,7 @@ onMounted(() => {
         </form>
         <!-- Footer -->
         <div class="flex justify-end space-x-3 pt-4">
-            <button type="button" @click="$emit('close')"
+            <button type="button" @click="duplicateFicheModal.close()"
                 class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                 Annuler
             </button>

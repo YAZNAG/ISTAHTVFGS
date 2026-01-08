@@ -34,7 +34,10 @@ class EditFicheTechniqueResource extends JsonResource
                 return [
                     'article_id' => $article->article_id,
                     'designation' => $article->article->designation,
+                    'unite_mesure' => $article->article->unite_mesure,
+                    'prix_unitaire' => $article->article->currentBonCommandeArticle->prix_unitaire_ht ?? 'Prix indisponible',
                     'quantite' => $article->quantite,
+                    'id' => $article->id,
                 ];
             }),
             'created_at' => $this->created_at,

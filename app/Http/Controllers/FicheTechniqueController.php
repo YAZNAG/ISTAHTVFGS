@@ -174,9 +174,21 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
     public function edit(FicheTechnique $fiche)
     {
-        $fiche->load(['etapes', 'ingredients', 'ingredients.article', 'user']);
+        $fiche->load(['etapes', 'ingredients', 'ingredients.article.currentBonCommandeArticle', 'user']);
 
-        $articles = Article::actives()->get(['id', 'designation']);
+        $articles = Article::actives()
+            ->with('currentBonCommandeArticle')
+            ->get(['id', 'designation', 'unite_mesure']);
+
+
+        $articles = $articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'designation' => $article->designation,
+                'unite_mesure' => $article->unite_mesure,
+                'prix_unitaire' => $article->currentBonCommandeArticle->prix_unitaire_ht ?? 'Prix indisponible'
+            ];
+        });
 
         $repas = Repas::with('plats:id,nom,repas_id')->get();
 
@@ -241,6 +253,45 @@ class FicheTechniqueController extends Controller implements HasMiddleware
         });
     }
 
+    public function duplicate(FicheTechnique $fiche)
+    {
+        $fiche->load(['etapes', 'ingredients', 'ingredients.article.currentBonCommandeArticle', 'user']);
+
+        $articles = Article::actives()
+            ->with('currentBonCommandeArticle')
+            ->get(['id', 'designation', 'unite_mesure']);
+
+
+        $articles = $articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'designation' => $article->designation,
+                'unite_mesure' => $article->unite_mesure,
+                'prix_unitaire' => $article->currentBonCommandeArticle->prix_unitaire_ht ?? 'Prix indisponible'
+            ];
+        });
+
+        $repas = Repas::with('plats:id,nom,repas_id')->get();
+
+        $data = [
+            'articles' => $articles,
+            'repas' => $repas,
+            'fiche' => EditFicheTechniqueResource::make($fiche),
+            'types' => array_filter(
+                        FicheType::toSelect(),
+                        fn ($item) => $item['value'] !== FicheType::RESTAURANT->value
+            ),
+        ];
+
+
+        if (auth()->user()->isAdmin()) {
+            $data['demandeurs'] = User::permission('create_ficheTechniques')
+                        ->withoutRole('manager')
+                        ->get(['id', 'name']);
+        }
+
+        return Inertia::modal('Fiches/DuplicateFicheModal', $data)->baseUrl(url()->previous());
+    }
 
     public function destroy(FicheTechnique $fiche)
     {

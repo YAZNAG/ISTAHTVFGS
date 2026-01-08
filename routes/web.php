@@ -211,6 +211,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/fiches-techniques/{fiche}', [FicheTechniqueController::class, 'destroy'])->name('fiches-techniques.destroy');
     Route::get('/fiches-techniques/{fiche}/export', [FicheTechniqueController::class, 'export'])->name('fiches-techniques.export');
 
+    Route::get('/fiches-techniques/{fiche}/duplicate', [FicheTechniqueController::class, 'duplicate'])->name('fiches-techniques.duplicate');
+
+
     ##### Sortie Stock #####
     // Route::get('/sorties/{sortieStock}/approve', [SortieStockController::class, 'showApprove'])->name('sortie-stocks.show.approve');
     // Route::put('/sorties/{sortieStock}/approve', [SortieStockController::class, 'approve'])->name('sortie-stocks.approve');

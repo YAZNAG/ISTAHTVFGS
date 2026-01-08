@@ -7,7 +7,8 @@ import {
     MagnifyingGlassIcon,
     PencilIcon,
     TrashIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    ClipboardDocumentCheckIcon
 } from '@heroicons/vue/24/outline';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -145,6 +146,13 @@ function formatDate(date) {
                                         :href="route('fiches-techniques.show', fiche.id)" 
                                         class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
                                         <EyeIcon class="h-5 w-5" />
+                                    </ModalLink>
+
+                                    <ModalLink 
+                                        v-if="can('create_ficheTechniques')"
+                                        :href="route('fiches-techniques.duplicate', fiche.id)" 
+                                        class="text-blue-600 hover:text-blue-900 p-1" title="Dupliquer">
+                                        <ClipboardDocumentCheckIcon class="h-5 w-5" />
                                     </ModalLink>
 
                                     <ModalLink 
