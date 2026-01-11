@@ -27,7 +27,7 @@ const fiches = computed(() => {
 
 const form = useForm({
   demandeur: '',
-  fiche_technique: null,
+  fiche_technique: "",
   motif: '',
   demandable_id: '',
   demandable_type: '',
@@ -115,7 +115,7 @@ function submit() {
         >
           <option disabled value="">Sélectionnez une {{ form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche' }}</option>
           <option v-for="fiche in fiches" :key="fiche.id" :value="fiche.id">
-            {{ fiche.nom }}
+            {{ fiche.nom }} - {{ fiche.id }}
           </option>
         </select>
         <InputError :message="form.errors.demandable_id" />

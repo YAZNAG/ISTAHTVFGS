@@ -16,7 +16,7 @@ class FicheTechniqueDemandeResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'nom' => $this->nom,
+            'nom' => $this->plat->nom,
             'type' => $this->type,
             'articles' => $this->ingredients->map(function ($ingredient) {
                 return [
