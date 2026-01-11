@@ -303,9 +303,8 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
     public function export(FicheTechnique $fiche)
     {
-        $totalTtc = $fiche->etapes->sum(function ($etape) {
-            return $etape->ingredients->sum('total_ttc');
-        });
+        $fiche->load(['ingredients', 'ingredients.article', 'user']);
+        $totalTtc = $fiche->ingredients->sum('total_ttc');
 
         $template = $fiche->type == FicheType::PEDAGOGIQUE ? 'fiche-pedagogique' : 'fiche-collective';
 
