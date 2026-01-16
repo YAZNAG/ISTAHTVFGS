@@ -186,7 +186,7 @@ class BonSortieController extends Controller implements HasMiddleware
             ->headerView('pdf.H')
             ->footerView('pdf.F')
             ->margins(45, 5, 40,5)
-            ->format(Format::A4);
-            // ->download("bon-sortie-{$bonSortie->numero}.pdf");
+            ->format(Format::A4)
+            ->download("bon-sortie-{$bonSortie->numero}.pdf");
     }
 }
