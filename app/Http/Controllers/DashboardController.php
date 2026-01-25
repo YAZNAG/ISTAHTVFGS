@@ -33,20 +33,6 @@ class DashboardController extends Controller
             ->groupBy('statut')
             ->pluck('total', 'statut');
 
-        // ---- Top 5 Articles in Stock ----
-        $topArticles = Article::orderByDesc('quantite_stock')
-            ->take(5)
-            ->get(['designation', 'quantite_stock']);
-        
-
-        // ---- Low Stock Articles ----
-        $lowStockArticles = Article::whereColumn('quantite_stock', '<', 'seuil_minimal')
-            ->get(['reference', 'designation', 'quantite_stock', 'seuil_minimal']);
-
-        // ---- Max Stock Articles ----
-        $overstockedArticles = Article::whereColumn('quantite_stock', '>', 'seuil_maximal')
-            ->get(['reference', 'designation', 'quantite_stock', 'seuil_maximal']);
-
         $topUsedArticles = MouvementStock::select('article_id', DB::raw('SUM(quantite_sortie) as total_sorties'))
             ->sorties()
             ->groupBy('article_id')
@@ -77,7 +63,24 @@ class DashboardController extends Controller
                 'date' => $d->created_at->format('Y-m-d')
             ]);
 
+        // -- Recent sorties
+        $recentSorties = MouvementStock::sorties()->with([
+            'article:id,designation,unite_mesure',
+        ])->take(8)->get()->map(fn($ms) => [
+            'date_sortie' => $ms->date_mouvement->format('Y-m-d'),
+            'designation_article' => $ms->article->designation,
+            'unite_mesure' => $ms->article->unite_mesure,
+            'quantite_sortie' => $ms->quantite_sortie,
+        ]);
 
+        $recentEntrees = MouvementStock::entrees()->with([
+            'article:id,designation,unite_mesure',
+        ])->take(8)->get()->map(fn($ms) => [
+            'date_sortie' => $ms->date_mouvement->format('Y-m-d'),
+            'designation_article' => $ms->article->designation,
+            'unite_mesure' => $ms->article->unite_mesure,
+            'quantite_entree' => $ms->quantite_entree,
+        ]);
 
         return Inertia::render('Dashboard', [
             'stats' => [
@@ -90,8 +93,8 @@ class DashboardController extends Controller
             ],
             'bonCommandeStatus' => $bonCommandeStatus,
             'topUsedArticles' => $topUsedArticles,
-            'lowStockArticles' => $lowStockArticles,
-            'overstockedArticles' => $overstockedArticles,
+            'recentSorties' => $recentSorties,
+            'recentEntrees' => $recentEntrees,
             'recentDemandes' => $recentDemandes,
         ]);
     }
