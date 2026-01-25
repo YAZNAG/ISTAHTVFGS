@@ -44,7 +44,7 @@
                 @foreach ($fiche->ingredients as $ingredient)
                     <tr>
 
-                        <td class="border border-black p-1">{{$ingredient->article->designation}}</td>
+                        <td class="border border-black p-1 text-left">{{$ingredient->article->designation}}</td>
                         <td class="border border-black p-1">{{$ingredient->article->reference}}</td>
                         <td class="border border-black p-1">{{ $ingredient->quantite }}</td>
                         <td class="border border-black p-1">{{ $ingredient->article->unite_mesure }}</td>

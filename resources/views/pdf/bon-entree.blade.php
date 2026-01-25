@@ -65,7 +65,7 @@
                         @foreach($entree->lignesEntree as $ligne)
                         <tr class="text-sm border-b hover:bg-gray-50">
                             <td class="border border-black p-1">{{ $ligne->article->reference }}</td>
-                            <td class="border border-black p-1">{{ $ligne->article->designation }}</td>
+                            <td class="border border-black p-1 text-left">{{ $ligne->article->designation }}</td>
                             <td class="border border-black p-1">{{ number_format($ligne->quantite, 2) }}</td>
                             <td class="border border-black p-1">{{ number_format($ligne->prix_unitaire, 2, ',', ' ') }}</td>
                             <td class="border border-black p-1 text-right">{{ number_format($ligne->prix_total, 2, ',', ' ') }}</td>

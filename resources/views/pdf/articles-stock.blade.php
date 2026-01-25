@@ -33,7 +33,7 @@
                     <tr>
                         <td class="border border-black text-center p-1">{{ $row->reference }}</td>
                         <td class="border border-black text-center p-1">{{ $row->categorie->nom }}</td>
-                        <td class="border border-black text-center p-1">{{ $row->designation }}</td>
+                        <td class="border border-black text-left p-1">{{ $row->designation }}</td>
                         <td class="border border-black text-center p-1">{{ $row->unite_mesure }}</td>
                         <td class="border border-black text-center p-1">{{ $row->quantite_stock }}</td>
                     </tr>

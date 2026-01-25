@@ -48,7 +48,7 @@
                     @foreach($inventaire->lignes as $ligne)
                         <tr>
                             <td class="border border-black p-1 text-center">{{ $ligne->code_article ?? 'N/A' }}</td>
-                            <td class="border border-black p-1 text-center">{{ $ligne->designation ?? 'N/A' }}</td>
+                            <td class="border border-black p-1 text-left">{{ $ligne->designation ?? 'N/A' }}</td>
                             <td class="border border-black p-1 text-center">{{ $ligne->unite_mesure ?? 'N/A' }}</td>
                             <td class="border border-black p-1 text-center">{{ number_format($ligne->qte_entree, 2) }}</td>
                             <td class="border border-black p-1 text-center">{{ number_format($ligne->qte_sortie, 2) }}</td>

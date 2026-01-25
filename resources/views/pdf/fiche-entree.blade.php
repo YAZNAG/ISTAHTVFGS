@@ -48,7 +48,7 @@
                         <tr>
                             <td class="border border-black text-center p-1">{{ $article['date_entree'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['code_article'] }}</td>
-                            <td class="border border-black text-center p-1">{{ $article['designation_article'] }}</td>
+                            <td class="border border-black text-left p-1">{{ $article['designation_article'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['stock_initial'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['quantite_entree'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['reference_bon_reception'] }}</td>

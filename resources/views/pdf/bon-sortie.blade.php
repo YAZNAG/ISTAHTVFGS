@@ -45,7 +45,7 @@
                     @foreach($sortieStock->lignesSortie as $ligne)
                         <tr>
                             <td class="border border-black text-center p-1">{{ $ligne->article->reference }}</td>
-                            <td class="border border-black text-center p-1">{{ $ligne->article->designation }}</td>
+                            <td class="border border-black text-center p-1 text-left">{{ $ligne->article->designation }}</td>
                             <td class="border border-black text-center p-1">{{ $ligne->article->unite_mesure }}</td>
                             <td class="border border-black text-center p-1">{{ $ligne->quantite }}</td>
 

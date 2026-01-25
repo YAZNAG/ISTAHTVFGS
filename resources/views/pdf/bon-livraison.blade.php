@@ -86,7 +86,7 @@
         <tbody>
             @forelse($livraison['lignes'] as $i => $ligne)
                 <tr>
-                    <td>{{ $ligne['designation'] ?? '-' }}</td>
+                    <td class="text-left">{{ $ligne['designation'] ?? '-' }}</td>
                     <td>{{ $ligne['unite_mesure'] ?? '-' }}</td>
                     <td class="text-right">{{ $ligne['quantite_livree'] }}</td>
                     <td class="text-right">{{ $ligne['prix_unitaire'] }} DH</td>
