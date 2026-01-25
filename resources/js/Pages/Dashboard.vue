@@ -160,20 +160,16 @@
 
     </div>
 
-    <!-- Top Articles -->
     <div class="bg-white rounded-2xl shadow-sm p-4">
       <h2 class="text-lg font-semibold mb-4">Articles les plus utilisés</h2>
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div
-          v-for="a in topUsedArticles"
-          :key="a.designation"
-          class="p-3 rounded-lg bg-gray-50 text-center"
-        >
-          <p class="font-semibold text-gray-800">{{ a.designation }}</p>
-          <p class="text-sm text-gray-600">{{ a.total_sorties }} {{ a.unite_mesure}}</p>
-        </div>
-      </div>
+      <apexchart 
+        type="bar" 
+        height="350" 
+        :options="topArticlesChartOptions" 
+        :series="topArticlesChartSeries" 
+      />
     </div>
+
   </div>
   </AuthenticatedLayout>  
 </template>
@@ -206,4 +202,68 @@ const commandeChartOptions = computed(() => ({
 const commandeChartSeries = computed(() => Object.values(props.bonCommandeStatus))
 
 
+
+const topArticlesChartOptions = computed(() => ({
+  chart: {
+    type: 'bar',
+    toolbar: { show: false }
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
+      borderRadius: 4,
+      dataLabels: {
+        position: 'top',
+      },
+    }
+  },
+  dataLabels: {
+    enabled: true,
+    formatter: function (val, opts) {
+      const unit = props.topUsedArticles[opts.dataPointIndex]?.unite_mesure || '';
+      return val + ' ' + unit;
+    },
+    style: {
+      fontSize: '12px',
+      colors: ['#334155']
+    }
+  },
+  xaxis: {
+    categories: props.topUsedArticles.map(a => a.designation),
+    labels: {
+      style: {
+        fontSize: '12px'
+      }
+    }
+  },
+  yaxis: {
+    labels: {
+      style: {
+        fontSize: '12px'
+      }
+    }
+  },
+  colors: ['#60A5FA'],
+  grid: {
+    borderColor: '#f1f5f9',
+    xaxis: {
+      lines: {
+        show: true
+      }
+    }
+  },
+  tooltip: {
+    y: {
+      formatter: function (val, opts) {
+        const unit = props.topUsedArticles[opts.dataPointIndex]?.unite_mesure || '';
+        return val + ' ' + unit;
+      }
+    }
+  }
+}))
+
+const topArticlesChartSeries = computed(() => [{
+  name: 'Quantité utilisée',
+  data: props.topUsedArticles.map(a => a.total_sorties)
+}])
 </script>
