@@ -10,9 +10,6 @@
     <!-- Main Content -->
     <div class="flex-1 p-5 flex flex-col">
 
-        <!-- HEADER -->
-        @include('pdf.header')
-
         <!-- DOCUMENT INFO -->
         <div class="mb-6">
             <div class="text-center font-bold text-lg underline uppercase py-2">Bon de sortie N° {{ $sortieStock->numero }}</div>
@@ -70,9 +67,6 @@
         </div>
 
     </div>
-
-    <!-- FOOTER -->
-    @include('pdf.footer')
 
 </body>
 </html>
