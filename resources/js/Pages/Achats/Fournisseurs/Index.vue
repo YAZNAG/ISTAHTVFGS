@@ -102,12 +102,33 @@
                                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Nom du fournisseur">
                             </div>
-                            
+
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Raison sociale</label>
                                 <input v-model="fournisseurForm.raison_sociale" type="text"
                                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Raison sociale">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Taxe Professionnelle</label>
+                                <input v-model="fournisseurForm.tp" type="text"
+                                    class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Taxe Professionnelle">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Register de Commerce</label>
+                                <input v-model="fournisseurForm.rc" type="text"
+                                    class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Register de Commerce">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Identifiant Fiscal</label>
+                                <input v-model="fournisseurForm.if" type="text"
+                                    class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Identifiant Fiscal">
                             </div>
 
                             <div>
@@ -154,6 +175,20 @@
                                 <input v-model="fournisseurForm.ice" type="text"
                                     class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Identifiant Commun de l'Entreprise">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">CNSS</label>
+                                <input v-model="fournisseurForm.cnss" type="text"
+                                    class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="CNSS">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Compte Bancaire</label>
+                                <input v-model="fournisseurForm.cb" type="text"
+                                    class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Compte Bancaire">
                             </div>
 
                             <!-- Logo -->
@@ -508,6 +543,11 @@ const fournisseurForm = useForm({
     adresse: '',
     ville: '',
     ice: '',
+    tp: '',
+    rc: '',
+    if: '',
+    cb: '',
+    cnss: '',
     notes: '',
     logo: null,
     logoPreview: null,
@@ -559,6 +599,11 @@ const editFournisseur = (fournisseur) => {
     fournisseurForm.adresse = fournisseur.adresse || '';
     fournisseurForm.ville = fournisseur.ville || '';
     fournisseurForm.ice = fournisseur.ice || '';
+    fournisseurForm.tp = fournisseur.tp || '';
+    fournisseurForm.cnss = fournisseur.cnss || '';
+    fournisseurForm.rc = fournisseur.rc || '';
+    fournisseurForm.if = fournisseur.if || '';
+    fournisseurForm.cb = fournisseur.cb || '';
     fournisseurForm.notes = fournisseur.notes || '';
 };
 
