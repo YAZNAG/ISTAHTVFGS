@@ -27,10 +27,11 @@ class Fournisseur extends Model implements HasMedia
         'est_actif',
         'notes',
         'logo',
-        // Supprimer ces champs s'ils n'existent pas dans la base
-        // 'if', 
-        // 'rc', 
-        // 'patente'
+        'tp',
+        'rc',
+        'if',
+        'cb',
+        'cnss',
     ];
 
     protected $casts = [
