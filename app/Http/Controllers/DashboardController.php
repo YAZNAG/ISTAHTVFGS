@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\BonCommande;
 use App\Models\Demande;
+use App\Models\FicheTechnique;
 use App\Models\Fournisseur;
 use App\Models\MouvementStock;
 use App\Models\User;
@@ -16,7 +17,24 @@ use Spatie\LaravelPdf\Facades\Pdf;
 class DashboardController extends Controller
 {
     public function index() {
-        
+        $ficheCollective = FicheTechnique::collectivite()
+            ->select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Fill missing months with 0
+        $ficheCollectivePerMonth = array_fill(1, 12, 0);
+        foreach ($ficheCollective as $row) {
+            $ficheCollectivePerMonth[$row->month] = (int) $row->total;
+        }
+
+
+        // return response()->json($ficheCollectivePerMonth);
         // ---- KPI Cards ----
         $totalUsers = User::count();
         $activeFournisseurs = Fournisseur::where('est_actif', true)->count();
@@ -96,6 +114,7 @@ class DashboardController extends Controller
             'recentSorties' => $recentSorties,
             'recentEntrees' => $recentEntrees,
             'recentDemandes' => $recentDemandes,
+            'ficheCollectivePerMonth' => array_values($ficheCollectivePerMonth),
         ]);
     }
 }

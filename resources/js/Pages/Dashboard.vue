@@ -209,6 +209,16 @@
       />
     </div>
 
+    <div class="bg-white rounded-2xl shadow-sm p-4">
+      <h2 class="text-lg font-semibold mb-4">Fiches collectives créées par mois</h2>
+      <apexchart 
+        type="bar" 
+        height="360" 
+        :options="ficheCollectiveMonthlyChartOptions" 
+        :series="ficheCollectiveMonthlyChartSeries" 
+      />
+    </div>
+
   </div>
   </AuthenticatedLayout>  
 </template>
@@ -227,7 +237,12 @@ const props = defineProps({
   topUsedArticles: Array,
   recentDemandes: Array,
   recentSorties: Array,
-  recentEntrees: Array
+  recentEntrees: Array,
+  ficheCollectivePerMonth: {
+    type: Array,
+    default: () => new Array(12).fill(0)
+  }
+  
 })
 
 // --- Bon Commande Chart ---
@@ -304,5 +319,92 @@ const topArticlesChartOptions = computed(() => ({
 const topArticlesChartSeries = computed(() => [{
   name: 'Quantité utilisée',
   data: props.topUsedArticles.map(a => a.total_sorties)
+}])
+const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+const ficheCollectiveMonthlyChartOptions = computed(() => ({
+  chart: {
+    type: 'bar',
+    toolbar: { show: false },
+    fontFamily: 'Inter, system-ui, sans-serif'
+  },
+  plotOptions: {
+    bar: {
+      columnWidth: '60%',
+      borderRadius: 6,
+      borderRadiusApplication: 'end',
+      dataLabels: {
+        position: 'top'
+      }
+    }
+  },
+  dataLabels: {
+    enabled: true,
+    formatter: (val) => val > 0 ? val : '',
+    offsetY: -20,
+    style: {
+      fontSize: '12px',
+      colors: ['#64748b']
+    }
+  },
+  colors: ['#6366f1'],
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'light',
+      type: 'vertical',
+      shadeIntensity: 0.5,
+      gradientToColors: ['#3b82f6'],
+      inverseColors: false,
+      opacityFrom: 1,
+      opacityTo: 0.8,
+      stops: [0, 100]
+    }
+  },
+  xaxis: {
+    categories: months,
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    labels: {
+      style: {
+        colors: '#64748b',
+        fontSize: '12px'
+      }
+    },
+    tooltip: { enabled: false }
+  },
+  yaxis: {
+    labels: {
+      style: {
+        colors: '#64748b',
+        fontSize: '12px'
+      },
+      formatter: (val) => Math.round(val)
+    }
+  },
+  grid: {
+    borderColor: '#e2e8f0',
+    strokeDashArray: 4,
+    yaxis: { lines: { show: true } },
+    padding: { top: 0, right: 0, bottom: 0, left: 10 }
+  },
+  tooltip: {
+    y: {
+      formatter: (val) => `${val} fiche${val > 1 ? 's' : ''} collective${val > 1 ? 's' : ''}`
+    }
+  },
+  states: {
+    hover: {
+      filter: {
+        type: 'lighten',
+        value: 0.1
+      }
+    }
+  }
+}))
+
+const ficheCollectiveMonthlyChartSeries = computed(() => [{
+  name: 'Fiches créées',
+  data: props.ficheCollectivePerMonth
 }])
 </script>
