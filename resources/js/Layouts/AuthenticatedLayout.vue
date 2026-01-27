@@ -216,13 +216,13 @@ const menuGroups = [
     label: 'Fiches Techniques',
     items: [
       {
-        name: 'Restaurants',
-        title: 'Les Restaurants',
-        href: '/restaurants',
-        match: '/restaurants',
+        name: 'Menu Collectivité',
+        title: 'Les Menus Collectivité',
+        href: '/menu-collectivite',
+        match: '/menu-collectivite',
         icon: ClipboardDocumentListIcon,
         bgColor: 'bg-orange-100 text-orange-600',
-        permission: 'list_restaurants',
+        permission: 'list_menus',
       },
       {
         name: 'Pédagogiques',

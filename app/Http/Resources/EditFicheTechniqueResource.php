@@ -18,8 +18,8 @@ class EditFicheTechniqueResource extends JsonResource
             'id' => $this->id,
             'type' => $this->type,
             'type_label' => $this->type_label,
-            'nom' => $this->nom,
-            'plat' => $this->plat,
+            'repas_id' => $this->repas_id,
+            'plat_id' => $this->plat_id,
             'responsable' => $this->responsable,
             'effectif' => $this->effectif,
             'demandeur_id' => $this->created_by,
@@ -27,13 +27,17 @@ class EditFicheTechniqueResource extends JsonResource
                 return [
                     'id' => $etape->id,
                     'title' => $etape->title,
-                    'articles' => $etape->ingredients->map(function ($article) {
-                        return [
-                            'article_id' => $article->article_id,
-                            'designation' => $article->article->designation,
-                            'quantite' => $article->quantite,
-                        ];
-                    }),
+                    'description' => $etape->description
+                ];
+            }),
+            'articles' => $this->ingredients->map(function ($article) {
+                return [
+                    'article_id' => $article->article_id,
+                    'designation' => $article->article->designation,
+                    'unite_mesure' => $article->article->unite_mesure,
+                    'prix_unitaire' => $article->article->currentBonCommandeArticle->prix_unitaire_ht ?? 'Prix indisponible',
+                    'quantite' => $article->quantite,
+                    'id' => $article->id,
                 ];
             }),
             'created_at' => $this->created_at,

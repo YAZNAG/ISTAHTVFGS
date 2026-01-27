@@ -29,7 +29,7 @@
                 <thead>
                     <tr class="text-center font-bold">
                         <th class=" border border-black p-1">Code d'article</th>
-                        <th class=" border border-black p-1">Désignation</th>
+                        <th class=" border border-black p-1 text-left">Désignation</th>
                         <th class="border border-black p-1">Quantité</th>
                         <th class=" border border-black p-1">Prix unitaire</th>
                         <th class=" border border-black p-1">Montant TVA</th>

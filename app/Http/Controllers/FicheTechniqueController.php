@@ -6,12 +6,14 @@ use App\Enums\FicheType;
 use App\Http\Requests\CreateFicheTechniqueRequest;
 use App\Http\Requests\UpdateFicheTechniqueRequest;
 use App\Http\Resources\EditFicheTechniqueResource;
+use App\Http\Resources\IndexCollectiviteResource;
 use App\Http\Resources\ShowFicheTechniqueResource;
 use App\Models\Article;
 use App\Models\BonCommandeArticle;
 use App\Models\Etape;
 use App\Models\FicheTechnique;
 use App\Models\MouvementStock;
+use App\Models\Repas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -78,7 +80,7 @@ class FicheTechniqueController extends Controller implements HasMiddleware
         ->withQueryString();
 
         return Inertia::render('Fiches/CollectiveIndex', [
-            'fiches' => $fiches,
+            'fiches' => IndexCollectiviteResource::collection($fiches),
             'filters' => request()->all('search', 'trashed'),
         ]);
     }
@@ -101,8 +103,11 @@ class FicheTechniqueController extends Controller implements HasMiddleware
             ];
         });
 
+        $repas = Repas::with('plats:id,nom,repas_id')->get();
+
         $data = [
             'articles' => $articles,
+            'repas' => $repas,
             'types' => array_filter(
                         FicheType::toSelect(),
                         fn ($item) => $item['value'] !== FicheType::RESTAURANT->value
@@ -128,36 +133,31 @@ class FicheTechniqueController extends Controller implements HasMiddleware
             ## Create fiche technique
             $fiche = FicheTechnique::create([
                 'type' => $request->type,
-                'nom' => $request->nom,
                 'responsable' => $request->responsable,
-                'plat' => $request->plat,
+                'repas_id' => $request->repas_id,
+                'plat_id' => $request->plat_id,
                 'effectif' => $request->effectif,
                 'created_by' => $created_by ?? auth()->user()->id
             ]);
 
-            # Create fiche technique etapes
-            collect($request->etapes)->each(function ($ficheEtape) use ($fiche) {
-                $etape = $fiche->etapes()->create([
-                    'title' => $ficheEtape['title'],
-                ]);
+            # create fiche technique etape
+            $fiche->etapes()->createMany($request->etapes);
 
-                # Create etape ingredients
-                foreach ($ficheEtape['articles'] as $ingredient) {
-                    $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])
-                        ->whereHas('bonCommande', function ($query) {
-                            $query->whereDate('date_debut', '<=', now())
-                                ->whereDate('date_fin', '>=', now());
-                        })->first();
-                    
-                    $etape->ingredients()->create([
-                        'article_id' => $ingredient['article_id'],
-                        'quantite' => $ingredient['quantite'],
-                        'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
-                        'taux_tva' => $articleFromLastEntree->taux_tva,
-                    ]);
-                }
-            });
-            
+            # Create etape ingredients
+            foreach ($request->articles as $ingredient) {
+                $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])
+                    ->whereHas('bonCommande', function ($query) {
+                        $query->whereDate('date_debut', '<=', now())
+                            ->whereDate('date_fin', '>=', now());
+                    })->first();
+                
+                $fiche->ingredients()->create([
+                    'article_id' => $ingredient['article_id'],
+                    'quantite' => $ingredient['quantite'],
+                    'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
+                    'taux_tva' => $articleFromLastEntree->taux_tva,
+                ]);
+            }
             
         });
         
@@ -165,7 +165,7 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
     public function show(FicheTechnique $fiche)
     {
-        $fiche->load(['etapes', 'etapes.ingredients', 'etapes.ingredients.article', 'user']);
+        $fiche->load(['etapes', 'ingredients', 'ingredients.article', 'user']);
 
         return Inertia::modal('Fiches/ShowFicheModal', [
             'fiche' => ShowFicheTechniqueResource::make($fiche)
@@ -174,12 +174,27 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
     public function edit(FicheTechnique $fiche)
     {
-        $fiche->load(['etapes', 'etapes.ingredients', 'etapes.ingredients.article', 'user']);
+        $fiche->load(['etapes', 'ingredients', 'ingredients.article.currentBonCommandeArticle', 'user']);
 
-        $articles = Article::actives()->get(['id', 'designation']);
+        $articles = Article::actives()
+            ->with('currentBonCommandeArticle')
+            ->get(['id', 'designation', 'unite_mesure']);
+
+
+        $articles = $articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'designation' => $article->designation,
+                'unite_mesure' => $article->unite_mesure,
+                'prix_unitaire' => $article->currentBonCommandeArticle->prix_unitaire_ht ?? 'Prix indisponible'
+            ];
+        });
+
+        $repas = Repas::with('plats:id,nom,repas_id')->get();
 
         $data = [
             'articles' => $articles,
+            'repas' => $repas,
             'fiche' => EditFicheTechniqueResource::make($fiche),
             'types' => array_filter(
                         FicheType::toSelect(),
@@ -207,83 +222,76 @@ class FicheTechniqueController extends Controller implements HasMiddleware
             // Update fiche technique main fields
             $fiche->update([
                 'type' => $request->type,
-                'nom' => $request->nom,
+                'repas_id' => $request->repas_id,
                 'responsable' => $request->responsable,
-                'plat' => $request->plat,
+                'plat_id' => $request->plat_id,
                 'effectif' => $request->effectif,
                 'created_by' => $updated_by ?? auth()->user()->id,
             ]);
 
-            // --- Sync etapes ---
-            // Remove etapes that were deleted
-            $requestEtapeIds = collect($request->etapes)->pluck('id')->filter()->all();
-            $fiche->etapes()->whereNotIn('id', $requestEtapeIds)->each(function ($etape) {
-                $etape->ingredients()->delete();
-                $etape->delete();
-            });
+            $fiche->etapes()->delete();
+            $fiche->ingredients()->delete();
+            
+            # create fiche technique etape
+            $fiche->etapes()->createMany($request->etapes);
 
-            // Loop through request etapes
-            foreach ($request->etapes as $ficheEtape) {
-
-                if (!empty($ficheEtape['id'])) {
-                    // Existing etape → update
-                    $etape = $fiche->etapes()->find($ficheEtape['id']);
-                    $etape->update(['title' => $ficheEtape['title']]);
-
-                    // Sync ingredients: remove missing, update existing, add new
-                    $requestIngredientIds = collect($ficheEtape['articles'])->pluck('id')->filter()->all();
-                    $etape->ingredients()->whereNotIn('id', $requestIngredientIds)->delete();
-
-                    foreach ($ficheEtape['articles'] as $ingredient) {
-                        // $articleFromLastEntree = MouvementStock::entrees()
-                        //     ->where('article_id', $ingredient['article_id'])
-                        //     ->latest('date_mouvement')
-                        //     ->first();
-                        $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])->latest()->first();
-
-
-                        if (!empty($ingredient['id'])) {
-                            // Update existing ingredient
-                            $etapeIngredient = $etape->ingredients()->find($ingredient['id']);
-                            $etapeIngredient->update([
-                                'article_id' => $ingredient['article_id'],
-                                'quantite' => $ingredient['quantite'],
-                                'prix_unitaire' => $articleFromLastEntree->prix_unitaire,
-                                'taux_tva' => $articleFromLastEntree->taux_tva,
-                            ]);
-                        } else {
-                            // New ingredient
-                            $etape->ingredients()->create([
-                                'article_id' => $ingredient['article_id'],
-                                'quantite' => $ingredient['quantite'],
-                                'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
-                                'taux_tva' => $articleFromLastEntree->taux_tva,
-                            ]);
-                        }
-                    }
-
-                } else {
-                    // New etape → create
-                    $etape = $fiche->etapes()->create([
-                        'title' => $ficheEtape['title'],
-                    ]);
-
-                    foreach ($ficheEtape['articles'] as $ingredient) {
-                        $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])->latest()->first();
-
-                        $etape->ingredients()->create([
-                            'article_id' => $ingredient['article_id'],
-                            'quantite' => $ingredient['quantite'],
-                            'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
-                            'taux_tva' => $articleFromLastEntree->taux_tva,
-                        ]);
-                    }
-                }
+            # Create etape ingredients
+            foreach ($request->articles as $ingredient) {
+                $articleFromLastEntree = BonCommandeArticle::where('article_id', $ingredient['article_id'])
+                    ->whereHas('bonCommande', function ($query) {
+                        $query->whereDate('date_debut', '<=', now())
+                            ->whereDate('date_fin', '>=', now());
+                    })->first();
+                
+                $fiche->ingredients()->create([
+                    'article_id' => $ingredient['article_id'],
+                    'quantite' => $ingredient['quantite'],
+                    'prix_unitaire' => $articleFromLastEntree->prix_unitaire_ht,
+                    'taux_tva' => $articleFromLastEntree->taux_tva,
+                ]);
             }
-
         });
     }
 
+    public function duplicate(FicheTechnique $fiche)
+    {
+        $fiche->load(['etapes', 'ingredients', 'ingredients.article.currentBonCommandeArticle', 'user']);
+
+        $articles = Article::actives()
+            ->with('currentBonCommandeArticle')
+            ->get(['id', 'designation', 'unite_mesure']);
+
+
+        $articles = $articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'designation' => $article->designation,
+                'unite_mesure' => $article->unite_mesure,
+                'prix_unitaire' => $article->currentBonCommandeArticle->prix_unitaire_ht ?? 'Prix indisponible'
+            ];
+        });
+
+        $repas = Repas::with('plats:id,nom,repas_id')->get();
+
+        $data = [
+            'articles' => $articles,
+            'repas' => $repas,
+            'fiche' => EditFicheTechniqueResource::make($fiche),
+            'types' => array_filter(
+                        FicheType::toSelect(),
+                        fn ($item) => $item['value'] !== FicheType::RESTAURANT->value
+            ),
+        ];
+
+
+        if (auth()->user()->isAdmin()) {
+            $data['demandeurs'] = User::permission('create_ficheTechniques')
+                        ->withoutRole('manager')
+                        ->get(['id', 'name']);
+        }
+
+        return Inertia::modal('Fiches/DuplicateFicheModal', $data)->baseUrl(url()->previous());
+    }
 
     public function destroy(FicheTechnique $fiche)
     {
@@ -295,9 +303,8 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
     public function export(FicheTechnique $fiche)
     {
-        $totalTtc = $fiche->etapes->sum(function ($etape) {
-            return $etape->ingredients->sum('total_ttc');
-        });
+        $fiche->load(['ingredients', 'ingredients.article', 'user']);
+        $totalTtc = $fiche->ingredients->sum('total_ttc');
 
         $template = $fiche->type == FicheType::PEDAGOGIQUE ? 'fiche-pedagogique' : 'fiche-collective';
 

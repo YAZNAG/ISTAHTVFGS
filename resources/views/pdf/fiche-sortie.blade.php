@@ -18,9 +18,9 @@
         </div>
         <div class="text-center font-bold mb-4">
             @if ($endDate)
-                {{ 'de ' . \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') . ' à ' . \Carbon\Carbon::parse($endDate)->translatedFormat('F Y') }}
+                {{ 'de ' . \Carbon\Carbon::parse($startDate)->format('Y-m-d') . ' à ' . \Carbon\Carbon::parse($endDate)->format('Y-m-d') }}
             @else
-                {{ 'du mois de ' . \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') }}
+                {{ 'du mois de ' . \Carbon\Carbon::parse($startDate)->format('Y-m-d') }}
             @endif
         </div>
 
@@ -45,7 +45,7 @@
                         <tr>
                             <td class="border border-black text-center p-1">{{ $article['date_sortie'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['code_article'] }}</td>
-                            <td class="border border-black text-center p-1">{{ $article['designation_article'] }}</td>
+                            <td class="border border-black text-left p-1">{{ $article['designation_article'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['stock_actuel'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['quantite_sortie'] }}</td>
                             <td class="border border-black text-center p-1">{{ $article['unite'] }}</td>

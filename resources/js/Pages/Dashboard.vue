@@ -89,91 +89,136 @@
       </div>
     </div>
 
-    <!-- Low Stock + Max Stock -->
+    <!-- Recent Sortie + Recent Entrie -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Low Stock -->
+      <!-- Recent Sorties -->
       <div class="bg-white rounded-2xl shadow-sm p-4">
-        <h2 class="text-lg font-semibold mb-4">Articles en stock faible</h2>
-        <table class="w-full text-sm border border-gray-200 rounded-md">
-          <thead class="bg-gray-100 text-gray-600">
-            <tr>
-              <th class="p-2 text-left">Référence</th>
-              <th class="p-2 text-left">Désignation</th>
-              <th class="p-2 text-center">Stock</th>
-              <th class="p-2 text-center">Seuil</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="a in lowStockArticles"
-              :key="a.reference"
-              class="border-t text-gray-700"
+        <h2 class="text-lg font-semibold mb-4">Dernières sorties stock</h2>
+
+        <template v-if="recentSorties.length">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border border-gray-200 rounded-md">
+              <thead class="bg-gray-100 text-gray-600">
+                <tr>
+                  <th class="p-2 text-left">Date</th>
+                  <th class="p-2 text-left">Article</th>
+                  <th class="p-2 text-center">Qté sortie</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="s in recentSorties"
+                  :key="s.reference_bon_sortie + s.designation_article + s.date_sortie"
+                  class="border-t hover:bg-gray-50 even:bg-gray-50"
+                >
+                  <td class="p-2">{{ s.date_sortie }}</td>
+                  <td class="p-2">
+                    <p class="font-medium">{{ s.designation_article }}</p>
+                  </td>
+                  <td class="p-2 text-center font-semibold">{{ s.quantite_sortie }} <span class="text-xs text-gray-500">{{ s.unite_mesure }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="flex flex-col items-center justify-center py-6 text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10 text-gray-400 mb-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.5"
             >
-              <td class="p-2">{{ a.reference }}</td>
-              <td class="p-2">{{ a.designation }}</td>
-              <td class="p-2 text-center">{{ a.quantite_stock }} <span class="text-red-600">(-{{ a.seuil_minimal - a.quantite_stock }})</span></td>
-              <td class="p-2 text-center text-green-600 font-semibold">{{ a.seuil_minimal }}</td>
-            </tr>
-            <tr v-if="!lowStockArticles.length">
-              <td colspan="4" class="p-2 text-center text-gray-400">
-                Aucun article en stock faible
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"
+              />
+            </svg>
+            <p class="text-sm">Aucune sortie récente</p>
+          </div>
+        </template>
       </div>
 
-      <!-- Low Stock -->
+      <!-- Dernières entrées stock -->
       <div class="bg-white rounded-2xl shadow-sm p-4">
-        <h2 class="text-lg font-semibold mb-4">Articles dépassant la quantité maximale</h2>
-        <table class="w-full text-sm border border-gray-200 rounded-md">
-          <thead class="bg-gray-100 text-gray-600">
-            <tr>
-              <th class="p-2 text-left">Référence</th>
-              <th class="p-2 text-left">Désignation</th>
-              <th class="p-2 text-center">Stock</th>
-              <th class="p-2 text-center">Maximum</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="a in overstockedArticles"
-              :key="a.reference"
-              class="border-t text-gray-700"
+        <h2 class="text-lg font-semibold mb-4">Dernières entrées stock</h2>
+
+        <template v-if="recentEntrees.length">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border border-gray-200 rounded-md">
+              <thead class="bg-gray-100 text-gray-600">
+                <tr>
+                  <th class="p-2 text-left">Date</th>
+                  <th class="p-2 text-left">Article</th>
+                  <th class="p-2 text-center">Qté entrée</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="e in recentEntrees"
+                  :key="e.reference_bon_entree + e.designation_article + e.date_entree"
+                  class="border-t hover:bg-gray-50 even:bg-gray-50"
+                >
+                  <td class="p-2">{{ e.date_entree }}</td>
+                  <td class="p-2">
+                    <p class="font-medium">{{ e.designation_article }}</p>
+                  </td>
+                  <td class="p-2 text-center font-semibold">
+                    {{ e.quantite_entree }} <span class="text-xs text-gray-500">{{ e.unite_mesure }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="flex flex-col items-center justify-center py-6 text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10 text-gray-400 mb-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.5"
             >
-              <td class="p-2">{{ a.reference }}</td>
-              <td class="p-2">{{ a.designation }}</td>
-              <td class="p-2 text-center">
-                {{ a.quantite_stock }}
-                <span class="text-green-600">(+{{ a.quantite_stock - a.seuil_maximal }})</span>
-              </td>
-              <td class="p-2 text-center text-red-600 font-semibold">{{ a.seuil_maximal }}</td>
-            </tr>
-            <tr v-if="!overstockedArticles.length">
-              <td colspan="4" class="p-2 text-center text-gray-400">
-                Aucun article dépassant la quantité maximale
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"
+              />
+            </svg>
+            <p class="text-sm">Aucune entrée récente</p>
+          </div>
+        </template>
       </div>
 
     </div>
 
-    <!-- Top Articles -->
     <div class="bg-white rounded-2xl shadow-sm p-4">
       <h2 class="text-lg font-semibold mb-4">Articles les plus utilisés</h2>
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div
-          v-for="a in topUsedArticles"
-          :key="a.designation"
-          class="p-3 rounded-lg bg-gray-50 text-center"
-        >
-          <p class="font-semibold text-gray-800">{{ a.designation }}</p>
-          <p class="text-sm text-gray-600">{{ a.total_sorties }} {{ a.unite_mesure}}</p>
-        </div>
-      </div>
+      <apexchart 
+        type="bar" 
+        height="350" 
+        :options="topArticlesChartOptions" 
+        :series="topArticlesChartSeries" 
+      />
     </div>
+
+    <div class="bg-white rounded-2xl shadow-sm p-4">
+      <h2 class="text-lg font-semibold mb-4">Fiches collectives créées par mois</h2>
+      <apexchart 
+        type="bar" 
+        height="360" 
+        :options="ficheCollectiveMonthlyChartOptions" 
+        :series="ficheCollectiveMonthlyChartSeries" 
+      />
+    </div>
+
   </div>
   </AuthenticatedLayout>  
 </template>
@@ -190,9 +235,14 @@ const props = defineProps({
   stats: Object,
   bonCommandeStatus: Object,
   topUsedArticles: Array,
-  lowStockArticles: Array,
   recentDemandes: Array,
-  overstockedArticles: Array,
+  recentSorties: Array,
+  recentEntrees: Array,
+  ficheCollectivePerMonth: {
+    type: Array,
+    default: () => new Array(12).fill(0)
+  }
+  
 })
 
 // --- Bon Commande Chart ---
@@ -206,4 +256,155 @@ const commandeChartOptions = computed(() => ({
 const commandeChartSeries = computed(() => Object.values(props.bonCommandeStatus))
 
 
+
+const topArticlesChartOptions = computed(() => ({
+  chart: {
+    type: 'bar',
+    toolbar: { show: false }
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
+      borderRadius: 4,
+      dataLabels: {
+        position: 'top',
+      },
+    }
+  },
+  dataLabels: {
+    enabled: true,
+    formatter: function (val, opts) {
+      const unit = props.topUsedArticles[opts.dataPointIndex]?.unite_mesure || '';
+      return val + ' ' + unit;
+    },
+    style: {
+      fontSize: '12px',
+      colors: ['#334155']
+    }
+  },
+  xaxis: {
+    categories: props.topUsedArticles.map(a => a.designation),
+    labels: {
+      style: {
+        fontSize: '12px'
+      }
+    }
+  },
+  yaxis: {
+    labels: {
+      style: {
+        fontSize: '12px'
+      }
+    }
+  },
+  colors: ['#60A5FA'],
+  grid: {
+    borderColor: '#f1f5f9',
+    xaxis: {
+      lines: {
+        show: true
+      }
+    }
+  },
+  tooltip: {
+    y: {
+      formatter: function (val, opts) {
+        const unit = props.topUsedArticles[opts.dataPointIndex]?.unite_mesure || '';
+        return val + ' ' + unit;
+      }
+    }
+  }
+}))
+
+const topArticlesChartSeries = computed(() => [{
+  name: 'Quantité utilisée',
+  data: props.topUsedArticles.map(a => a.total_sorties)
+}])
+const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+const ficheCollectiveMonthlyChartOptions = computed(() => ({
+  chart: {
+    type: 'bar',
+    toolbar: { show: false },
+    fontFamily: 'Inter, system-ui, sans-serif'
+  },
+  plotOptions: {
+    bar: {
+      columnWidth: '60%',
+      borderRadius: 6,
+      borderRadiusApplication: 'end',
+      dataLabels: {
+        position: 'top'
+      }
+    }
+  },
+  dataLabels: {
+    enabled: true,
+    formatter: (val) => val > 0 ? val : '',
+    offsetY: -20,
+    style: {
+      fontSize: '12px',
+      colors: ['#64748b']
+    }
+  },
+  colors: ['#6366f1'],
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'light',
+      type: 'vertical',
+      shadeIntensity: 0.5,
+      gradientToColors: ['#3b82f6'],
+      inverseColors: false,
+      opacityFrom: 1,
+      opacityTo: 0.8,
+      stops: [0, 100]
+    }
+  },
+  xaxis: {
+    categories: months,
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    labels: {
+      style: {
+        colors: '#64748b',
+        fontSize: '12px'
+      }
+    },
+    tooltip: { enabled: false }
+  },
+  yaxis: {
+    labels: {
+      style: {
+        colors: '#64748b',
+        fontSize: '12px'
+      },
+      formatter: (val) => Math.round(val)
+    }
+  },
+  grid: {
+    borderColor: '#e2e8f0',
+    strokeDashArray: 4,
+    yaxis: { lines: { show: true } },
+    padding: { top: 0, right: 0, bottom: 0, left: 10 }
+  },
+  tooltip: {
+    y: {
+      formatter: (val) => `${val} fiche${val > 1 ? 's' : ''} collective${val > 1 ? 's' : ''}`
+    }
+  },
+  states: {
+    hover: {
+      filter: {
+        type: 'lighten',
+        value: 0.1
+      }
+    }
+  }
+}))
+
+const ficheCollectiveMonthlyChartSeries = computed(() => [{
+  name: 'Fiches créées',
+  data: props.ficheCollectivePerMonth
+}])
 </script>

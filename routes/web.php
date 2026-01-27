@@ -22,6 +22,7 @@ use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\InventaireController;
+use App\Http\Controllers\MenuCollectiviteController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\NotificationController;
@@ -211,6 +212,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/fiches-techniques/{fiche}', [FicheTechniqueController::class, 'destroy'])->name('fiches-techniques.destroy');
     Route::get('/fiches-techniques/{fiche}/export', [FicheTechniqueController::class, 'export'])->name('fiches-techniques.export');
 
+    Route::get('/fiches-techniques/{fiche}/duplicate', [FicheTechniqueController::class, 'duplicate'])->name('fiches-techniques.duplicate');
+
+
     ##### Sortie Stock #####
     // Route::get('/sorties/{sortieStock}/approve', [SortieStockController::class, 'showApprove'])->name('sortie-stocks.show.approve');
     // Route::put('/sorties/{sortieStock}/approve', [SortieStockController::class, 'approve'])->name('sortie-stocks.approve');
@@ -338,7 +342,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/marches/{bonCommande}/decompte', [DecompteController::class, 'store'])->name('decompte.store');
     Route::get('/marches/{decompte}/download', [DecompteController::class, 'download'])->name('decompte.download-pdf');
 
-    
+    #### Menu Collectivite ####
+    Route::get('/menu-collectivite', [MenuCollectiviteController::class, 'index'])->name('menus.index');
+    Route::get('/menu-collectivite/create', [MenuCollectiviteController::class, 'create'])->name('menus.create');
+    Route::post('/menu-collectivite', [MenuCollectiviteController::class, 'store'])->name('menus.store');
+    Route::get('/menu-collectivite/{menu}/edit', [MenuCollectiviteController::class, 'edit'])->name('menus.edit');
+    Route::put('/menu-collectivite/{menu}', [MenuCollectiviteController::class, 'update'])->name('menus.update');
+
+    Route::get('/menu-collectivite/{menu}/download', [MenuCollectiviteController::class, 'download'])->name('menus.download');
+    Route::get('/menu-collectivite/export/create', [MenuCollectiviteController::class, 'createExport'])->name('menus.createExport');
+    Route::get('/menu-collectivite/export', [MenuCollectiviteController::class, 'export'])->name('menus.export');
+
+
+    Route::delete('/menu-collectivite/{MenuCollectivite}', [MenuCollectiviteController::class, 'destroy'])->name('menus.destroy');
+
+
     #### API ####
     Route::get('/fiches/type/{type}', [ApiFicheController::class, 'getFicheByType'])->name('fiches.byType');
     

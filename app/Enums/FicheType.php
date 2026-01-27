@@ -13,7 +13,7 @@ enum FicheType : string
         return match ($this) {
             self::COLLECTIVITE => 'Collectivité',
             self::PEDAGOGIQUE => 'Pédagogique',
-            self::RESTAURANT => 'Restaurant',
+            // self::RESTAURANT => 'Restaurant',
         };
     }
 
@@ -28,10 +28,10 @@ enum FicheType : string
                 'value' => self::PEDAGOGIQUE->value,
                 'label' => self::PEDAGOGIQUE->label(),
             ],
-            [
-                'value' => self::RESTAURANT->value,
-                'label' => self::RESTAURANT->label(),
-            ],
+            // [
+            //     'value' => self::RESTAURANT->value,
+            //     'label' => self::RESTAURANT->label(),
+            // ],
         ];
     }
 

@@ -42,32 +42,26 @@
                 </thead>
                 <tbody>
 
-                @foreach ($fiche->etapes as $etape)
-                    <!-- Step 1 -->
-                    <tr class="border-t-2 border-black">
-                        <td class="border border-black p-1 font-bold" rowspan="{{$etape->ingredients->count() + 1}}">{{$loop->iteration}}) {{ $etape->title }}</td>
+                @foreach ($fiche->ingredients as $ingredient)
+                    <tr>
 
-                        @foreach ($etape->ingredients as $ingredient)
-                        <tr>
-
-                            <td class="border border-black p-1">{{$ingredient->article->designation}}</td>
-                            <td class="border border-black p-1">{{$ingredient->article->reference}}</td>
-                            <td class="border border-black p-1">{{ $ingredient->quantite }}</td>
-                            <td class="border border-black p-1">{{ $ingredient->article->unite_mesure }}</td>
-                            <td class="border border-black p-1">{{ $ingredient->prix_unitaire }}</td>
-                            <td class="border border-black p-1">{{ $ingredient->total_ttc }}</td>
-                        </tr>
-                        @endforeach
+                        <td class="border border-black p-1 text-left">{{ $ingredient->article->designation }}</td>
+                        <td class="border border-black p-1">{{ $ingredient->article->reference }}</td>
+                        <td class="border border-black p-1">{{ $ingredient->quantite }}</td>
+                        <td class="border border-black p-1">{{ $ingredient->article->unite_mesure }}</td>
+                        <td class="border border-black p-1">{{ $ingredient->prix_unitaire }}</td>
+                        <td class="border border-black p-1">{{ $ingredient->total_ttc }}</td>
                     </tr>
                 @endforeach
 
+
                     <!-- Total rows -->
                     <tr>
-                        <td colspan="6" class="border border-black p-1 text-right font-bold">Coût total</td>
+                        <td colspan="5" class="border border-black p-1 text-right font-bold">Coût total</td>
                         <td class="border border-black p-1">{{ $totalTtc }}</td>
                     </tr>
                     <tr>
-                        <td colspan="6" class="border border-black p-1 text-right font-bold">Coût total / effectif</td>
+                        <td colspan="5" class="border border-black p-1 text-right font-bold">Coût total / effectif</td>
                         <td class="border border-black p-1">{{ $total_effectif }}</td>
                     </tr>
                 </tbody>

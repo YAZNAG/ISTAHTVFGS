@@ -1,15 +1,27 @@
 <template>
     <AuthenticatedLayout>
-        <Head :title="`Fournisseur ${fournisseur.raison_sociale || fournisseur.nom}`" />
+        <Head :title="`Fournisseur ${fournisseur.nom}`" />
 
         <div class="space-y-6 py-8 px-4">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
-                        {{ fournisseur.raison_sociale || fournisseur.nom }}
-                    </h1>
-                    <p class="text-gray-600">Détails du fournisseur</p>
+                <div class="flex items-center gap-4">
+                    <div v-if="fournisseur.logo" class="w-20 h-20">
+                        <img
+                            :src="fournisseur.logo"
+                            alt="Logo"
+                            class="w-full h-full object-contain rounded-md border border-gray-200"
+                        />
+                    </div>
+                    <div v-else class="w-20 h-20 mb-4 bg-gray-100 border border-gray-200 rounded-md flex items-center justify-center text-gray-400">
+                        <BuildingStorefrontIcon class="w-10 h-10" />
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+                            {{ fournisseur.nom }}
+                        </h1>
+                        <p class="text-gray-600">créé le {{ fournisseur.created_at }}</p>
+                    </div>
                 </div>
 
                 <div class="flex space-x-3">
@@ -41,9 +53,16 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Informations Générales</h3>
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Nom / Raison sociale:</span>
+                            <span class="text-gray-600">Nom</span>
                             <span class="font-medium text-right">
-                                {{ fournisseur.raison_sociale || fournisseur.nom || '-' }}
+                                {{ fournisseur.nom }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Raison sociale:</span>
+                            <span class="font-medium text-right">
+                                {{ fournisseur.raison_sociale || '-' }}
                             </span>
                         </div>
 
@@ -77,6 +96,55 @@
                     </div>
                 </div>
 
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Identifiants Fiscaux & Légaux</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">ICE</span>
+                            <span class="font-medium text-right">
+                                {{ fournisseur.ice || '-' }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Identifiant Fiscal</span>
+                            <span class="font-medium text-right">
+                                {{ fournisseur.if || '-' }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Registre de Commerce</span>
+                            <span class="font-medium text-right">
+                                {{ fournisseur.rc || '-' }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Taxe Professionnelle</span>
+                            <span class="font-medium text-right">
+                                {{ fournisseur.tp || '-' }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">CNSS</span>
+                            <span class="font-medium text-right">
+                                {{ fournisseur.cnss || '-' }}
+                            </span>
+                        </div>
+                        
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Compte Bancaire</span>
+                            <span class="font-medium text-right">
+                                {{ fournisseur.cb || '-' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+
                 <!-- Adresse & Statut -->
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Adresse & Statut</h3>
@@ -99,26 +167,6 @@
                                 {{ fournisseur.est_actif ? 'Actif' : 'Inactif' }}
                             </span>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Logo & Dates -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Logo & Dates</h3>
-
-                    <div v-if="fournisseur.logo" class="w-28 h-28 mb-4">
-                        <img
-                            :src="`/storage/${fournisseur.logo}`"
-                            alt="Logo"
-                            class="w-full h-full object-contain rounded-md border border-gray-200"
-                        />
-                    </div>
-                    <div v-else class="w-28 h-28 mb-4 bg-gray-100 border border-gray-200 rounded-md flex items-center justify-center text-gray-400">
-                        <BuildingStorefrontIcon class="w-10 h-10" />
-                    </div>
-
-                    <div class="text-sm text-gray-600 space-y-1">
-                        <p>Créé le <span class="font-medium">{{ fournisseur.created_at }}</span></p>
                     </div>
                 </div>
             </div>

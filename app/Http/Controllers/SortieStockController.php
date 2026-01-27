@@ -89,25 +89,16 @@ class SortieStockController extends Controller implements HasMiddleware
     {
         $request->validate([
             'start_date' => 'required|date',
-            'end_date' => 'nullable|date',
+            'end_date' => 'required|date',
         ]);
 
         $startDate = Carbon::parse($request->start_date)->startOfDay();
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
 
-        $query = MouvementStock::sorties()->with([
+        $data = MouvementStock::sorties()->with([
             'article',
             'referenceable',
-        ]);
-
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfMonth() : null;
-        if ($request->end_date) {
-            $data = $query->whereBetween('created_at', [$startDate, $endDate])->get();
-        } else {
-            // get data for entire month of start_date
-            $data = $query->whereYear('created_at', $startDate->year)
-                        ->whereMonth('created_at', $startDate->month)
-                        ->get();
-        }
+        ])->whereBetween('created_at', [$startDate, $endDate])->get();
 
         $articles = ExportSortieStockRecource::collection($data)->toArray($request);
 

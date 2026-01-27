@@ -56,7 +56,7 @@
                         @endphp
                         <tr>
                             <td class="border border-black p-1 text-center">{{ $item->article->reference ?? 'N/A' }}</td>
-                            <td class="border border-black p-1 text-center">{{ $item->article->designation ?? 'N/A' }}</td>
+                            <td class="border border-black p-1 text-left">{{ $item->article->designation ?? 'N/A' }}</td>
                             <td class="border border-black p-1 text-center">{{ $item->article->unite_mesure ?? 'N/A' }}</td>
                             <td class="border border-black p-1 text-center">{{ number_format((float) $quantite, 2) }}</td>
                             <td class="border border-black p-1 text-right">{{ $prixHT }} DH</td>

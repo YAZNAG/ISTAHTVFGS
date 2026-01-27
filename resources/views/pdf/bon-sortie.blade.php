@@ -10,9 +10,6 @@
     <!-- Main Content -->
     <div class="flex-1 p-5 flex flex-col">
 
-        <!-- HEADER -->
-        @include('pdf.header')
-
         <!-- DOCUMENT INFO -->
         <div class="mb-6">
             <div class="text-center font-bold text-lg underline uppercase py-2">Bon de sortie N° {{ $sortieStock->numero }}</div>
@@ -45,7 +42,7 @@
                     @foreach($sortieStock->lignesSortie as $ligne)
                         <tr>
                             <td class="border border-black text-center p-1">{{ $ligne->article->reference }}</td>
-                            <td class="border border-black text-center p-1">{{ $ligne->article->designation }}</td>
+                            <td class="border border-black text-center p-1 text-left">{{ $ligne->article->designation }}</td>
                             <td class="border border-black text-center p-1">{{ $ligne->article->unite_mesure }}</td>
                             <td class="border border-black text-center p-1">{{ $ligne->quantite }}</td>
 
@@ -70,9 +67,6 @@
         </div>
 
     </div>
-
-    <!-- FOOTER -->
-    @include('pdf.footer')
 
 </body>
 </html>

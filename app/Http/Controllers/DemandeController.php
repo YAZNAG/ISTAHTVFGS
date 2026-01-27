@@ -96,16 +96,16 @@ class DemandeController extends Controller implements HasMiddleware
         $this->authorize('create', Demande::class);
 
         
-        $fichesCollectives = FicheTechnique::collectivite()->with('ingredients')->get();
+        $fichesCollectives = FicheTechnique::collectivite()->with('ingredients.article', 'plat')->get();
 
-        $fichesPedagogiques = FicheTechnique::pedagogique()->with('ingredients')->get();
+        $fichesPedagogiques = FicheTechnique::pedagogique()->with('ingredients.article', 'plat')->get();
 
-        $restaurants = Restaurant::with(['items', 'items.article'])->get();
+        // $restaurants = Restaurant::with(['items', 'items.article'])->get();
         
         $data = [
             'fichesCollectives' => FicheTechniqueDemandeResource::collection($fichesCollectives),
             'fichesPedagogiques' => FicheTechniqueDemandeResource::collection($fichesPedagogiques),
-            'restaurants' => RestaurantDemandeResource::collection($restaurants),
+            // 'restaurants' => RestaurantDemandeResource::collection($restaurants),
 
             'types' => FicheType::toSelect(),
         ];

@@ -18,8 +18,8 @@ class ShowFicheTechniqueResource extends JsonResource
             'id' => $this->id,
             'type_label' => $this->type,
             'type' => $this->type->label(),
-            'nom' => $this->nom,
-            'plat' => $this->plat,
+            'repas' => $this->repas->nom,
+            'plat' => $this->plat->nom,
             'responsable' => $this->responsable,
             'effectif' => $this->effectif,
             'created_by' => $this->user?->name,
@@ -27,17 +27,18 @@ class ShowFicheTechniqueResource extends JsonResource
                 return [
                     'id' => $etape->id,
                     'title' => $etape->title,
-                    'ingredients' => $etape->ingredients->map(function ($ingredient) {
-                        return [
-                            'code' => $ingredient->article->reference,
-                            'designation' => $ingredient->article->designation,
-                            'unite_mesure' => $ingredient->article->unite_mesure,
-                            'prix_unitaire' => $ingredient->prix_unitaire,
-                            'taux_tva' => $ingredient->taux_tva,
-                            'quantite' => $ingredient->quantite,
-                            'total_ttc' => $ingredient->total_ttc,
-                        ];
-                    }),
+                    'description' => $etape->description
+                ];
+            }),
+            'ingredients' => $this->ingredients->map(function ($ingredient) {
+                return [
+                    'code' => $ingredient->article->reference,
+                    'designation' => $ingredient->article->designation,
+                    'unite_mesure' => $ingredient->article->unite_mesure,
+                    'prix_unitaire' => $ingredient->prix_unitaire,
+                    'taux_tva' => $ingredient->taux_tva,
+                    'quantite' => $ingredient->quantite,
+                    'total_ttc' => $ingredient->total_ttc,
                 ];
             }),
             'created_at' => $this->created_at?->format('Y-m-d H:i'),

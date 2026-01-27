@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,74 +15,87 @@ class UsersSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->insert([
+        $users = [
             [
-                'id' => 1,
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-                'email_verified_at' => '2025-09-27 18:57:20',
-                'password' => Hash::make('123456789'),
-                'status' => 1,
-                'remember_token' => 'SnOdK3sWsC',
-                'created_at' => '2025-09-27 18:57:21',
-                'updated_at' => '2025-09-27 18:57:21'
-            ],
-            [
-                'id' => 2,
-                'name' => 'YASSINE AZNAG',
-                'email' => 'aznagy09@gmail.com',
+                'id'    => 2,
+                'name'  => 'Stitou Mohamed',
+                'email' => 'mstitou@tourisme.gov.ma',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
                 'status' => 1,
-                'remember_token' => null,
-                'created_at' => '2025-09-27 18:58:50',
-                'updated_at' => '2025-09-27 18:58:50'
             ],
             [
-                'id' => 3,
-                'name' => 'Jean Dupont',
-                'email' => 'jean.dupont@entreprise.com',
+                'id'    => 3,
+                'name'  => 'el ghali ali',
+                'email' => 'elghali.ali2015@gmail.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
                 'status' => 1,
-                'remember_token' => null,
-                'created_at' => '2025-10-05 19:17:47',
-                'updated_at' => '2025-10-05 19:17:47'
             ],
             [
-                'id' => 4,
-                'name' => 'Marie Martin',
-                'email' => 'marie.martin@entreprise.com',
+                'id'    => 4,
+                'name'  => 'Janati Meryem',
+                'email' => 'meryemjanati20@gmail.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
                 'status' => 1,
-                'remember_token' => null,
-                'created_at' => '2025-10-05 19:17:47',
-                'updated_at' => '2025-10-05 19:17:47'
             ],
             [
-                'id' => 5,
-                'name' => 'Pierre Durand',
-                'email' => 'pierre.durand@entreprise.com',
+                'id'    => 5,
+                'name'  => 'Amal Mehyaoui',
+                'email' => 'amalmehyaouii@gmail.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
                 'status' => 1,
-                'remember_token' => null,
-                'created_at' => '2025-10-05 19:17:47',
-                'updated_at' => '2025-10-05 19:17:47'
             ],
             [
-                'id' => 6,
-                'name' => 'Sophie Leroy',
-                'email' => 'sophie.leroy@entreprise.com',
+                'id'    => 6,
+                'name'  => 'Chentouf Hamman Oussama',
+                'email' => 'oussama.chentouf90@gmail.com',
                 'email_verified_at' => null,
                 'password' => Hash::make('123456789'),
                 'status' => 1,
-                'remember_token' => null,
-                'created_at' => '2025-10-05 19:17:47',
-                'updated_at' => '2025-10-05 19:17:47'
-            ]
-        ]);
+            ],
+            [
+                'id'    => 7,
+                'name'  => 'Akel Jawaher',
+                'email' => 'jawhara-1000@hotmail.com',
+                'email_verified_at' => null,
+                'password' => Hash::make('123456789'),
+                'status' => 1,
+            ],
+            [
+                'id'    => 8,
+                'name'  => 'Addach mahjouba',
+                'email' => 'addachhjiba1970@gmail.com',
+                'email_verified_at' => null,
+                'password' => Hash::make('123456789'),
+                'status' => 1,
+            ],
+            [
+                'id'    => 9,
+                'name'  => 'Merrouni Touham',
+                'email' => 'merrounitouhami@gmail.com',
+                'email_verified_at' => null,
+                'password' => Hash::make('123456789'),
+                'status' => 1,
+            ],
+            [
+                'id'    => 10,
+                'name'  => 'test user',
+                'email' => 'test@user.com',
+                'email_verified_at' => null,
+                'password' => Hash::make('123456789'),
+                'status' => 1,
+            ],
+        ];
+
+        foreach ($users as $user) {
+            User::updateOrCreate(
+                ['id' => $user['id']],   // match on primary key
+                $user                     // insert / update these fields
+            );
+        }
 
     }
 }
