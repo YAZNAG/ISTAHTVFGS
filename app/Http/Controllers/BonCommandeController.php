@@ -501,21 +501,12 @@ public function show(BonCommande $bonCommande)
     ]);
 
     // Decompte List
-    $decomptes = Decompte::where('marche_id', $bonCommande->id)->get();
+    $decomptes = Decompte::with('items')->where('marche_id', $bonCommande->id)->get();
 
-    $receptions = Reception::with('bonLivraison')->whereHas('bonLivraison.chefCommande.bonCommande', function ($q) use ($bonCommande) {
-        $q->where('bon_commandes.id', $bonCommande->id);
-    })
-    ->get();
-
-    $decomtes =  $decomptes->map(function ($decompte) use ($receptions) {
-         $recsUpToDate = $receptions->where('created_at', '<=', $decompte->date->endOfDay());
+    $decomtes =  $decomptes->map(function ($decompte){
 
         // sum the accessor that lives on bonLivraison
-        $totalTtc = $recsUpToDate
-            ->pluck('bonLivraison')
-            ->unique('id')
-            ->sum('total_ttc');
+        $totalTtc = $decompte->items->sum('montant_ttc');
 
         return [
             'id'          => $decompte->id,

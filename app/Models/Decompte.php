@@ -26,4 +26,8 @@ class Decompte extends Model
         return $this->belongsTo(BonCommande::class, 'marche_id');
     }
     
+    public function items()
+    {
+        return $this->hasMany(DecompteItem::class);
+    }
 }
