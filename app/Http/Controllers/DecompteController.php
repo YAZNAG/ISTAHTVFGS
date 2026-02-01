@@ -8,6 +8,7 @@ use App\Models\Decompte;
 use App\Models\Reception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -27,6 +28,16 @@ class DecompteController extends Controller
             'date' => 'required|date',
             'is_final' => 'boolean'
         ]);
+
+        $aleadyExitsWithDate = $bonCommande->decomptes()->whereDate('date', $request->date)->exists();
+        if ($aleadyExitsWithDate) {
+            throw ValidationException::withMessages([
+                'date' => 'Un decompte existe deja pour cette date.'
+            ]);
+        }
+
+        dd('qsdqsd');
+        
 
         DB::transaction(function () use ($request, $bonCommande) {
             
