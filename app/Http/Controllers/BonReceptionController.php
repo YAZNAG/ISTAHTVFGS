@@ -149,7 +149,6 @@ class BonReceptionController extends Controller
     public function show(BonReception $bonReception)
     {
 
-        dsd($bonReception);
         try {
             $bonReception->load([
                 'bonCommande',

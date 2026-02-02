@@ -36,8 +36,6 @@ class DecompteController extends Controller
             ]);
         }
 
-        dd('qsdqsd');
-        
 
         DB::transaction(function () use ($request, $bonCommande) {
             
