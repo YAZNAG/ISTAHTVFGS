@@ -16,6 +16,8 @@ class BonCommandeArticle extends Model
     protected $fillable = [
         'bon_commande_id',
         'article_id',
+        'quantite_minimale',
+        'quantite_maximale',
         'quantite_commandee',
         'taux_tva',
         'prix_unitaire_ht',    // ← AJOUTER
@@ -25,6 +27,8 @@ class BonCommandeArticle extends Model
     ];
 
     protected $casts = [
+        'quantite_minimale' => 'decimal:2',
+        'quantite_maximale' => 'decimal:2',
         'quantite_commandee' => 'decimal:2',
         'taux_tva' => 'decimal:2',
         'prix_unitaire_ht' => 'decimal:2',  // ← AJOUTER

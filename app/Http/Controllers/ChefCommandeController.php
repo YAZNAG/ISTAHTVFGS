@@ -12,7 +12,6 @@ use App\Models\BonLivraison;
 use App\Models\Categorie;
 use App\Models\ChefCommande;
 use App\Models\ChefCommandeItem;
-use App\Models\MarcheCategory;
 use App\Models\User;
 use App\Notifications\ChefCommandeApproved;
 use App\Notifications\ChefCommandeRejected;
@@ -83,10 +82,43 @@ class ChefCommandeController extends Controller implements HasMiddleware
                     ->get(['id', 'name']);
 
         return Inertia::modal('ChefCommande/CreateCommandeModal', [
-            'articles' => Article::all(['id', 'designation', 'marche_category_id', 'unite_mesure']),
-            'categories' => MarcheCategory::active()->get(['id', 'nom']),
+            'articles' => Article::where('est_actif', true)->orderBy('designation')->get(['id', 'designation', 'categorie_id', 'unite_mesure']),
+            'categories' => $this->categoryOptions(),
             'users' => $users,
         ])->baseRoute('chef-commandes.index');
+    }
+
+    private function categoryOptions()
+    {
+        return Categorie::query()
+            ->where('est_actif', true)
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'code']);
+    }
+
+    private function chefCommandeFieldsForCategory(array $payload, Categorie $categorie): array
+    {
+        $payload['categorie_id'] = $categorie->id;
+        return $payload;
+    }
+
+    private function currentMarketForCategory(int $categorieId): BonCommande
+    {
+        $marche = BonCommande::current()
+            ->where('categorie_id', $categorieId)
+            ->whereNotNull('fournisseur_id')
+            ->whereIn('statut', [BonCommande::STATUT_ATTENTE_LIVRAISON, BonCommande::STATUT_LIVRE_PARTIELLEMENT])
+            ->with('articles')
+            ->latest()
+            ->first();
+
+        if (!$marche) {
+            throw ValidationException::withMessages([
+                'categorie_id' => 'Aucun marche actif attribue pour cette categorie.',
+            ]);
+        }
+
+        return $marche;
     }
 
 
@@ -94,8 +126,8 @@ class ChefCommandeController extends Controller implements HasMiddleware
     {
         $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
         
-        $marche = BonCommande::current()->where('categorie_id', $request->categorie_id)
-                              ->with('articles')->latest()->first();
+        $categorie = Categorie::findOrFail($request->categorie_id);
+        $marche = $this->currentMarketForCategory($categorie->id);
         
         $missingArticles = collect($request->articles)->pluck('article_id')->diff(
             $marche->articles->pluck('article_id')
@@ -110,13 +142,12 @@ class ChefCommandeController extends Controller implements HasMiddleware
         
         
         #FIX: it creates multiple chef commandes
-        $chefCommande = ChefCommande::create([
+        $chefCommande = ChefCommande::create($this->chefCommandeFieldsForCategory([
             'numero' => ChefCommande::genererNumero(),
-            'categorie_id' => $request->categorie_id,
             'note' => $request->note,
             'statut' => $request->type == 'submit' ? ChefCommande::STATUS_EN_ATTENTE_VALIDATION : ChefCommande::STATUS_CREE,
             'user_id' => $user_id,
-        ]);
+        ], $categorie));
 
 
 
@@ -152,7 +183,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
     public function edit(ChefCommande $chefCommande)
     {
-        $articles = Article::all(['id', 'designation', 'marche_category_id', 'unite_mesure']);
+        $articles = Article::where('est_actif', true)->orderBy('designation')->get(['id', 'designation', 'categorie_id', 'unite_mesure']);
         $users = User::permission('create_chefCommandes')
                     ->withoutRole('manager')
                     ->get(['id', 'name']);
@@ -160,7 +191,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
         return Inertia::modal('ChefCommande/EditCommandeModal', [
             'chefCommande' => EditChefCommandeResource::make($chefCommande),
             'articles' => $articles,
-            'categories' => MarcheCategory::active()->get(['id', 'nom']),
+            'categories' => $this->categoryOptions(),
             'users' => $users,
         ])
         ->baseRoute('chef-commandes.index');
@@ -174,8 +205,8 @@ class ChefCommandeController extends Controller implements HasMiddleware
                 ->with('error', 'Impossible de modifier ce bon de commande.');
         }
 
-        $marche = BonCommande::current()->where('categorie_id', $request->categorie_id)
-                              ->with('articles')->latest()->first();
+        $categorie = Categorie::findOrFail($request->categorie_id);
+        $marche = $this->currentMarketForCategory($categorie->id);
         
         $missingArticles = collect($request->articles)->pluck('article_id')->diff(
             $marche->articles->pluck('article_id')
@@ -190,11 +221,10 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
         $user_id = $request->user()->isAdmin() ? $request->user_id : $request->user()->id;
 
-        $chefCommande->update([
-            'categorie_id' => $request->categorie_id,
+        $chefCommande->update($this->chefCommandeFieldsForCategory([
             'note' => $request->note,
             'user_id' => $user_id,
-        ]);
+        ], $categorie));
 
         $chefCommande->items()->delete();
 
@@ -251,7 +281,8 @@ class ChefCommandeController extends Controller implements HasMiddleware
         // $this->authorize('approve', $demande);
         $marches = BonCommande::select(['id', 'reference'])
             ->current()
-            ->where('statut', BonCommande::STATUT_ATTENTE_LIVRAISON)
+            ->whereNotNull('fournisseur_id')
+            ->whereIn('statut', [BonCommande::STATUT_ATTENTE_LIVRAISON, BonCommande::STATUT_LIVRE_PARTIELLEMENT])
             ->where('categorie_id', $chefCommande->categorie_id)->get();
 
         return Inertia::modal('ChefCommande/ApproveModal', [
@@ -273,8 +304,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
             // 'marche_id' => 'required|integer|exists:bon_commandes,id',
         ]);
         
-        $marche = BonCommande::current()->where('categorie_id', $chefCommande->categorie_id)
-                              ->with('articles')->latest()->first();
+        $marche = $this->currentMarketForCategory($chefCommande->categorie_id);
         
         $missingArticles = $chefCommande->items()->pluck('article_id')->diff(
             $marche->articles->pluck('article_id')

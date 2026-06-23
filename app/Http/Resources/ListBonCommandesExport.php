@@ -16,9 +16,9 @@ class ListBonCommandesExport extends JsonResource
     {
         return [
             'reference' => $this->reference, 
-            'objet' => $this->objct, 
-            'categorie_principale' => $this->categoriePrincipale->nom,
-            'nature_prestation' => $this->naturePrestation->nom, 
+            'objet' => $this->objet, 
+            'categorie_principale' => $this->categorie?->nom,
+            'nature_prestation' => 'Approvisionnement alimentaire', 
             'fournisseur' => $this->fournisseur?->nom, 
             'statut' => $this->getStatusLabel($this->statut), 
             

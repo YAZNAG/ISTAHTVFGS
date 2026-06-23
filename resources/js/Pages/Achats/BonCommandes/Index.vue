@@ -1,568 +1,519 @@
-<!-- resources/js/Pages/Achats/Marches/Index.vue -->
-<template>
-    <AuthenticatedLayout>
-
-        <Head title="Gestion des Marchés" />
-
-        <div class="space-y-6">
-            <!-- En-tête -->
-            <div class="flex items-center justify-between pt-4 px-4">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Les Marchés</h1>
-                    <p class="text-gray-600">Gestion des marchés</p>
-                </div>
-                <div class="flex items-center gap-4">
-
-                    <ModalLink as="button" href="#export-modal"
-                        v-if="can('export_marches')"
-                        class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-400 flex items-center justify-center gap-2 ">
-                        <DocumentArrowDownIcon class="h-5 w-5" />
-                        Exporter
-                    </ModalLink>
-                    <CreateExportModal name="export-modal" />
-
-                    <ModalLink :href="route('bon-commandes.create')"
-                        v-if="can('create_marches')"
-                        class="bg-blue-600 text-white  px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                        <PlusIcon class="h-5 w-5" />
-                        Nouveau Marché
-                    </ModalLink>
-
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <section class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-lg shadow-sm border">
-                    <div class="text-gray-500">Marchés Créés</div>
-                    <div class="mt-2 flex items-center justify-between">
-                        <div class="text-3xl font-bold text-gray-800">{{ stats?.total || 0 }}</div>
-                        <DocumentTextIcon class="w-6 h-6 text-gray-600" />
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-lg shadow-sm border">
-                    <div class="text-gray-500">En Attente Livraison</div>
-                    <div class="mt-2 flex items-center justify-between">
-                        <div class="text-3xl font-bold text-yellow-700">{{ stats?.attente_livraison || 0 }}</div>
-                        <ClockIcon class="w-6 h-6 text-yellow-600" />
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-lg shadow-sm border">
-                    <div class="text-gray-500">Livrés</div>
-                    <div class="mt-2 flex items-center justify-between">
-                        <div class="text-3xl font-bold text-green-700">{{ stats?.livre_completement}}</div>
-                        <CheckCircleIcon class="w-6 h-6 text-green-600" />
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-lg shadow-sm border">
-                    <div class="text-gray-500">Montant Total</div>
-                    <div class="mt-2 flex items-center justify-between">
-                        <div class="text-3xl font-bold text-indigo-700">{{ formatCurrency(stats?.montant_total || 0) }}
-                        </div>
-                        <BanknotesIcon class="w-6 h-6 text-indigo-600" />
-                    </div>
-                </div>
-            </section>
-
-            <!-- Filtres -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                        <select v-model="filters.statut" class="w-full border border-gray-300 rounded-lg p-2">
-                            <option value="">Tous les statuts</option>
-                            <option value="cree">Créé</option>
-                            <option value="attente_livraison">En attente livraison</option>
-                            <option value="livre_completement">Livré complètement</option>
-                            <option value="livre_partiellement">Livré partiellement</option>
-                            <option value="annule">Annulé</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
-                        <select v-model="filters.categorie_id" class="w-full border border-gray-300 rounded-lg p-2">
-                            <option value="">Toutes les catégories</option>
-                            <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
-                                {{ categorie.nom }}
-                            </option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Date limite</label>
-                        <input v-model="filters.date_limite" type="date"
-                            class="w-full border border-gray-300 rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Référence</label>
-                        <input v-model="filters.reference" type="text" placeholder="Rechercher par référence"
-                            class="w-full border border-gray-300 rounded-lg p-2">
-                    </div>
-                </div>
-                <div class="flex justify-end mt-4">
-                    <button @click="resetFilters"
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 mr-2">
-                        Réinitialiser
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tableau des bons de commande -->
-            <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Objet</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date mise
-                                    ligne</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date limite
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fournisseur
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant TTC
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="marche in marches.data" :key="marche.id" class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ marche.reference }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">{{ marche.objet }}</div>
-                                    <div v-if="marche.description" class="text-sm text-gray-500 truncate max-w-xs">
-                                        {{ marche.description }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ marche.categorie?.nom || 'N/A' }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ formatDate(marche.date_mise_ligne) }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ formatDate(marche.date_limite_reception) }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ marche.fournisseur?.nom || 'Non attribué' }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium" >
-                                        {{ formatCurrency(marche.total_ttc) }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="getBonCommandeStatutInfo(marche.statut).color"
-                                        class="px-2 py-1 text-xs font-medium rounded-full">
-                                        {{ getBonCommandeStatutInfo(marche.statut).label }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex space-x-2">
-                                        <ModalLink :href="route('bon-commandes.modify', marche.id)"
-                                            class="text-green-600 hover:text-green-900 p-1" title="Modifier statut"
-                                            v-if="marche.statut === 'cree' && can('edit_marches')">
-                                            <PencilIcon class="h-4 w-4" />
-                                        </ModalLink>
-                                        <Link :href="route('bon-commandes.show', marche.id)"
-                                            v-if="can('show_marches')"
-                                            class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
-                                        <EyeIcon class="h-4 w-4" />
-                                        </Link>
-                                        <ModalLink :href="route('bon-commandes.edit', marche.id)"
-                                            class="text-green-600 hover:text-green-900 p-1" title="Modifier statut"
-                                            v-if="marche.statut === 'cree' && can('validate_marches')">
-                                            <ArrowPathIcon class="h-4 w-4" />
-                                        </ModalLink>
-                                        <!-- Bouton PDF - N'apparaît que pour les statuts différents de "cree" et "annule" -->
-                                        <a v-if="marche.statut !== 'cree' && marche.statut !== 'annule' && can('pdf_marches')"
-                                            :href="route('bon-commandes.pdf', marche.id)" target="_blank"
-                                            class="text-purple-600 hover:text-purple-900 p-1" title="Télécharger PDF">
-                                            <DocumentTextIcon class="h-4 w-4" />
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Message vide -->
-                <div v-if="marches.data.length === 0" class="text-center py-12">
-                    <div class="text-gray-500">
-                        <DocumentTextIcon class="mx-auto h-12 w-12" />
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun marché trouvé</h3>
-                        <p class="mt-1 text-sm text-gray-500">
-                            Commencez par créer votre premier marché.
-                        </p>
-                        <div class="mt-6">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pagination -->
-                <div v-if="marches.links && marches.links.length > 1"
-                    class="bg-white px-6 py-3 border-t border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <div class="text-sm text-gray-700">
-                            Affichage de {{ marches.from }} à {{ marches.to }} sur {{ marches.total }} résultats
-                        </div>
-                        <div class="flex space-x-2">
-                            <template v-for="link in marches.links" :key="link.label">
-                                <Link v-if="link.url" :href="link.url" :class="[
-                                    'px-3 py-1 rounded-lg text-sm font-medium',
-                                    link.active
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                ]" v-html="link.label" />
-                                <span v-else :class="[
-                                    'px-3 py-1 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed'
-                                ]" v-html="link.label" />
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </AuthenticatedLayout>
-</template>
-
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ref, watch, computed, onMounted } from 'vue';
-import {
-    PlusIcon,
-    EyeIcon,
-    DocumentTextIcon,
-    XMarkIcon,
-    ArrowPathIcon,
-    ExclamationTriangleIcon,
-    ClockIcon,
-    CheckCircleIcon,
-    BanknotesIcon,
-    DocumentArrowDownIcon,
-    PencilIcon
-}
-    from '@heroicons/vue/24/outline';
-import { ModalLink } from '@inertiaui/modal-vue';
+import { computed, ref, watch } from 'vue'
+import { Head, Link, router, useForm } from '@inertiajs/vue3'
+import { ModalLink } from '@inertiaui/modal-vue'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import Pagination from '@/Components/Pagination.vue'
+import UiBadge from '@/Components/UI/Badge.vue'
+import { usePermission } from '@/Utils/permission'
 
-import InputError from '@/Components/InputError.vue';
-import CreateExportModal from './CreateExportModal.vue';
-import { getBonCommandeStatutInfo } from '@/Utils/labels';
-import { usePermission } from '@/Utils/permission';
+const { can } = usePermission()
 
-const { can } = usePermission();
-
-// Props avec valeurs par défaut pour éviter les erreurs
 const props = defineProps({
-    marches: {
-        type: Object,
-        default: () => ({ data: [], links: [] })
-    },
-    articles: {
-        type: Array,
-        default: () => []
-    },
-    fournisseurs: {
-        type: Array,
-        default: () => []
-    },
-    tauxTVA: {
-        type: Array,
-        default: () => [0, 5, 7, 10, 14, 20]
-    },
-    filters: {
-        type: Object,
-        default: () => ({})
-    },
-    stats: {
-        type: Object,
-        default: () => ({})
-    },
-    categories: {
-        type: Array,
-    }
-});
+  marches: {
+    type: Object,
+    default: () => ({ data: [], links: [] }),
+  },
+  filters: {
+    type: Object,
+    default: () => ({}),
+  },
+  stats: {
+    type: Object,
+    default: () => ({}),
+  },
+  categories: {
+    type: Array,
+    default: () => [],
+  },
+  fournisseurs: {
+    type: Array,
+    default: () => [],
+  },
+})
 
-// États pour les modales
-const showMarcheForm = ref(false);
-const showUpdateStatutForm = ref(false);
-const showNewFournisseurForm = ref(false);
-const selectedMarche = ref(null);
-const confirmationAnnulation = ref(false);
-
-// Filtres
 const filters = ref({
-    statut: props.filters?.statut || '',
-    categorie_id: props.filters?.categorie_id || '',
-    date_limite: props.filters?.date_limite || '',
-    reference: props.filters?.reference || '',
-});
+  search: props.filters?.search || props.filters?.reference || props.filters?.objet || '',
+  statut: props.filters?.statut || '',
+  categorie_id: props.filters?.categorie_id || '',
+  fournisseur_id: props.filters?.fournisseur_id || '',
+  date: props.filters?.date || '',
+})
 
-// Formulaires
-const marcheForm = useForm({
-    reference: '',
-    objet: '',
-    description: '',
-    categorie_id: '',
-    date_debut: new Date().toISOString().split('T')[0],
-    date_fin: null,
-    date_mise_ligne: new Date().toISOString().split('T')[0],
-    date_limite_reception: '',
-    pieces_jointes: [],
-    notes: '',
-    articles: [],
-});
+const pendingDelete = ref(null)
+const pendingCancel = ref(null)
+const isDeleting = ref(false)
+const isCancelling = ref(false)
+const showMobileFilters = ref(false)
 
-const statutForm = useForm({
-    statut: 'attente_livraison',
-    fournisseur_id: '',
-    articles: [],
-    raison: '',
-});
+const cancelForm = useForm({
+  raison: '',
+})
 
-const newFournisseurForm = useForm({
-    nom: '',
-    code: '',
-    contact: '',
-    telephone: '',
-    email: '',
-    adresse: '',
-    ville: '',
-    pays: 'Maroc',
-    ice: '',
-    if: '',
-    rc: '',
-    patente: '',
-    logo: null,
-    logoPreview: null,
-});
+const statusMap = {
+  cree: { label: 'Cree', tone: 'info', bar: 'bg-istaht-blue' },
+  attente_livraison: { label: 'Attente livraison', tone: 'warning', bar: 'bg-istaht-amber' },
+  livre_partiellement: { label: 'Livre partiellement', tone: 'warning', bar: 'bg-orange-500' },
+  livre_completement: { label: 'Livre completement', tone: 'success', bar: 'bg-istaht-green' },
+  annule: { label: 'Annule', tone: 'danger', bar: 'bg-istaht-red' },
+}
 
-// Computed properties
-const showFournisseurAndPrixSection = computed(() => {
-    return ['attente_livraison', 'livre_completement', 'livre_partiellement'].includes(statutForm.statut);
-});
+const activeFilterCount = computed(() => Object.values(filters.value).filter(Boolean).length)
 
-// Dans la computed property isStatutFormValid
-const isStatutFormValid = computed(() => {
-    if (statutForm.statut === 'annule') {
-        return !!statutForm.raison && statutForm.raison.length >= 20 && confirmationAnnulation.value;
-    } else {
-        // Seulement vérifier le fournisseur, pas les prix
-        const hasFournisseur = !!statutForm.fournisseur_id;
-        return hasFournisseur;
-    }
-});
+const exportParams = computed(() => Object.fromEntries(
+  Object.entries(filters.value).filter(([, value]) => value !== '' && value !== null && value !== undefined)
+))
 
-// Dans le template, supprimez la section des prix pour l'annulation
-// Gardez seulement la confirmation d'annulation
+const kpis = computed(() => [
+  { label: 'Total marches', value: formatNumber(props.stats.total), tone: 'text-istaht-navy' },
+  { label: 'Actifs', value: formatNumber(props.stats.actifs), tone: 'text-istaht-green' },
+  { label: 'Attente livraison', value: formatNumber(props.stats.attente_livraison), tone: 'text-istaht-amber' },
+  { label: 'Expires', value: formatNumber(props.stats.expires), tone: 'text-istaht-red' },
+  { label: 'Clotures', value: formatNumber(props.stats.clotures), tone: 'text-istaht-green' },
+  { label: 'Montant engage', value: formatCurrency(props.stats.montant_engage), tone: 'text-istaht-navy' },
+  { label: 'Consomme', value: formatCurrency(props.stats.montant_consomme), tone: 'text-istaht-blue' },
+  { label: 'Restant', value: formatCurrency(props.stats.montant_restant), tone: 'text-istaht-amber' },
+])
 
-const isNewFournisseurValid = computed(() => {
-    return newFournisseurForm.nom && newFournisseurForm.code;
-});
+const deleteMessage = computed(() => {
+  if (!pendingDelete.value) return ''
 
-const getSubmitButtonText = computed(() => {
-    if (statutForm.statut === 'annule') {
-        return 'Confirmer l\'annulation';
-    } else {
-        return 'Mettre à jour le statut';
-    }
-});
+  if (pendingDelete.value.can_delete_physical) {
+    return `Le marche ${pendingDelete.value.reference} ne contient aucune donnee operationnelle. Confirmez-vous la suppression definitive ?`
+  }
 
-const totalHTStatut = computed(() => {
-    return statutForm.articles.reduce((total, article) => {
-        return total + (article.montant_ht || 0);
-    }, 0);
-});
+  return 'Ce marche contient des donnees operationnelles. Voulez-vous le desactiver ?'
+})
 
-const totalTVAStatut = computed(() => {
-    return statutForm.articles.reduce((total, article) => {
-        return total + (article.montant_tva || 0);
-    }, 0);
-});
+const confirmDeleteLabel = computed(() => pendingDelete.value?.can_delete_physical ? 'Supprimer definitivement' : 'Desactiver le marche')
 
-const totalTTCStatut = computed(() => {
-    return statutForm.articles.reduce((total, article) => {
-        return total + (article.montant_ttc || 0);
-    }, 0);
-});
-
-// Watch pour les filtres
-watch(filters, (value) => {
+let filterTimer = null
+watch(filters, value => {
+  clearTimeout(filterTimer)
+  filterTimer = setTimeout(() => {
     router.get(route('bon-commandes.index'), value, {
-        preserveState: true,
-        replace: true,
-    });
-}, { deep: true });
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    })
+  }, 280)
+}, { deep: true })
 
-// Méthodes utilitaires
-const getArticle = (articleId) => {
-    return props.articles.find(art => art.id == articleId);
-};
+function resetFilters() {
+  filters.value = {
+    search: '',
+    statut: '',
+    categorie_id: '',
+    fournisseur_id: '',
+    date: '',
+  }
+}
 
-const getTvaLabel = (taux) => {
-    const labels = {
-        0: 'Exonéré 0%',
-        5: '5%',
-        7: '7%',
-        10: '10%',
-        14: '14%',
-        20: '20%'
-    };
-    return labels[taux] || `${taux}%`;
-};
+function statusInfo(statut) {
+  return statusMap[statut] || { label: 'Inconnu', tone: 'neutral', bar: 'bg-slate-400' }
+}
 
-const showToast = (message, duration = 3000) => {
-    toast.value = { show: true, message };
-    setTimeout(() => {
-        toast.value.show = false;
-    }, duration);
-};
+function progressClass(percent) {
+  if (Number(percent || 0) >= 90) return 'bg-istaht-red'
+  if (Number(percent || 0) >= 80) return 'bg-istaht-amber'
+  return 'bg-istaht-green'
+}
 
-// Méthodes principales
-const openMarcheForm = () => {
-    showMarcheForm.value = true;
-    marcheForm.reset();
+function alertTone(type) {
+  if (type === 'danger') return 'danger'
+  if (type === 'warning') return 'warning'
+  return 'info'
+}
 
-    const today = new Date();
-    marcheForm.date_mise_ligne = today.toISOString().split('T')[0];
+function canCancelMarket(marche) {
+  return ['cree', 'attente_livraison'].includes(marche.statut)
+}
 
-    const dateLimite = new Date(today);
-    dateLimite.setDate(dateLimite.getDate() + 15);
-    marcheForm.date_limite_reception = dateLimite.toISOString().split('T')[0];
+function formatDate(date) {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('fr-FR')
+}
 
-    marcheForm.articles = [];
-};
+function formatNumber(amount, fraction = 0) {
+  return Number(amount || 0).toLocaleString('fr-FR', {
+    minimumFractionDigits: fraction,
+    maximumFractionDigits: fraction,
+  })
+}
 
-// États pour les fournisseurs
-const selectedFournisseur = ref(null);
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('fr-MA', {
+    style: 'currency',
+    currency: 'MAD',
+    minimumFractionDigits: 2,
+  }).format(Number(amount || 0))
+}
 
-// Méthodes pour les fournisseurs
-const onFournisseurChange = () => {
-    if (statutForm.fournisseur_id) {
-        selectedFournisseur.value = props.fournisseurs.find(f => f.id == statutForm.fournisseur_id);
-    } else {
-        selectedFournisseur.value = null;
-    }
-};
+function askDelete(marche) {
+  pendingDelete.value = marche
+}
 
-// Mettez à jour la méthode openUpdateStatutForm
-const openUpdateStatutForm = (marche) => {
-    selectedMarche.value = marche;
-    showUpdateStatutForm.value = true;
-    showMarcheForm.value = false;
-    confirmationAnnulation.value = false;
-    selectedFournisseur.value = null;
+function closeDelete() {
+  if (isDeleting.value) return
+  pendingDelete.value = null
+}
 
-    // Initialiser le formulaire de statut
-    statutForm.reset();
-    statutForm.statut = 'attente_livraison';
-    statutForm.fournisseur_id = marche.fournisseur_id || '';
-    statutForm.raison = '';
+function askCancel(marche) {
+  pendingCancel.value = marche
+  cancelForm.reset()
+  cancelForm.clearErrors()
+}
 
-    // Initialiser les articles
-    statutForm.articles = (marche.articles || []).map((articlePivot, index) => {
-        return {
-            id: articlePivot.id,
-            article_id: articlePivot.article_id,
-            reference: articlePivot.article?.reference || 'N/A',
-            designation: articlePivot.article?.designation || 'Article non trouvé',
-            unite_mesure: articlePivot.article?.unite_mesure || 'N/A',
-            quantite_commandee: articlePivot.quantite_commandee,
-            taux_tva: articlePivot.taux_tva,
-            prix_unitaire_ht: articlePivot.prix_unitaire_ht || 0,
-            montant_ht: articlePivot.montant_ht || 0,
-            montant_tva: articlePivot.montant_tva || 0,
-            montant_ttc: articlePivot.montant_ttc || 0,
-        };
-    });
+function closeCancel() {
+  if (isCancelling.value) return
+  pendingCancel.value = null
+  cancelForm.reset()
+  cancelForm.clearErrors()
+}
 
-    // Si un fournisseur est déjà attribué, charger ses informations
-    if (marche.fournisseur_id) {
-        selectedFournisseur.value = props.fournisseurs.find(f => f.id == marche.fournisseur_id);
-    }
+function confirmCancel() {
+  if (!pendingCancel.value) return
 
-    // Scroll vers le formulaire
-    setTimeout(() => {
-        document.querySelector('.edit-form-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-};
+  isCancelling.value = true
+  cancelForm.post(route('bon-commandes.annuler', pendingCancel.value.id), {
+    preserveScroll: true,
+    onSuccess: () => {
+      pendingCancel.value = null
+      cancelForm.reset()
+    },
+    onFinish: () => {
+      isCancelling.value = false
+    },
+  })
+}
 
-const closeAllForms = () => {
-    showMarcheForm.value = false;
-    showUpdateStatutForm.value = false;
-    showNewFournisseurForm.value = false;
-    selectedMarche.value = null;
-    confirmationAnnulation.value = false;
-    marcheForm.reset();
-    statutForm.reset();
-    newFournisseurForm.reset();
-};
+function confirmDelete() {
+  if (!pendingDelete.value) return
 
-const resetFilters = () => {
-    filters.value = {
-        statut: '',
-        categorie_id: '',
-        date_limite: '',
-        reference: '',
-    };
-};
-
-const formatDate = (date) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('fr-FR');
-};
-
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('fr-MA', {
-        style: 'currency',
-        currency: 'MAD',
-        minimumFractionDigits: 2
-    }).format(amount || 0);
-};
-
-
-
+  isDeleting.value = true
+  router.delete(route('bon-commandes.destroy', pendingDelete.value.id), {
+    preserveScroll: true,
+    onFinish: () => {
+      isDeleting.value = false
+      pendingDelete.value = null
+    },
+  })
+}
 </script>
 
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s ease;
-}
+<template>
+  <AuthenticatedLayout>
+    <Head title="Marches" />
 
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
+    <section class="space-y-5">
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <p class="text-xs font-bold uppercase text-istaht-cyan">Achats et approvisionnement</p>
+            <h2 class="mt-1 text-2xl font-bold text-istaht-navy">Marches</h2>
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+              Categorie, articles automatiques, fournisseur attributaire, livraisons, receptions et decomptes.
+            </p>
+          </div>
 
-.badge {
-    @apply px-2 py-1 text-xs font-medium rounded-full;
-}
-</style>
-<style scoped>
-.animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-}
+          <div class="flex flex-wrap gap-2">
+            <Link
+              v-if="can('export_marches')"
+              :href="route('bon-commandes.export.pdf', exportParams)"
+              class="ui-button ui-button-ghost"
+            >
+              Export PDF
+            </Link>
+            <Link
+              v-if="can('export_marches')"
+              :href="route('bon-commandes.export.excel', exportParams)"
+              class="ui-button ui-button-secondary"
+            >
+              Export Excel
+            </Link>
+            <ModalLink
+              v-if="can('create_marches')"
+              :href="route('bon-commandes.create')"
+              class="ui-button ui-button-primary"
+            >
+              Nouveau marche
+            </ModalLink>
+          </div>
+        </div>
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
+        <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div
+            v-for="item in kpis"
+            :key="item.label"
+            class="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
+          >
+            <p class="text-xs font-bold uppercase text-slate-400">{{ item.label }}</p>
+            <p class="mt-1 text-xl font-bold" :class="item.tone">{{ item.value }}</p>
+          </div>
+        </div>
+      </div>
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-</style>
+      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+        <div class="flex items-center justify-between gap-3 md:hidden">
+          <p class="text-sm font-bold text-istaht-navy">Recherche et filtres</p>
+          <button type="button" class="ui-button ui-button-ghost px-3 py-1.5 text-xs" @click="showMobileFilters = !showMobileFilters">
+            {{ showMobileFilters ? 'Masquer' : 'Afficher' }}
+          </button>
+        </div>
+
+        <div :class="['mt-3 grid grid-cols-1 gap-3 md:mt-0 md:grid-cols-[1.3fr_190px_190px_190px_160px_auto]', showMobileFilters ? 'grid' : 'hidden md:grid']">
+          <input
+            v-model="filters.search"
+            type="search"
+            class="ui-input"
+            placeholder="Reference ou objet..."
+          />
+
+          <select v-model="filters.categorie_id" class="ui-input">
+            <option value="">Toutes categories</option>
+            <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
+              {{ categorie.code || '-' }} - {{ categorie.nom }}
+            </option>
+          </select>
+
+          <select v-model="filters.fournisseur_id" class="ui-input">
+            <option value="">Tous fournisseurs</option>
+            <option v-for="fournisseur in fournisseurs" :key="fournisseur.id" :value="fournisseur.id">
+              {{ fournisseur.raison_sociale || fournisseur.nom }}
+            </option>
+          </select>
+
+          <select v-model="filters.statut" class="ui-input">
+            <option value="">Tous statuts</option>
+            <option value="cree">Cree</option>
+            <option value="attente_livraison">Attente livraison</option>
+            <option value="livre_partiellement">Livre partiellement</option>
+            <option value="livre_completement">Livre completement</option>
+            <option value="annule">Annule</option>
+          </select>
+
+          <input v-model="filters.date" type="date" class="ui-input" />
+
+          <button class="ui-button ui-button-ghost whitespace-nowrap" type="button" @click="resetFilters">
+            Reinitialiser
+          </button>
+        </div>
+
+        <div v-if="activeFilterCount" class="mt-3 text-sm font-semibold text-slate-500">
+          {{ activeFilterCount }} filtre(s) actif(s)
+        </div>
+      </div>
+
+      <div v-if="marches.data.length" class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <article
+          v-for="marche in marches.data"
+          :key="marche.id"
+          class="animate-fade-up overflow-hidden rounded-lg border border-slate-200 bg-white shadow-soft transition hover:-translate-y-0.5 hover:shadow-panel"
+        >
+          <div class="h-1.5" :class="statusInfo(marche.statut).bar" />
+
+          <div class="p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="font-mono text-sm font-bold text-istaht-blue">{{ marche.reference }}</p>
+                <h3 class="mt-1 line-clamp-2 text-lg font-bold text-istaht-navy">{{ marche.objet }}</h3>
+              </div>
+              <UiBadge :tone="statusInfo(marche.statut).tone">{{ statusInfo(marche.statut).label }}</UiBadge>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="ui-badge bg-cyan-50 text-istaht-blue ring-1 ring-cyan-100">
+                {{ marche.categorie?.nom || 'Sans categorie' }}
+              </span>
+              <span class="ui-badge bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+                {{ marche.nombre_articles || 0 }} article(s)
+              </span>
+            </div>
+
+            <div class="mt-4 rounded-lg bg-slate-50 p-3">
+              <p class="text-xs font-bold uppercase text-slate-400">Fournisseur attributaire</p>
+              <p class="mt-1 font-semibold text-slate-800">{{ marche.fournisseur?.nom_affichage || 'Non attribue' }}</p>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p class="text-xs font-bold uppercase text-slate-400">Date debut</p>
+                <p class="mt-1 font-semibold text-slate-800">{{ formatDate(marche.date_debut) }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold uppercase text-slate-400">Date fin</p>
+                <p class="mt-1 font-semibold text-slate-800">{{ formatDate(marche.date_fin) }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold uppercase text-slate-400">Montant HT</p>
+                <p class="mt-1 font-bold text-istaht-navy">{{ formatCurrency(marche.total_ht) }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold uppercase text-slate-400">Montant TTC</p>
+                <p class="mt-1 font-bold text-istaht-navy">{{ formatCurrency(marche.total_ttc) }}</p>
+              </div>
+            </div>
+
+            <div class="mt-5">
+              <div class="mb-2 flex items-center justify-between text-sm">
+                <span class="font-semibold text-slate-600">Consommation</span>
+                <span class="font-bold text-istaht-navy">{{ formatNumber(marche.consumption_percent, 1) }}%</span>
+              </div>
+              <div class="h-2.5 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  :class="progressClass(marche.consumption_percent)"
+                  :style="{ width: `${Math.min(Number(marche.consumption_percent || 0), 100)}%` }"
+                />
+              </div>
+              <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
+                <span>Consomme: {{ formatCurrency(marche.consumed_amount) }}</span>
+                <span>Reste: {{ formatCurrency(marche.remaining_amount) }}</span>
+              </div>
+            </div>
+
+            <div v-if="marche.alerts?.length" class="mt-4 flex flex-wrap gap-2">
+              <UiBadge v-for="alert in marche.alerts" :key="alert.message" :tone="alertTone(alert.type)">
+                {{ alert.message }}
+              </UiBadge>
+            </div>
+
+            <div class="mt-5 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
+              <Link
+                v-if="can('show_marches')"
+                :href="route('bon-commandes.show', marche.id)"
+                class="ui-button ui-button-secondary px-3 py-1.5 text-xs"
+              >
+                Voir
+              </Link>
+              <ModalLink
+                v-if="marche.statut === 'cree' && can('validate_marches')"
+                :href="route('bon-commandes.edit', marche.id)"
+                class="ui-button ui-button-primary px-3 py-1.5 text-xs"
+              >
+                Attribuer
+              </ModalLink>
+              <ModalLink
+                v-if="marche.statut === 'cree' && can('edit_marches')"
+                :href="route('bon-commandes.modify', marche.id)"
+                class="ui-button ui-button-ghost px-3 py-1.5 text-xs"
+              >
+                Modifier
+              </ModalLink>
+              <a
+                v-if="marche.statut !== 'cree' && marche.statut !== 'annule' && can('pdf_marches')"
+                :href="route('bon-commandes.pdf', marche.id)"
+                target="_blank"
+                class="ui-button ui-button-ghost px-3 py-1.5 text-xs"
+              >
+                PDF
+              </a>
+              <button
+                v-if="canCancelMarket(marche) && can('validate_marches')"
+                type="button"
+                class="ui-button bg-istaht-amber px-3 py-1.5 text-xs text-white hover:bg-orange-600"
+                @click="askCancel(marche)"
+              >
+                Annuler
+              </button>
+              <button
+                v-if="can('edit_marches')"
+                type="button"
+                class="ui-button ui-button-danger px-3 py-1.5 text-xs"
+                @click="askDelete(marche)"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center shadow-soft">
+        <h3 class="text-base font-bold text-istaht-navy">Aucun marche trouve</h3>
+        <p class="mt-1 text-sm text-slate-500">Ajustez les filtres ou creez un nouveau marche.</p>
+        <ModalLink
+          v-if="can('create_marches')"
+          :href="route('bon-commandes.create')"
+          class="ui-button ui-button-primary mt-5"
+        >
+          Nouveau marche
+        </ModalLink>
+      </div>
+
+      <div class="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-soft">
+        <Pagination
+          :links="marches.links || []"
+          :from="marches.from || 0"
+          :to="marches.to || 0"
+          :total="marches.total || 0"
+        />
+      </div>
+    </section>
+
+    <div
+      v-if="pendingDelete"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-istaht-navy/55 p-4 backdrop-blur-sm"
+    >
+      <div class="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-panel">
+        <h3 class="text-lg font-bold text-istaht-navy">Confirmer l'action</h3>
+        <p class="mt-3 text-sm leading-6 text-slate-600">{{ deleteMessage }}</p>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" class="ui-button ui-button-ghost" :disabled="isDeleting" @click="closeDelete">
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="ui-button"
+            :class="pendingDelete.can_delete_physical ? 'ui-button-danger' : 'bg-istaht-amber text-white hover:bg-orange-600'"
+            :disabled="isDeleting"
+            @click="confirmDelete"
+          >
+            {{ isDeleting ? 'Traitement...' : confirmDeleteLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="pendingCancel"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-istaht-navy/55 p-4 backdrop-blur-sm"
+    >
+      <div class="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-panel">
+        <h3 class="text-lg font-bold text-istaht-navy">Annuler le marche</h3>
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Indiquez le motif d'annulation du marche {{ pendingCancel.reference }}. Le motif sera conserve dans l'historique.
+        </p>
+
+        <div class="mt-4">
+          <label class="block text-sm font-bold text-slate-700">Motif annulation *</label>
+          <textarea
+            v-model="cancelForm.raison"
+            rows="4"
+            class="ui-input mt-1 w-full"
+            placeholder="Minimum 20 caracteres..."
+          />
+          <p class="mt-1 text-xs text-slate-500">Minimum 20 caracteres.</p>
+          <p v-if="cancelForm.errors.raison" class="mt-1 text-sm font-semibold text-istaht-red">
+            {{ cancelForm.errors.raison }}
+          </p>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" class="ui-button ui-button-ghost" :disabled="isCancelling" @click="closeCancel">
+            Retour
+          </button>
+          <button
+            type="button"
+            class="ui-button ui-button-danger"
+            :disabled="isCancelling || cancelForm.raison.length < 20"
+            @click="confirmCancel"
+          >
+            {{ isCancelling ? 'Annulation...' : 'Confirmer annulation' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
+</template>

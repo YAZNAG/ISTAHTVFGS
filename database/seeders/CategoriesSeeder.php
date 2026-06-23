@@ -4,77 +4,31 @@ namespace Database\Seeders;
 
 use App\Models\Categorie;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class CategoriesSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     * Populates the categories table with initial data.
-     */
-    public function run()
+    public function run(): void
     {
         $categories = [
-            [
-                'nom' => 'légume',
-                'code' => 'LEG',
-                'description' => '',
-                'categorie_principale_id' => 1,
-                'nature_prestation_id' => 1,
-                'est_actif' => 1,
-            ],
-            [
-                'nom' => 'épiserie',
-                'code' => 'EP',
-                'description' => '',
-                'categorie_principale_id' => 1,
-                'nature_prestation_id' => 1,
-                'est_actif' => 1,
-            ],
-            [
-                'nom' => 'viandes',
-                'code' => 'VIA',
-                'description' => '',
-                'categorie_principale_id' => 1,
-                'nature_prestation_id' => 1,
-                'est_actif' => 1,
-            ],
-            [
-                'nom' => 'volailles',
-                'code' => 'VOL',
-                'description' => '',
-                'categorie_principale_id' => 1,
-                'nature_prestation_id' => 1,
-                'est_actif' => 1,
-            ],
-            [
-                'nom' => 'poissons',
-                'code' => 'POI',
-                'description' => '',
-                'categorie_principale_id' => 1,
-                'nature_prestation_id' => 1,
-                'est_actif' => 1,
-            ],
-            [
-                'nom' => 'fruits',
-                'code' => 'FRU',
-                'description' => null,
-                'categorie_principale_id' => 1,
-                'nature_prestation_id' => 1,
-                'est_actif' => 1,
-            ],
-            [
-                'nom' => 'pain',
-                'code' => 'PAI',
-                'description' => null,
-                'categorie_principale_id' => 1,
-                'nature_prestation_id' => 1,
-                'est_actif' => 1,
-            ]
+            ['code' => 'VIA', 'nom' => 'Viandes et Abats', 'couleur' => '#0f3b63'],
+            ['code' => 'VOL', 'nom' => 'Volailles, Lapin et Oeufs', 'couleur' => '#155e9f'],
+            ['code' => 'POI', 'nom' => 'Poissons et Fruits de Mer', 'couleur' => '#0ea5b7'],
+            ['code' => 'LEG', 'nom' => 'Fruits et Legumes', 'couleur' => '#15803d'],
+            ['code' => 'EP', 'nom' => 'Epicerie', 'couleur' => '#64748b'],
+            ['code' => 'PAI', 'nom' => 'Pain et Viennoiserie', 'couleur' => '#f59e0b'],
+            ['code' => 'ENT', 'nom' => 'Produits d entretien', 'couleur' => '#dc2626'],
+            ['code' => 'DIV', 'nom' => 'Fournitures diverses', 'couleur' => '#475569'],
         ];
 
         foreach ($categories as $category) {
-            Categorie::create($category);
+            Categorie::updateOrCreate(
+                ['code' => $category['code']],
+                [
+                    'nom' => $category['nom'],
+                    'couleur' => $category['couleur'],
+                    'est_actif' => true,
+                ]
+            );
         }
     }
 }

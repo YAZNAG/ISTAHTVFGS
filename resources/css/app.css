@@ -2,19 +2,282 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-.slide-enter-active, .slide-leave-active {
-    transition: transform 0.3s ease;
+:root {
+    --istaht-navy: #1B2D6B;
+    --istaht-blue: #00AEEF;
+    --istaht-cyan: #00AEEF;
+    --istaht-green: #4CAF50;
+    --istaht-amber: #F5A623;
+    --istaht-red: #E53935;
+    --surface: #ffffff;
+    --surface-muted: #F8FAFC;
+    --border-soft: #dbe7f0;
+    --text-main: #102a43;
 }
 
-.slide-enter-from, .slide-leave-to {
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    color: var(--text-main);
+    background: #F8FAFC;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background: rgba(14, 165, 183, 0.22);
+    color: var(--istaht-navy);
+}
+
+@layer components {
+    .app-shell {
+        @apply min-h-screen bg-istaht-mist text-slate-800;
+    }
+
+    .app-page {
+        @apply mx-auto w-full max-w-[1500px] animate-fade-up space-y-6;
+    }
+
+    .erp-hero {
+        @apply relative overflow-hidden rounded-lg border border-cyan-100 p-5 shadow-soft;
+        background: linear-gradient(135deg, #1B2D6B 0%, #18528f 62%, #00AEEF 145%);
+    }
+
+    .erp-hero::before {
+        content: '';
+        @apply pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-istaht-navy via-istaht-blue to-istaht-green;
+    }
+
+    .erp-section-title {
+        @apply text-lg font-bold text-istaht-navy;
+    }
+
+    .erp-section-subtitle {
+        @apply mt-1 text-sm leading-6 text-slate-500;
+    }
+
+    .ui-card,
+    .dashboard-card,
+    .erp-card {
+        @apply rounded-lg border border-slate-200/80 bg-white shadow-soft transition duration-200 ease-out;
+    }
+
+    main .bg-white.rounded-lg,
+    main .bg-white.rounded-xl,
+    main .bg-white.rounded-2xl {
+        @apply border border-slate-200/80 shadow-soft transition duration-200 ease-out;
+    }
+
+    .ui-card:hover,
+    .dashboard-card:hover,
+    .erp-card:hover {
+        @apply -translate-y-0.5 shadow-lift;
+    }
+
+    .ui-panel-header {
+        @apply border-b border-slate-200/80 bg-gradient-to-r from-slate-50 to-cyan-50/50 px-5 py-4;
+    }
+
+    .ui-title {
+        @apply text-2xl font-bold text-istaht-navy md:text-3xl;
+    }
+
+    .ui-subtitle {
+        @apply mt-1 text-sm text-slate-500;
+    }
+
+    .ui-button,
+    button[type='submit'],
+    a[role='button'] {
+        @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-sm font-semibold transition duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-istaht-cyan focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    .ui-button::after,
+    button[type='submit']::after,
+    a[role='button']::after {
+        content: '';
+        @apply pointer-events-none absolute inset-0 opacity-0 transition duration-200;
+        background: radial-gradient(circle at center, rgba(255,255,255,.38), transparent 42%);
+        transform: scale(.2);
+    }
+
+    .ui-button:active::after,
+    button[type='submit']:active::after,
+    a[role='button']:active::after {
+        @apply opacity-100;
+        transform: scale(1.8);
+    }
+
+    .ui-button-primary {
+        @apply bg-istaht-blue text-white shadow-sm hover:-translate-y-0.5 hover:bg-istaht-navy hover:shadow-soft active:translate-y-0;
+    }
+
+    .ui-button-secondary {
+        @apply border border-istaht-cyan/30 bg-cyan-50 text-istaht-blue hover:-translate-y-0.5 hover:border-istaht-cyan hover:bg-cyan-100;
+    }
+
+    .ui-button-success {
+        @apply bg-istaht-green text-white hover:-translate-y-0.5 hover:bg-green-700;
+    }
+
+    .ui-button-danger {
+        @apply bg-istaht-red text-white hover:-translate-y-0.5 hover:bg-red-700;
+    }
+
+    .ui-button-ghost {
+        @apply border border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-istaht-cyan/40 hover:bg-slate-50 hover:text-istaht-blue;
+    }
+
+    .ui-icon-button {
+        @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-slate-500 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-100 hover:bg-cyan-50 hover:text-istaht-blue focus:outline-none focus:ring-2 focus:ring-istaht-cyan focus:ring-offset-2;
+    }
+
+    .ui-input,
+    input[type='text'],
+    input[type='email'],
+    input[type='password'],
+    input[type='number'],
+    input[type='date'],
+    input[type='file'],
+    textarea,
+    select {
+        @apply rounded-lg border-slate-300 bg-white text-sm text-slate-800 shadow-sm transition duration-200 placeholder:text-slate-400 focus:border-istaht-cyan focus:ring-2 focus:ring-istaht-cyan/30;
+    }
+
+    .floating-field {
+        @apply relative;
+    }
+
+    .floating-field > input,
+    .floating-field > select,
+    .floating-field > textarea {
+        @apply peer w-full pt-5;
+    }
+
+    .floating-field > label {
+        @apply pointer-events-none absolute left-3 top-2 text-xs font-bold uppercase text-slate-400 transition-all peer-focus:text-istaht-blue;
+    }
+
+    label {
+        @apply text-sm font-semibold text-slate-700;
+    }
+
+    .ui-table-wrap {
+        @apply overflow-hidden rounded-lg border border-slate-200 bg-white shadow-soft;
+    }
+
+    .erp-table-toolbar {
+        @apply flex flex-col gap-3 border-b border-slate-200 bg-white p-4 lg:flex-row lg:items-center lg:justify-between;
+    }
+
+    table {
+        @apply w-full border-collapse text-sm;
+    }
+
+    thead {
+        @apply bg-istaht-navy text-white;
+    }
+
+    thead th {
+        @apply px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-white;
+    }
+
+    tbody tr {
+        @apply border-b border-slate-100 transition duration-150;
+    }
+
+    tbody tr:hover {
+        @apply bg-cyan-50/60;
+    }
+
+    tbody td {
+        @apply px-5 py-4 align-middle text-slate-700;
+    }
+
+    .ui-badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset;
+    }
+
+    tbody span.rounded-full {
+        @apply inline-flex items-center px-2.5 py-1 text-xs font-bold ring-1 ring-inset;
+    }
+
+    .bg-green-100.text-green-700,
+    .bg-green-100.text-green-800 {
+        @apply ring-green-200;
+    }
+
+    .bg-yellow-100.text-yellow-700,
+    .bg-yellow-100.text-yellow-800,
+    .bg-orange-100.text-orange-800 {
+        @apply ring-amber-200;
+    }
+
+    .bg-red-100.text-red-700,
+    .bg-red-100.text-red-800,
+    .bg-rose-100.text-rose-600 {
+        @apply ring-red-200;
+    }
+
+    .ui-empty-state {
+        @apply flex flex-col items-center justify-center px-6 py-14 text-center text-slate-500;
+    }
+
+    .skeleton {
+        @apply rounded-md bg-slate-200;
+        background-image: linear-gradient(90deg, #e2e8f0 0, #f8fafc 45%, #e2e8f0 90%);
+        background-size: 700px 100%;
+        animation: shimmer 1.8s linear infinite;
+    }
+
+    .status-border-success {
+        @apply border-l-4 border-l-istaht-green;
+    }
+
+    .status-border-warning {
+        @apply border-l-4 border-l-istaht-amber;
+    }
+
+    .status-border-danger {
+        @apply border-l-4 border-l-istaht-red;
+    }
+
+    .status-border-info {
+        @apply border-l-4 border-l-istaht-blue;
+    }
+}
+
+.slide-enter-active,
+.slide-leave-active {
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+    opacity: 0;
     transform: translateX(-100%);
 }
 
-.dashboard-card {
-    transition: all 0.3s ease;
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.dashboard-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+.page-enter-from,
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(6px);
+}
+
+.modal-enter-active,
+.modal-leave-active {
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+    opacity: 0;
+    transform: scale(.98);
 }

@@ -3,67 +3,67 @@
 namespace App\Exports;
 
 use App\Models\Fournisseur;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class FournisseursExport implements FromCollection, WithHeadings, WithStyles, WithMapping
+class FournisseursExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
-    /**
-     * Export all fournisseurs data
-     */
-    public function collection()
+    public function __construct(private array $filters = [])
     {
-        return Fournisseur::all([
-            'id',
-            'nom',
-            'contact',
-            'telephone',
-            'email',
-            'adresse',
-            'ville',
-            'ice',
-            'notes',
-            'created_at',
-        ]);
     }
 
-    /**
-     * Define the header row
-     */
+    public function collection()
+    {
+        return $this->query()
+            ->withCount(['bonCommandes as marches_count'])
+            ->get();
+    }
+
     public function headings(): array
     {
         return [
-            'ID',
-            'NOM',
-            'CONTACT',
-            'TÉLÉPHONE',
-            'E-MAIL',
-            'ADRESSE',
-            'VILLE',
+            'Nom',
+            'Raison sociale',
+            'Contact',
+            'Telephone',
+            'Email',
+            'Ville',
             'ICE',
-            'NOTES',
-            'AJOUTÉ À',
+            'Statut',
+            'Nombre de marches',
         ];
     }
 
-    /**
-     * Apply styles to the spreadsheet
-     */
+    public function map($fournisseur): array
+    {
+        return [
+            $fournisseur->nom,
+            $fournisseur->raison_sociale,
+            $fournisseur->contact,
+            $fournisseur->telephone,
+            $fournisseur->email,
+            $fournisseur->ville,
+            $fournisseur->ice,
+            $fournisseur->est_actif ? 'Actif' : 'Inactif',
+            (int) $fournisseur->marches_count,
+        ];
+    }
+
     public function styles(Worksheet $sheet)
     {
-        // Style for the header row
-        $sheet->getStyle('A1:J1')->applyFromArray([
+        $sheet->getStyle('A1:I1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
-                'size' => 12,
             ],
             'fill' => [
                 'fillType' => 'solid',
-                'color' => ['rgb' => '4F81BD'], // Blue background
+                'color' => ['rgb' => '1B2D6B'],
             ],
             'alignment' => [
                 'horizontal' => 'center',
@@ -71,36 +71,39 @@ class FournisseursExport implements FromCollection, WithHeadings, WithStyles, Wi
             ],
         ]);
 
-        // Auto-size all columns
-        foreach (range('A', 'J') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $lastRow = $sheet->getHighestRow();
-        $sheet->getStyle("A2:J{$lastRow}")
-              ->getAlignment()
-              ->setHorizontal('left');
-
         return [];
     }
 
-
-    /**
-     * Format each row before exporting
-     */
-    public function map($fournisseur): array
+    private function query(): Builder
     {
-        return [
-            $fournisseur->id,
-            $fournisseur->nom,
-            $fournisseur->contact,
-            $fournisseur->telephone,
-            $fournisseur->email,
-            $fournisseur->adresse,
-            $fournisseur->ville,
-            $fournisseur->ice,
-            $fournisseur->notes,
-            optional($fournisseur->created_at)->format('d/m/Y H:i'), // <-- formatted date
-        ];
+        $search = $this->filters['search'] ?? null;
+
+        return Fournisseur::query()
+            ->select([
+                'id',
+                'nom',
+                'raison_sociale',
+                'contact',
+                'telephone',
+                'email',
+                'ville',
+                'ice',
+                'est_actif',
+            ])
+            ->when($search, function (Builder $query) use ($search) {
+                $query->where(function (Builder $query) use ($search) {
+                    $query->where('nom', 'like', "%{$search}%")
+                        ->orWhere('raison_sociale', 'like', "%{$search}%")
+                        ->orWhere('contact', 'like', "%{$search}%")
+                        ->orWhere('telephone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('ville', 'like', "%{$search}%")
+                        ->orWhere('ice', 'like', "%{$search}%");
+                });
+            })
+            ->when(($this->filters['statut'] ?? null) === 'actifs', fn (Builder $query) => $query->where('est_actif', true))
+            ->when(($this->filters['statut'] ?? null) === 'inactifs', fn (Builder $query) => $query->where('est_actif', false))
+            ->orderBy('raison_sociale')
+            ->orderBy('nom');
     }
 }

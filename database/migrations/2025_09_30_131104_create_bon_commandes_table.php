@@ -12,15 +12,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bon_commandes', function (Blueprint $table) {
+        $driver = DB::connection()->getDriverName();
+
+        Schema::create('bon_commandes', function (Blueprint $table) use ($driver) {
             $table->id();
             $table->string('reference')->unique();
             $table->string('objet');
             $table->text('description')->nullable();
             $table->date('date_debut');
             $table->date('date_fin');
-            $table->date('date_mise_ligne')->default(DB::raw('CURDATE()'));
-            $table->date('date_limite_reception')->default(DB::raw('DATE_ADD(CURDATE(), INTERVAL 15 DAY)'));
+
+            $dateMiseLigne = $table->date('date_mise_ligne');
+            $dateLimiteReception = $table->date('date_limite_reception');
+
+            if ($driver !== 'sqlite') {
+                $dateMiseLigne->default(DB::raw('CURDATE()'));
+                $dateLimiteReception->default(DB::raw('DATE_ADD(CURDATE(), INTERVAL 15 DAY)'));
+            }
+
             $table->string('statut')->nullable();
             $table->longText('pieces_jointes')->nullable();
             $table->text('notes')->nullable();

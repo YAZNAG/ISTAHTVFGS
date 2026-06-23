@@ -1,176 +1,187 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { DocumentArrowDownIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-import { Link, router, Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue'
+import { Head, router } from '@inertiajs/vue3'
+import {
+  ArrowPathIcon,
+  ArchiveBoxIcon,
+  BellAlertIcon,
+  DocumentArrowDownIcon,
+  ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/vue/24/outline'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import KpiCard from '@/Components/KpiCard.vue'
+import Pagination from '@/Components/Pagination.vue'
+import UiBadge from '@/Components/UI/Badge.vue'
+import UiCard from '@/Components/UI/Card.vue'
 
 const props = defineProps({
-  articles: Array,
-  categories: Array,
-  filters: Object,
-});
+  articles: {
+    type: Object,
+    default: () => ({ data: [], links: [] }),
+  },
+  categories: {
+    type: Array,
+    default: () => [],
+  },
+  filters: {
+    type: Object,
+    default: () => ({}),
+  },
+  stats: {
+    type: Object,
+    default: () => ({}),
+  },
+})
 
-
-// Filters
 const filters = ref({
   search: props.filters.search || '',
   categorie: props.filters.categorie || '',
 })
 
+const activeFilterCount = computed(() => Object.values(filters.value).filter(Boolean).length)
+
+let filterTimer = null
+watch(filters, value => {
+  clearTimeout(filterTimer)
+  filterTimer = setTimeout(() => {
+    router.get(route('articles-stocks.index'), value, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    })
+  }, 280)
+}, { deep: true })
+
 function resetFilters() {
   filters.value = { search: '', categorie: '' }
-  router.get(route('articles-stocks.index'))
 }
 
-function applyFilters() {
-  router.get(route('articles-stocks.index'), filters.value)
+function stockInfo(article) {
+  const quantity = Number(article.quantite_stock || 0)
+  const threshold = Number(article.seuil_minimal || 0)
+
+  if (quantity <= 0) return { label: 'Rupture', tone: 'danger', border: 'status-border-danger' }
+  if (threshold > 0 && quantity <= threshold) return { label: 'Sous seuil', tone: 'warning', border: 'status-border-warning' }
+  return { label: 'Normal', tone: 'success', border: 'status-border-success' }
 }
 </script>
 
 <template>
   <AuthenticatedLayout>
-
     <Head title="Gestion du Stock" />
 
-    <div class="space-y-6">
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <div class="flex-1">
-            <h1 class="text-3xl font-bold mb-2">Gestion du Stock</h1>
-            <p class="text-blue-100 text-lg opacity-90">Consultez et gérez les niveaux de stock</p>
+    <section class="space-y-6">
+      <div class="erp-hero">
+        <div class="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p class="text-sm font-bold uppercase tracking-wide text-cyan-100">Stock articles</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-normal text-white md:text-4xl">Niveaux de stock</h2>
+            <p class="mt-3 max-w-3xl text-sm leading-6 text-cyan-50/90">
+              Consultation rapide des stocks, seuils critiques, categories et export PDF pour suivi administratif.
+            </p>
           </div>
-          
-           <a
-              :href="route('articles-stocks.export')"
-              target="_blank"
-              class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 transition-all duration-200 font-semibold border border-blue-400"
+
+          <a
+            :href="route('articles-stocks.export')"
+            target="_blank"
+            class="ui-button ui-button-secondary px-5 py-2.5 text-sm"
           >
-              <DocumentArrowDownIcon class="h-5 w-5" />
-              Exporter
-        </a>
+            <DocumentArrowDownIcon class="h-5 w-5" />
+            Export PDF
+          </a>
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtrer les articles</h3>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard title="Articles suivis" :value="stats.total || articles.total || 0" icon="ArchiveBoxIcon" color="blue" caption="Catalogue stock" />
+        <KpiCard title="Quantite totale" :value="stats.stockTotal || 0" icon="CubeIcon" color="cyan" caption="Toutes unites confondues" />
+        <KpiCard title="Sous seuil" :value="stats.lowStock || 0" icon="ExclamationTriangleIcon" color="orange" caption="A reapprovisionner" />
+        <KpiCard title="Rupture" :value="stats.rupture || 0" icon="BellAlertIcon" color="red" caption="Critique" />
+      </div>
 
-        <div class="flex flex-col lg:flex-row gap-4">
-            <div class="w-full">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
-              <div class="relative">
-                <input v-model="filters.search" type="text" placeholder="Référence ou désignation..."
-                  class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-blue-500 focus:border-blue-500" />
-                <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              </div>
+      <UiCard>
+        <div class="erp-table-toolbar">
+          <div class="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2">
+            <div class="relative">
+              <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+              <input
+                v-model="filters.search"
+                type="search"
+                placeholder="Reference ou designation..."
+                class="ui-input w-full pl-10"
+              />
             </div>
 
-            <div class="w-full">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Categorie</label>
-              <select v-model="filters.categorie" class="w-full border border-gray-300 rounded-lg p-2">
-                <option value="">Toutes les catégories</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
-              </select>
-            </div>
+            <select v-model="filters.categorie" class="ui-input">
+              <option value="">Toutes les categories</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
+            </select>
+          </div>
 
-          <div class="flex gap-3 ms-auto items-end">
-            <button @click="resetFilters"
-              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">
-              Réinitialiser
-            </button>
-
-            <button @click="applyFilters"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2">
-              <MagnifyingGlassIcon class="w-4 h-4" />
-              Appliquer
+          <div class="flex flex-wrap items-center gap-2">
+            <UiBadge v-if="activeFilterCount" tone="info">{{ activeFilterCount }} filtre(s)</UiBadge>
+            <button class="ui-button ui-button-ghost px-4 py-2 text-sm" type="button" @click="resetFilters">
+              <ArrowPathIcon class="h-4 w-4" />
+              Reinitialiser
             </button>
           </div>
         </div>
-      </div>
+      </UiCard>
 
-      <!-- Table -->
-      <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+      <UiCard :padded="false" class="overflow-hidden">
+        <div class="ui-panel-header flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 class="erp-section-title">Etat du stock</h3>
+            <p class="erp-section-subtitle">Lecture directe des articles normaux, faibles ou en rupture.</p>
+          </div>
+          <UiBadge tone="info">{{ articles.total || 0 }} article(s)</UiBadge>
+        </div>
+
+        <div v-if="articles.data.length" class="overflow-x-auto">
+          <table>
+            <thead>
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Réf. Article</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categorie</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                <th>Reference</th>
+                <th>Categorie</th>
+                <th>Designation</th>
+                <th>Unite</th>
+                <th>Stock</th>
+                <th>Etat</th>
               </tr>
             </thead>
 
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="article in articles.data" :key="article.id" class="hover:bg-gray-50">
-                <!-- Article Reference -->
-                <td class="px-6 py-4 text-sm font-mono text-gray-900">
-                  {{ article.reference || 'N/A' }}
-                </td>
-
-                <!-- Article Categorie -->
-                <td class="px-6 py-4 text-sm text-gray-900">
-                  <div class="max-w-xs truncate" :title="article.designation_article">
-                    {{ article.categorie?.nom || 'N/A' }}
-                  </div>
-                </td>
-
-                <!-- Article Designation -->
-                <td class="px-6 py-4 text-sm text-gray-900">
-                  <div class="max-w-xs truncate" :title="article.designation_article">
-                    {{ article.designation || 'N/A' }}
-                  </div>
-                </td>
-
-                <!-- Unit -->
-                <td class="px-6 py-4 text-sm text-gray-600">
-                  {{ article.unite_mesure || '-' }}
-                </td>
-
-                <!-- Quantite in Stock -->
-                <td class="px-6 py-4 text-sm text-gray-900 font-medium">
-                  {{ article.quantite_stock }}
-                </td>
+            <tbody>
+              <tr
+                v-for="article in articles.data"
+                :key="article.id"
+                class="animate-fade-up"
+                :class="stockInfo(article).border"
+              >
+                <td class="font-mono font-bold text-istaht-navy">{{ article.reference || 'N/A' }}</td>
+                <td><UiBadge tone="info">{{ article.categorie?.nom || 'N/A' }}</UiBadge></td>
+                <td class="font-semibold text-slate-800">{{ article.designation || 'N/A' }}</td>
+                <td class="font-semibold text-slate-600">{{ article.unite_mesure || '-' }}</td>
+                <td class="text-lg font-bold text-istaht-navy">{{ article.quantite_stock || 0 }}</td>
+                <td><UiBadge :tone="stockInfo(article).tone">{{ stockInfo(article).label }}</UiBadge></td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- Empty State -->
-        <div v-if="articles.data.length === 0" class="text-center py-12">
-          <div class="text-gray-500">
-            <InboxIcon class="mx-auto h-12 w-12" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun article trouvé</h3>
-            <p class="mt-1 text-sm text-gray-500">Aucun résultat ne correspond à vos filtres. Essayez d’élargir votre recherche ou de réinitialiser les filtres.</p>
-
-          </div>
+        <div v-else class="ui-empty-state py-14">
+          <ArchiveBoxIcon class="mb-3 h-12 w-12 text-slate-300" />
+          <h3 class="text-sm font-bold text-istaht-navy">Aucun article trouve</h3>
+          <p class="mt-1 text-sm text-slate-500">Aucun resultat ne correspond aux filtres.</p>
         </div>
 
-        <!-- Pagination -->
-        <div v-if="articles.links && articles.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
-          <div class="flex justify-between items-center">
-            <div class="text-sm text-gray-700">
-              Affichage de {{ articles.from }} à {{ articles.to }} sur {{ articles.total }} résultats
-            </div>
-            <div class="flex space-x-2">
-              <template v-for="link in articles.links" :key="link.label">
-                <Link v-if="link.url" :href="link.url" :class="[
-                  'px-3 py-1 rounded-lg text-sm font-medium',
-                  link.active
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                ]" v-html="link.label" />
-                <span v-else :class="[
-                  'px-3 py-1 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed'
-                ]" v-html="link.label" />
-              </template>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
+        <Pagination
+          :links="articles.links || []"
+          :from="articles.from || 0"
+          :to="articles.to || 0"
+          :total="articles.total || 0"
+        />
+      </UiCard>
+    </section>
   </AuthenticatedLayout>
 </template>

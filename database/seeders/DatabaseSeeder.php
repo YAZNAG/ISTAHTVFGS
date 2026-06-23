@@ -31,17 +31,8 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            CategoriePrincipalesSeeder::class,
-            NaturePrestationsSeeder::class,
             CategoriesSeeder::class,
-            MarcheCategoriesSeeder::class,
-            ArticleEpicerieSeeder::class,
-            ArticleLegumeSeeder::class,
-            ArticleViandeSeeder::class,
-            ArticlePoissonSeeder::class,
-            ArticlePainSeeder::class,
-            ArticleFruitSeeder::class,
-            ArticleVolailleSeeder::class,
+            ArticleCatalogueSeeder::class,
             // FournisseursSeeder::class,
             ApplicationRolesSeeder::class,
             ArticlePermissionSeeder::class,

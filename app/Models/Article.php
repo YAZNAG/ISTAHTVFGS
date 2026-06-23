@@ -17,10 +17,10 @@ class Article extends Model
         'designation', 
         'description', 
         'categorie_id',
-        'marche_category_id',
-        'categorie_principale_id', 
-        'nature_prestation_id', 
+        'couleur_affichage',
+        'quantite_stock',
         'unite_mesure',
+        'taux_tva',
         'seuil_minimal', 
         'seuil_maximal', 
         'est_actif',
@@ -29,9 +29,10 @@ class Article extends Model
 
     protected $casts = [
         'est_actif' => 'boolean',
+        'quantite_stock' => 'decimal:2',
         'taux_tva' => 'decimal:2',
-        'seuil_minimal' => 'integer',
-        'seuil_maximal' => 'integer'
+        'seuil_minimal' => 'decimal:2',
+        'seuil_maximal' => 'decimal:2',
     ];
 
     protected static function booted()
@@ -47,21 +48,6 @@ class Article extends Model
     public function categorie(): BelongsTo
     {
         return $this->belongsTo(Categorie::class);
-    }
-
-    public function categoriePrincipale(): BelongsTo
-    {
-        return $this->belongsTo(CategoriePrincipale::class);
-    }
-
-    public function marcheCategory(): BelongsTo
-    {
-        return $this->belongsTo(MarcheCategory::class);
-    }
-
-    public function naturePrestation(): BelongsTo
-    {
-        return $this->belongsTo(NaturePrestation::class, 'nature_prestation_id');
     }
 
     public function lignesEntreeStock()
@@ -127,6 +113,16 @@ class Article extends Model
     public function lignesReception(): HasMany
 {
     return $this->hasMany(LigneReception::class);
+}
+
+    public function lignesSortieStock(): HasMany
+{
+    return $this->hasMany(LigneSortieStock::class);
+}
+
+    public function bonReceptionArticles(): HasMany
+{
+    return $this->hasMany(BonReceptionArticle::class);
 }
 
     public function getPriceAttribute()

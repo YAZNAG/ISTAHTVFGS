@@ -1,79 +1,81 @@
 <script setup>
-import { ref } from 'vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Modal } from '@inertiaui/modal-vue';
-import { useForm } from '@inertiajs/vue3';
-import Dump from '@/Components/Dump.vue';
-import InputError from '@/Components/InputError.vue';
+import { ref } from 'vue'
+import { Modal } from '@inertiaui/modal-vue'
+import { useForm } from '@inertiajs/vue3'
+import InputError from '@/Components/InputError.vue'
 
 const props = defineProps({
-  categorie: Object
-});
+  categorie: {
+    type: Object,
+    required: true,
+  },
+})
 
 const form = useForm({
-  nom:         props.categorie.nom,
-  code:        props.categorie.code,
-  description: props.categorie.description,
-  est_actif:   Boolean(props.categorie.est_actif),
-});
+  code: props.categorie.code,
+  nom: props.categorie.nom,
+  couleur: props.categorie.couleur || '#155e9f',
+  est_actif: Boolean(props.categorie.est_actif),
+})
 
-const editCategorieModal = ref(null);
+const editCategorieModal = ref(null)
 
 const submit = () => {
   form.put(route('categories.update', props.categorie.id), {
     preserveState: true,
     preserveScroll: true,
     onSuccess: () => editCategorieModal.value.close(),
-  });
-};
+  })
+}
 </script>
 
 <template>
   <Modal ref="editCategorieModal">
-    <!-- Header -->
-    <div class="mb-2">
-      <h2 class="text-lg font-semibold text-gray-900">Modifier une catégorie</h2>
-      <p class="text-sm text-gray-500 mt-1">
-        Mettez à jour les informations de la catégorie.
-      </p>
+    <div>
+      <h2 class="text-lg font-bold text-istaht-navy">Modifier une categorie</h2>
+      <p class="mt-1 text-sm text-slate-500">Le formulaire reste limite au code, nom, couleur et statut.</p>
     </div>
 
-    <form class="mt-8 space-y-4" @submit.prevent="submit">
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Nom *</label>
-        <input v-model="form.nom" type="text" required
-          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-        <InputError :message="form.errors.nom" />
+    <form class="mt-6 space-y-4" @submit.prevent="submit">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="ui-label">Code categorie *</label>
+          <input v-model="form.code" type="text" required maxlength="50" class="ui-input mt-1.5" />
+          <InputError :message="form.errors.code" />
+        </div>
+
+        <div>
+          <label class="ui-label">Nom categorie *</label>
+          <input v-model="form.nom" type="text" required maxlength="100" class="ui-input mt-1.5" />
+          <InputError :message="form.errors.nom" />
+        </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Code *</label>
-        <input v-model="form.code" type="text" required
-          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-        <InputError :message="form.errors.code" />
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="ui-label">Couleur *</label>
+          <input
+            v-model="form.couleur"
+            type="color"
+            required
+            class="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white p-1"
+          />
+          <InputError :message="form.errors.couleur" />
+        </div>
+
+        <label class="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+          <input v-model="form.est_actif" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-istaht-blue focus:ring-istaht-cyan" />
+          <span>
+            <span class="block text-sm font-bold text-istaht-navy">Categorie active</span>
+            <span class="block text-xs text-slate-500">Desactiver si elle ne doit plus etre utilisee</span>
+          </span>
+        </label>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Description</label>
-        <textarea v-model="form.description" rows="3"
-          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
-      </div>
-
-      <div class="flex items-center">
-        <input v-model="form.est_actif" type="checkbox" id="categorie_est_actif_edit"
-          class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-        <label for="categorie_est_actif_edit" class="ml-2 block text-sm text-gray-700">Catégorie active</label>
-      </div>
-
-      <!-- Footer -->
-      <div class="flex justify-end space-x-3 pt-2">
-        <button type="button" @click="editCategorieModal.close()"
-          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-          Annuler
-        </button>
-        <button type="submit" :disabled="form.processing"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-          Enregistrer
+      <div class="flex justify-end gap-3 border-t border-slate-100 pt-4">
+        <button type="button" class="ui-button ui-button-ghost" @click="editCategorieModal.close()">Annuler</button>
+        <button type="submit" class="ui-button ui-button-primary" :disabled="form.processing">
+          {{ form.processing ? 'Enregistrement...' : 'Enregistrer' }}
         </button>
       </div>
     </form>

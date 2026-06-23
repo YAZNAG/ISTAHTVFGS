@@ -29,7 +29,7 @@ class ArticlePermissionSeeder extends Seeder
             ['name' => 'list_categories',      'display_name' => 'Voir la liste des catégories'],
             ['name' => 'create_categories',   'display_name' => 'Créer des catégories'],
             ['name' => 'edit_categories',     'display_name' => 'Modifier des catégories'],
-            // ['name' => 'delete_categories',   'display_name' => 'Supprimer des catégories'],
+            ['name' => 'delete_categories',   'display_name' => 'Supprimer des catégories'],
         ];
 
         // Create permissions

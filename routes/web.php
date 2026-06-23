@@ -71,16 +71,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::get('api/bon-receptions/stats', [BonReceptionController::class, 'stats'])
     //     ->name('bon-receptions.stats');
     // Routes pour les articles
+    Route::get('/articles/export/pdf', [ArticleController::class, 'exportPdf'])->name('articles.export.pdf');
+    Route::get('/articles/export/excel', [ArticleController::class, 'exportExcel'])->name('articles.export.excel');
     Route::resource('articles', ArticleController::class);
     Route::get('/categories', [CategorieController::class, 'index'])->name('categories.index');
+    Route::get('/categories/export/pdf', [CategorieController::class, 'exportPdf'])->name('categories.export.pdf');
+    Route::get('/categories/export/excel', [CategorieController::class, 'exportExcel'])->name('categories.export.excel');
     Route::post('/categories/store', [CategorieController::class, 'store'])->name('categories.store');
     Route::get('/categories/{categorie}/edit', [CategorieController::class, 'edit'])->name('categories.edit');
+    Route::get('/categories/{categorie}', [CategorieController::class, 'show'])->name('categories.show');
     Route::put('/categories/{categorie}', [CategorieController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{categorie}', [CategorieController::class, 'destroy'])->name('categories.destroy');
 
 
     // Module Achats
     Route::prefix('achats')->group(function () {
         // Bons de commande
+        Route::get('marches-export/pdf', [BonCommandeController::class, 'exportPdf'])->name('bon-commandes.export.pdf');
+        Route::get('marches-export/excel', [BonCommandeController::class, 'exportExcel'])->name('bon-commandes.export.excel');
         Route::resource('marches', BonCommandeController::class)
         ->parameters(['marches' => 'bonCommande'])
         ->names([
@@ -93,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'destroy' => 'bon-commandes.destroy',
         ]);
         Route::post('marches/{bonCommande}/statut', [BonCommandeController::class, 'updateStatut'])->name('bon-commandes.statut');
+        Route::post('marches/{bonCommande}/annuler', [BonCommandeController::class, 'annuler'])->name('bon-commandes.annuler');
         Route::get('marches/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
         Route::get('marches/{bonCommande}/modify', [BonCommandeController::class, 'modify'])->name('bon-commandes.modify');
         Route::put('marches/{bonCommande}/modify', [BonCommandeController::class, 'updateModify'])->name('bon-commandes.updateModify');
@@ -144,6 +153,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //     return response()->json($debugData);
 // });
         // Fournisseurs
+        Route::get('fournisseurs-export/pdf', [FournisseurController::class, 'exportPdf'])->name('fournisseurs.export.pdf');
+        Route::get('fournisseurs-export/excel', [FournisseurController::class, 'exportExcel'])->name('fournisseurs.export.excel');
         Route::get('fournisseurs', [FournisseurController::class, 'index'])->name('fournisseurs.index');
         Route::post('fournisseurs', [FournisseurController::class, 'store'])->name('fournisseurs.store');
         Route::get('fournisseurs/{fournisseur}', [FournisseurController::class, 'show'])->name('fournisseurs.show');

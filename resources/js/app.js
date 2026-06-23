@@ -8,7 +8,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { Modal, ModalLink, renderApp } from '@inertiaui/modal-vue'
 import VueApexCharts from 'vue3-apexcharts';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'ISTAHT';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -27,6 +27,6 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#00AEEF',
     },
 });

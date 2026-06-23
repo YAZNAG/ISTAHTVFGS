@@ -23,13 +23,17 @@ class ArticleStockController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        $query = Article::withNonExists()->with(['categorie:id,nom'])->select(['id', 'reference','designation', 'quantite_stock', 'unite_mesure', 'categorie_id']);
+        $query = Article::withNonExists()
+            ->with(['categorie:id,nom'])
+            ->select(['id', 'reference', 'designation', 'quantite_stock', 'seuil_minimal', 'unite_mesure', 'categorie_id']);
 
         $search = $request->search;
         if ($request->filled('search')) {
 
-            $query->where('reference', 'like', '%' . $search . '%')
-                ->orWhere('designation', 'like', '%' . $search . '%');
+            $query->where(function ($query) use ($search) {
+                $query->where('reference', 'like', '%' . $search . '%')
+                    ->orWhere('designation', 'like', '%' . $search . '%');
+            });
 
         }
 
@@ -44,13 +48,24 @@ class ArticleStockController extends Controller implements HasMiddleware
         return inertia('Stock/ArticlesStocks/Index', [
             'articles' => $articles,
             'categories' => $categories,
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'categorie']),
+            'stats' => [
+                'total' => Article::withNonExists()->count(),
+                'stockTotal' => Article::withNonExists()->sum('quantite_stock'),
+                'lowStock' => Article::withNonExists()
+                    ->where('quantite_stock', '>', 0)
+                    ->whereColumn('quantite_stock', '<=', 'seuil_minimal')
+                    ->count(),
+                'rupture' => Article::withNonExists()->where('quantite_stock', '<=', 0)->count(),
+            ],
         ]);
     }
 
     public function export(Request $request)
     {
-        $query = Article::withNonExists()->with(['categorie:id,nom'])->select(['id', 'reference','designation', 'quantite_stock', 'unite_mesure', 'categorie_id']);
+        $query = Article::withNonExists()
+            ->with(['categorie:id,nom'])
+            ->select(['id', 'reference', 'designation', 'quantite_stock', 'seuil_minimal', 'unite_mesure', 'categorie_id']);
 
         $now = now()->toDateTimeString();
         return Pdf::view('pdf.articles-stock', [

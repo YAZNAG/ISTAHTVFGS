@@ -3,9 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\BonCommande;
-use App\Models\CategoriePrincipale;
+use App\Models\Categorie;
 use App\Models\Fournisseur;
-use App\Models\NaturePrestation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -24,8 +23,7 @@ class BonCommandeFactory extends Factory
             'reference' => 'BC-' . $this->faker->unique()->numerify('####'),
             'objet' => $this->faker->sentence(3),
             'description' => $this->faker->optional()->paragraph(),
-            'categorie_principale_id' => CategoriePrincipale::first()->id,
-            'nature_prestation_id' => NaturePrestation::first()->id,
+            'categorie_id' => Categorie::query()->inRandomOrder()->value('id'),
             'fournisseur_id' => Fournisseur::inRandomOrder()->first()->id,
             'statut' => $this->faker->randomElement([
                 BonCommande::STATUT_CREE,

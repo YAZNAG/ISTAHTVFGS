@@ -13,16 +13,19 @@ class BonCommande extends Model
     use HasFactory;
     
     protected $fillable = [
-        'reference', 'objet', 'description', 'categorie_principale_id',
-        'nature_prestation_id', 'fournisseur_id', 'statut', 'categorie_id',
+        'reference', 'objet', 'description',
+        'fournisseur_id', 'statut', 'categorie_id',
         'date_mise_ligne', 'date_limite_reception',
         'notes', 'created_by', 'pieces_jointes', 'date_debut', 'date_fin',
         'reason_annulation', 'annule_at'
     ];
 
     protected $casts = [
+        'date_debut' => 'date',
+        'date_fin' => 'date',
         'date_mise_ligne' => 'date',
         'date_limite_reception' => 'date',
+        'annule_at' => 'datetime',
         'pieces_jointes' => 'array',
     ];
 
@@ -35,17 +38,7 @@ class BonCommande extends Model
 
     public function categorie(): BelongsTo
     {
-        return $this->belongsTo(MarcheCategory::class, 'categorie_id', 'id');
-    }
-
-    public function categoriePrincipale(): BelongsTo
-    {
-        return $this->belongsTo(CategoriePrincipale::class);
-    }
-
-    public function naturePrestation(): BelongsTo
-    {
-        return $this->belongsTo(NaturePrestation::class);
+        return $this->belongsTo(Categorie::class, 'categorie_id', 'id');
     }
 
     public function articles()
@@ -66,6 +59,11 @@ class BonCommande extends Model
     public function bonReceptions(): HasMany
     {
         return $this->hasMany(BonReception::class);
+    }
+
+    public function chefCommandes(): HasMany
+    {
+        return $this->hasMany(ChefCommande::class);
     }
 
     public function createdBy(): BelongsTo
@@ -205,5 +203,5 @@ class BonCommande extends Model
             });
     }
 
-    protected $with = ['articles'];
+    protected $with = [];
 }

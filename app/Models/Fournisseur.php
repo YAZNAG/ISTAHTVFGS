@@ -53,6 +53,28 @@ class Fournisseur extends Model implements HasMedia
         return $this->hasMany(BonCommande::class);
     }
 
+    public function bonLivraisons(): HasMany
+    {
+        return $this->hasMany(BonLivraison::class);
+    }
+
+    public function bonReceptions(): HasMany
+    {
+        return $this->hasMany(BonReception::class);
+    }
+
+    public function decomptes()
+    {
+        return $this->hasManyThrough(
+            Decompte::class,
+            BonCommande::class,
+            'fournisseur_id',
+            'marche_id',
+            'id',
+            'id'
+        );
+    }
+
     // Accessor pour l'URL du logo
     public function getLogoUrlAttribute()
     {

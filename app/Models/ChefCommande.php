@@ -61,4 +61,14 @@ class ChefCommande extends Model
         return $this->belongsTo(BonCommande::class);
     }
 
+    public function livraisons()
+    {
+        return $this->hasMany(BonLivraison::class, 'chef_commande_id', 'id');
+    }
+
+    public function categorie()
+    {
+        return $this->belongsTo(Categorie::class, 'categorie_id');
+    }
+
 }

@@ -1,150 +1,153 @@
+const statusColor = {
+  draft: 'bg-slate-100 text-slate-700',
+  info: 'bg-cyan-50 text-istaht-blue',
+  waiting: 'bg-amber-50 text-amber-800',
+  partial: 'bg-orange-50 text-orange-800',
+  success: 'bg-green-50 text-istaht-green',
+  danger: 'bg-red-50 text-istaht-red',
+  neutral: 'bg-slate-100 text-slate-700',
+}
+
 const getMarcheStatutInfo = (statut) => {
-    
   switch (statut) {
     case 'cree':
-      return { label: 'Créé', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'Créé', color: statusColor.info }
     case 'attente_livraison':
-      return { label: 'En attente livraison', color: 'bg-yellow-100 text-yellow-800' }
+      return { label: 'En attente de livraison', color: statusColor.waiting }
     case 'livre_partiellement':
-      return { label: 'Livré partiellement', color: 'bg-orange-100 text-orange-800' }
+      return { label: 'Livré partiellement', color: statusColor.partial }
     case 'livre_completement':
-      return { label: 'Livré complètement', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livré complètement', color: statusColor.success }
     case 'annule':
-      return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
+      return { label: 'Annulé', color: statusColor.danger }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
 const getDemandeStatutInfo = (statut) => {
-    
   switch (statut) {
     case 'cree':
-      return { label: 'Créé', color: 'bg-purple-100 text-purple-800' }
+      return { label: 'Créée', color: statusColor.info }
     case 'en_attente_validation':
-      return { label: 'En attente de validation', color: 'bg-yellow-100 text-yellow-800' }
+      return { label: 'En attente de validation', color: statusColor.waiting }
     case 'en_attente_livraison':
-      return { label: 'En attente de livraison', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'En attente de livraison', color: statusColor.info }
     case 'validee':
-      return { label: 'Validée', color: 'bg-green-100 text-green-800' }
+      return { label: 'Validée', color: statusColor.success }
     case 'livree':
-      return { label: 'Livrée', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livrée', color: statusColor.success }
     case 'annulee':
-      return { label: 'Annulée', color: 'bg-red-100 text-red-800' }
+      return { label: 'Annulée', color: statusColor.danger }
     case 'rejetee':
-      return { label: 'Rejetée', color: 'bg-rose-100 text-rose-600' }
+      return { label: 'Rejetée', color: statusColor.danger }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
 const getDemandeTypeInfo = (type) => {
   switch (type) {
     case 'collectivite':
-      return { label: 'Collectivité', color: 'bg-purple-100 text-purple-800' }
+      return { label: 'Collectivité', color: statusColor.info }
     case 'pedagogique':
-      return { label: 'Pédagogique', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'Pédagogique', color: statusColor.info }
     case 'restaurant':
-      return { label: 'Restaurant', color: 'bg-yellow-100 text-yellow-800' }
+      return { label: 'Restaurant', color: statusColor.waiting }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
-
 const getSortieStatutInfo = (statut) => {
-    
   switch (statut) {
-    // case 'cree':
-    //   return { label: 'Créé', color: 'bg-purple-100 text-purple-800' }
     case 'attente_validation':
-      return { label: 'En attente d\'approbation', color: 'bg-yellow-100 text-yellow-800' }
+      return { label: "En attente d'approbation", color: statusColor.waiting }
     case 'attente_livraison':
-      return { label: 'En attente de livraison', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'En attente de livraison', color: statusColor.info }
     case 'valide':
-      return { label: 'Validée', color: 'bg-green-100 text-green-800' }
+      return { label: 'Validée', color: statusColor.success }
     case 'livree':
-      return { label: 'Livrée', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livrée', color: statusColor.success }
     case 'annulee':
-      return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
+      return { label: 'Annulée', color: statusColor.danger }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
 const getSortieTypeInfo = (type) => {
   switch (type) {
     case 'vente':
-      return { label: 'Vente', color: 'bg-green-100 text-green-800' }
+      return { label: 'Vente', color: statusColor.success }
     case 'transfert':
-      return { label: 'Transfert', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'Transfert', color: statusColor.info }
     case 'perte':
-      return { label: 'Perte', color: 'bg-red-100 text-red-800' }
+      return { label: 'Perte', color: statusColor.danger }
     case 'ajustement':
-      return { label: 'Ajustement', color: 'bg-yellow-100 text-yellow-800' }
+      return { label: 'Ajustement', color: statusColor.waiting }
     case 'demande':
-      return { label: 'Demande', color: 'bg-purple-100 text-purple-800' }
+      return { label: 'Demande', color: statusColor.info }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
 const getBonCommandeStatutInfo = (statut) => {
   switch (statut) {
     case 'cree':
-      return { label: 'Créé', color: 'bg-purple-100 text-purple-800' }
+      return { label: 'Créé', color: statusColor.info }
     case 'attente_livraison':
-      return { label: 'En attente de livraison', color: 'bg-yellow-100 text-yellow-800' }
+      return { label: 'En attente de livraison', color: statusColor.waiting }
     case 'livre_completement':
-      return { label: 'Livré complètement', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livré complètement', color: statusColor.success }
     case 'livre_partiellement':
-      return { label: 'Livré partiellement', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'Livré partiellement', color: statusColor.partial }
     case 'annule':
-      return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
+      return { label: 'Annulé', color: statusColor.danger }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
-// en attente d’approbation, en attente de livraison, livré, annulé
 const getChefCommandeStatutInfo = (statut) => {
   switch (statut) {
     case 'cree':
-      return { label: 'Créé', color: 'bg-purple-100 text-purple-800' }
+      return { label: 'Créé', color: statusColor.info }
     case 'en_attente_validation':
-      return { label: 'en attente d’approbation', color: 'bg-yellow-100 text-yellow-800' }
+      return { label: "En attente d'approbation", color: statusColor.waiting }
     case 'en_attente_livraison':
-      return { label: 'En attente de livraison', color: 'bg-orange-100 text-orange-800' }
+      return { label: 'En attente de livraison', color: statusColor.partial }
     case 'livre_completement':
-      return { label: 'Livré complètement', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livré complètement', color: statusColor.success }
     case 'livre_partiellement':
-      return { label: 'Livré partiellement', color: 'bg-blue-100 text-blue-800' }
+      return { label: 'Livré partiellement', color: statusColor.info }
     case 'rejet':
-      return { label: 'Rejeté', color: 'bg-rose-100 text-rose-600' }
+      return { label: 'Rejeté', color: statusColor.danger }
     case 'annulee':
-      return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
+      return { label: 'Annulé', color: statusColor.danger }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
 const getBonLivraisonInfo = (type) => {
   switch (type) {
     case 'en_attente_livraison':
-      return { label: 'En attente de livraison', color: 'bg-orange-100 text-orange-800' }
+      return { label: 'En attente de livraison', color: statusColor.partial }
     case 'livree':
-      return { label: 'Livrée', color: 'bg-green-100 text-green-800' }
+      return { label: 'Livrée', color: statusColor.success }
     default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+      return { label: 'Inconnu', color: statusColor.neutral }
   }
 }
 
-export { 
-  getBonLivraisonInfo, 
-  getDemandeStatutInfo, 
-  getDemandeTypeInfo, 
-  getSortieStatutInfo, 
-  getSortieTypeInfo, 
-  getBonCommandeStatutInfo, 
-  getChefCommandeStatutInfo
+export {
+  getBonLivraisonInfo,
+  getDemandeStatutInfo,
+  getDemandeTypeInfo,
+  getSortieStatutInfo,
+  getSortieTypeInfo,
+  getBonCommandeStatutInfo,
+  getChefCommandeStatutInfo,
 }

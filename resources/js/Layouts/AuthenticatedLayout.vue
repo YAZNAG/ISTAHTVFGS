@@ -1,595 +1,434 @@
-<!-- resources/js/Components/Layout/DashboardLayout.vue -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { usePage, Link } from '@inertiajs/vue3'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 import { onClickOutside } from '@vueuse/core'
-
-// Import all Heroicons
 import {
-  // General
-  HomeIcon,
-  Squares2X2Icon,
-
-  // Purchasing & Markets
-  ShoppingCartIcon,
-  BuildingOfficeIcon,
-  DocumentTextIcon,
-  TruckIcon,
   ArchiveBoxArrowDownIcon,
-
-  // Stock
   ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
-
-  // Requests
-  InboxIcon,
-
-  // Technical Sheets
-  BookOpenIcon,
-  UsersIcon,
-
-  // Reports
-  ChartBarIcon,
-
-  // UI icons
-  Bars3Icon,
-  ChevronDownIcon,
-  BellIcon,
-  MagnifyingGlassIcon,
-  UserCircleIcon,
   ArrowRightOnRectangleIcon,
-  ChevronRightIcon,
-  CubeIcon,
-  ClipboardDocumentListIcon,
-  ShieldCheckIcon,
-  TagIcon,
+  ArrowUpTrayIcon,
   ArrowUturnLeftIcon,
-  ClipboardDocumentCheckIcon
+  Bars3Icon,
+  BookOpenIcon,
+  BuildingOfficeIcon,
+  ChartBarIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ClipboardDocumentCheckIcon,
+  ClipboardDocumentListIcon,
+  CubeIcon,
+  DocumentTextIcon,
+  HomeIcon,
+  MagnifyingGlassIcon,
+  ShieldCheckIcon,
+  ShoppingCartIcon,
+  Squares2X2Icon,
+  StarIcon,
+  TagIcon,
+  TruckIcon,
+  UserCircleIcon,
+  UsersIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import Notifications from '@/Components/Notifications.vue'
 import { usePermission } from '@/Utils/permission'
 
-const { can, canAny } = usePermission();
+const { can, canAny } = usePermission()
+const page = usePage()
 
-// State management
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const mobileViewport = ref(false)
 const userMenuOpen = ref(false)
-const notificationMenuOpen = ref(false)
+const menuSearch = ref('')
+const favoritePaths = ref([])
+const userMenuRef = ref(null)
+const hasLogo = ref(true)
 
-// Get current page and user info
-const page = usePage()
+const logoSrc = '/images/logo-istaht.png'
 const currentPath = computed(() => page.url)
 const user = computed(() => page.props.auth.user)
+const unreadNotifications = computed(() => Number(page.props.notifications_unread_count || 0))
 
-// Optimized menu structure with logical grouping
 const menuGroups = [
   {
-    label: 'Général',
+    label: 'General',
     items: [
-      {
-        name: 'Tableau de bord',
-        title: 'Tableau de bord',
-        href: '/dashboard',
-        match: '/dashboard',
-        icon: HomeIcon,
-        bgColor: 'bg-blue-100 text-blue-600'
-      },
-      {
-        name: 'Catégories',
-        title: 'Les Catégories',
-        href: '/categories',
-        match: '/categories',
-        icon: TagIcon,
-        bgColor: 'bg-amber-100 text-amber-600',
-        permission: 'list_categories',
-      },
-      {
-        name: 'Articles',
-        title: 'Les Articles',
-        href: '/articles',
-        match: '/articles',
-        icon: Squares2X2Icon,
-        bgColor: 'bg-green-100 text-green-600',
-        permission: 'list_articles',
-      },
-    ]
+      { name: 'Tableau de bord', title: 'Tableau de bord', href: '/dashboard', match: '/dashboard', icon: HomeIcon },
+      { name: 'Categories', title: 'Les categories', href: '/categories', match: '/categories', icon: TagIcon, permission: 'list_categories' },
+      { name: 'Articles', title: 'Les articles', href: '/articles', match: '/articles', icon: Squares2X2Icon, permission: 'list_articles' },
+    ],
   },
   {
-    label: 'Marchés & Achats',
+    label: 'Marches & achats',
     items: [
-      {
-        name: 'Marchés',
-        title: 'Les Marchés',
-        href: '/achats/marches',
-        match: '/achats/marches',
-        icon: ShoppingCartIcon,
-        bgColor: 'bg-purple-100 text-purple-600',
-        permission: 'list_marches',
-      },
-      {
-        name: 'Fournisseurs',
-        title: 'Les Fournisseurs',
-        href: '/achats/fournisseurs',
-        match: '/achats/fournisseurs',
-        icon: BuildingOfficeIcon,
-        bgColor: 'bg-orange-100 text-orange-600',
-        permission: 'list_fournisseurs',
-      },
-      {
-        name: 'Bons de Commandes',
-        title: 'Les Bons de Commandes',
-        href: '/chef-commandes',
-        match: '/chef-commandes',
-        icon: DocumentTextIcon,
-        bgColor: 'bg-teal-100 text-teal-600',
-        permission: 'list_chefCommandes',
-      },
-      {
-        name: 'Bons de Livraison',
-        title: 'Les Bons de Livraison',
-        href: '/bon-livraisons',
-        match: '/bon-livraisons',
-        icon: TruckIcon,
-        bgColor: 'bg-rose-100 text-rose-600',
-        permission: 'list_bonLivraisons',
-      },
-      {
-        name: 'Bons de Réception',
-        title: 'Les Bons de Réception',
-        href: '/bon-receptions',
-        match: '/bon-receptions',
-        icon: ArchiveBoxArrowDownIcon,
-        bgColor: 'bg-indigo-100 text-indigo-600',
-        permission: 'list_bonReceptions',
-      },
-
-    ]
+      { name: 'Marches', title: 'Les marches', href: '/achats/marches', match: '/achats/marches', icon: ShoppingCartIcon, permission: 'list_marches', badge: 'Suivi' },
+      { name: 'Fournisseurs', title: 'Les fournisseurs', href: '/achats/fournisseurs', match: '/achats/fournisseurs', icon: BuildingOfficeIcon, permission: 'list_fournisseurs' },
+      { name: 'Bons de commande', title: 'Les bons de commande', href: '/chef-commandes', match: '/chef-commandes', icon: DocumentTextIcon, permission: 'list_chefCommandes', badge: 'Validation' },
+      { name: 'Bons de livraison', title: 'Les bons de livraison', href: '/bon-livraisons', match: '/bon-livraisons', icon: TruckIcon, permission: 'list_bonLivraisons' },
+      { name: 'Bons de reception', title: 'Les bons de reception', href: '/bon-receptions', match: '/bon-receptions', icon: ArchiveBoxArrowDownIcon, permission: 'list_bonReceptions' },
+    ],
   },
   {
-    label: 'Gestion du Stock',
+    label: 'Stock',
     items: [
-      {
-        name: 'Entrées Stock',
-        title: 'Les Entrées Stock',
-        href: '/stock/entrees',
-        match: '/stock/entrees',
-        icon: ArrowDownTrayIcon,
-        bgColor: 'bg-emerald-100 text-emerald-600',
-        permission: 'entree_stocks',
-      },
-      {
-        name: 'Articles en stock',
-        title: 'Stock des Articles',
-        href: '/stock/articles',
-        match: '/stock/articles',
-        icon: CubeIcon,
-        bgColor: 'bg-rose-100 text-rose-600',
-        permission: 'articles_stocks',
-      },
-      {
-        name: 'Sorties Stock',
-        title: 'Les Sorties Stock',
-        href: '/stock/sorties',
-        match: '/stock/sorties',
-        icon: ArrowUpTrayIcon,
-        bgColor: 'bg-amber-100 text-amber-600',
-        permission: 'sortie_stocks',
-      },
-      {
-        name: 'Retours Stock',
-        title: 'Les Retours Stock',
-        href: '/stock/returns',
-        match: '/stock/returns',
-        icon: ArrowUturnLeftIcon,
-        bgColor: 'bg-orange-100 text-orange-600',
-        permission: 'returns_stocks',
-      },
-    ]
+      { name: 'Entrees stock', title: 'Les entrees stock', href: '/stock/entrees', match: '/stock/entrees', icon: ArrowDownTrayIcon, permission: 'entree_stocks' },
+      { name: 'Articles en stock', title: 'Stock des articles', href: '/stock/articles', match: '/stock/articles', icon: CubeIcon, permission: 'articles_stocks', badge: 'Seuils' },
+      { name: 'Sorties stock', title: 'Les sorties stock', href: '/stock/sorties', match: '/stock/sorties', icon: ArrowUpTrayIcon, permission: 'sortie_stocks' },
+      { name: 'Retours stock', title: 'Les retours stock', href: '/stock/returns', match: '/stock/returns', icon: ArrowUturnLeftIcon, permission: 'returns_stocks' },
+    ],
   },
   {
     label: 'Demandes',
     items: [
-      {
-        name: 'Demandes',
-        title: 'Les Demandes',
-        href: '/demandes',
-        match: '/demandes',
-        icon: InboxIcon,
-        bgColor: 'bg-gray-100 text-gray-600',
-        permission: 'list_demandes',
-      },
-      {
-        name: 'Bons de Sortie',
-        title: 'Les Bons de Sortie',
-        href: '/bon-sorties',
-        match: '/bon-sorties',
-        icon: ArrowUpTrayIcon,
-        bgColor: 'bg-amber-100 text-amber-600',
-        permission: 'list_bonSorties',
-      },
-    ]
+      { name: 'Demandes', title: 'Les demandes', href: '/demandes', match: '/demandes', icon: ClipboardDocumentListIcon, permission: 'list_demandes', badge: 'A traiter' },
+      { name: 'Bons de sortie', title: 'Les bons de sortie', href: '/bon-sorties', match: '/bon-sorties', icon: ArrowUpTrayIcon, permission: 'list_bonSorties' },
+    ],
   },
   {
-    label: 'Fiches Techniques',
+    label: 'Fiches techniques',
     items: [
-      {
-        name: 'Menu Collectivité',
-        title: 'Les Menus Collectivité',
-        href: '/menu-collectivite',
-        match: '/menu-collectivite',
-        icon: ClipboardDocumentListIcon,
-        bgColor: 'bg-orange-100 text-orange-600',
-        permission: 'list_menus',
-      },
-      {
-        name: 'Pédagogiques',
-        title: 'Les Fiches Pédagogiques',
-        href: '/fiches-techniques/pedagogique',
-        match: '/fiches-techniques/pedagogique',
-        icon: BookOpenIcon,
-        bgColor: 'bg-violet-100 text-violet-600',
-        permission: 'list_ficheTechniques',
-      },
-      {
-        name: 'Collectivité',
-        title: 'Les Fiches Collectivité',
-        href: '/fiches-techniques/collectivite',
-        match: '/fiches-techniques/collectivite',
-        icon: UsersIcon,
-        bgColor: 'bg-pink-100 text-pink-600',
-        permission: 'list_ficheTechniques',
-      },
-    ]
+      { name: 'Menu collectivite', title: 'Les menus collectivite', href: '/menu-collectivite', match: '/menu-collectivite', icon: ClipboardDocumentListIcon, permission: 'list_menus' },
+      { name: 'Pedagogiques', title: 'Les fiches pedagogiques', href: '/fiches-techniques/pedagogique', match: '/fiches-techniques/pedagogique', icon: BookOpenIcon, permission: 'list_ficheTechniques' },
+      { name: 'Collectivite', title: 'Les fiches collectivite', href: '/fiches-techniques/collectivite', match: '/fiches-techniques/collectivite', icon: UsersIcon, permission: 'list_ficheTechniques' },
+    ],
   },
   {
-    label: 'Utilisateurs & Rapports',
+    label: 'Pilotage',
     items: [
-      {
-        name: 'Inventaires',
-        title: 'Les Inventaires',
-        href: '/inventaires',
-        match: '/inventaires',
-        icon: ClipboardDocumentCheckIcon,
-        bgColor: 'bg-indigo-100 text-indigo-600',
-        permission: 'list_inventaire',
-      },
-      {
-        name: 'Rapports',
-        title: 'Les Rapports',
-        href: '/rapports',
-        match: '/rapports',
-        icon: ChartBarIcon,
-        bgColor: 'bg-slate-100 text-slate-600',
-        permission: 'list_raports',
-      },
-      {
-        name: 'Utilisateurs',
-        title: 'Les Utilisateurs',
-        href: '/users',
-        match: '/users',
-        icon: UsersIcon,
-        bgColor: 'bg-cyan-100 text-cyan-600',
-        permission: 'list_utilisateurs',
-      },
-      {
-        name: 'Rôles & Permissions',
-        title: 'Les Rôles et Permissions',
-        href: '/roles',
-        match: '/roles',
-        icon: ShieldCheckIcon,
-        bgColor: 'bg-purple-100 text-purple-600',
-        permission: 'list_roles',
-      },
-    ]
+      { name: 'Inventaires', title: 'Les inventaires', href: '/inventaires', match: '/inventaires', icon: ClipboardDocumentCheckIcon, permission: 'list_inventaire' },
+      { name: 'Rapports', title: 'Les rapports', href: '/rapports', match: '/rapports', icon: ChartBarIcon, permission: 'list_raports' },
+      { name: 'Utilisateurs', title: 'Les utilisateurs', href: '/users', match: '/users', icon: UsersIcon, permission: 'list_utilisateurs' },
+      { name: 'Roles & permissions', title: 'Les roles et permissions', href: '/roles', match: '/roles', icon: ShieldCheckIcon, permission: 'list_roles' },
+    ],
   },
 ]
 
-const hasLogo = ref(true)          // will flip to false on error
-const logoSrc = '/images/logo-istaht.png'   // <-- NEW PATH
-
 const showItem = (item) => {
-
   if (!item.permission) return true
-  if (typeof item.permission === 'string') return can(item.permission)
-  return canAny(item.permission)
+  return typeof item.permission === 'string' ? can(item.permission) : canAny(item.permission)
 }
 
-const showGroup = (group) => group.items.some(item => showItem(item));
+const allVisibleItems = computed(() => menuGroups.flatMap(group => group.items.filter(showItem)))
 
-// Rest of the script remains the same...
-const userMenuRef = ref(null)
-const notificationMenuRef = ref(null)
+const visibleGroups = computed(() => {
+  const needle = menuSearch.value.trim().toLowerCase()
+
+  return menuGroups
+    .map(group => ({
+      ...group,
+      items: group.items
+        .filter(showItem)
+        .filter(item => !needle || `${group.label} ${item.name} ${item.title}`.toLowerCase().includes(needle)),
+    }))
+    .filter(group => group.items.length > 0)
+})
+
+const favoriteItems = computed(() => allVisibleItems.value.filter(item => favoritePaths.value.includes(item.href)))
+
+const isFavorite = (href) => favoritePaths.value.includes(href)
+const isActive = (matchPath) => currentPath.value.startsWith(matchPath)
+
+const pageTitle = computed(() => {
+  const item = allVisibleItems.value.find(row => isActive(row.match))
+  if (item) return item.title
+  if (currentPath.value.includes('/profile')) return 'Profil'
+  return 'Tableau de bord'
+})
+
+const currentRole = computed(() => page.props.auth.role || 'utilisateur')
+
+const shortcutItems = computed(() => allVisibleItems.value.filter(item => [
+  '/achats/marches',
+  '/articles',
+  '/stock/articles',
+  '/bon-receptions',
+].includes(item.href)).slice(0, 4))
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
+function toggleCollapse() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+  localStorage.setItem('ispitsrk.sidebarCollapsed', sidebarCollapsed.value ? '1' : '0')
+}
+
+function toggleUserMenu() {
+  userMenuOpen.value = !userMenuOpen.value
+}
+
+function toggleFavorite(item) {
+  const exists = favoritePaths.value.includes(item.href)
+  favoritePaths.value = exists
+    ? favoritePaths.value.filter(path => path !== item.href)
+    : [...favoritePaths.value, item.href].slice(-6)
+}
+
+function handleResize() {
+  mobileViewport.value = window.innerWidth < 768
+  if (!mobileViewport.value) sidebarOpen.value = false
+}
+
+watch(favoritePaths, (paths) => {
+  localStorage.setItem('ispitsrk.favoritePaths', JSON.stringify(paths))
+}, { deep: true })
 
 onClickOutside(userMenuRef, () => {
   userMenuOpen.value = false
 })
 
-onClickOutside(notificationMenuRef, () => {
-  notificationMenuOpen.value = false
-})
-
-const isActive = (matchPath) => {
-  return currentPath.value.startsWith(matchPath)
-}
-
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value
-}
-
-const toggleSidebarCollapse = () => {
-  sidebarCollapsed.value = !sidebarCollapsed.value
-}
-
-const toggleUserMenu = () => {
-  userMenuOpen.value = !userMenuOpen.value
-  notificationMenuOpen.value = false
-}
-
-const handleResize = () => {
-  mobileViewport.value = window.innerWidth < 768
-  if (!mobileViewport.value) {
-    sidebarOpen.value = false
-  }
-}
-
-const pageTitle = computed(() => {
-  // Search through all menu groups
-  for (const group of menuGroups) {
-    for (const item of group.items) {
-      if (isActive(item.match)) {
-        return item.title
-      }
-    }
-  }
-
-  // Fallback for routes not in menu
-  const path = currentPath.value
-  if (path === '/') return 'Accueil'
-  if (path.includes('/profile')) return 'Profil'
-  if (path.includes('/settings')) return 'Paramètres'
-  if (path.includes('/notifications')) return 'Notifications'
-
-  // Default
-  return 'Tableau de bord'
-})
-
 onMounted(() => {
   handleResize()
+  sidebarCollapsed.value = localStorage.getItem('ispitsrk.sidebarCollapsed') === '1'
+  try {
+    favoritePaths.value = JSON.parse(localStorage.getItem('ispitsrk.favoritePaths') || '[]')
+  } catch {
+    favoritePaths.value = []
+  }
   window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
-
-onMounted(() => {
-  const handleKeydown = (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
-      e.preventDefault()
-      if (mobileViewport.value) {
-        toggleSidebar()
-      } else {
-        toggleSidebarCollapse()
-      }
-    }
-  }
-  window.addEventListener('keydown', handleKeydown)
-  onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
-})
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Mobile sidebar overlay -->
-    <div v-show="sidebarOpen && mobileViewport" @click="toggleSidebar"
-      class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 transition-opacity"></div>
+  <div class="app-shell">
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-150"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <button
+        v-if="sidebarOpen && mobileViewport"
+        class="fixed inset-0 z-30 bg-istaht-navy/55 backdrop-blur-sm md:hidden"
+        aria-label="Fermer le menu"
+        @click="toggleSidebar"
+      ></button>
+    </Transition>
 
-    <!-- Sidebar -->
-    <aside :class="[
-      'fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-20 transition-all duration-300',
-      {
-        'w-64': !sidebarCollapsed || mobileViewport,
-        'w-20': sidebarCollapsed && !mobileViewport,
-        'translate-x-0': sidebarOpen || !mobileViewport,
-        '-translate-x-full': !sidebarOpen && mobileViewport
-      }
-    ]">
-      <div class="flex flex-col h-full">
-        <!-- Sidebar Header -->
-        <div class="flex items-center justify-between px-4 py-5 border-b border-gray-200 relative">
-          <Link href="/" class="flex items-center space-x-2">
-          <div class="shrink-0 w-[50px] h-[50px] rounded-lg overflow-hidden bg-white/10">
-          <img
-            v-if="hasLogo"
-            :src="logoSrc"
-            class="w-full h-full object-contain"
-            @error="hasLogo = false"
-            alt="ISTAHT"
+    <aside
+      :class="[
+        'fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white/95 shadow-panel backdrop-blur transition-all duration-300',
+        sidebarCollapsed && !mobileViewport ? 'w-20' : 'w-80',
+        sidebarOpen || !mobileViewport ? 'translate-x-0' : '-translate-x-full',
+      ]"
+    >
+      <div class="flex h-20 items-center justify-between border-b border-slate-200 px-4">
+        <Link href="/dashboard" class="flex min-w-0 items-center gap-3">
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-cyan-100 bg-white shadow-sm">
+            <img
+              v-if="hasLogo"
+              :src="logoSrc"
+              class="h-10 w-10 object-contain"
+              alt="ISTAHT"
+              @error="hasLogo = false"
+            />
+            <CubeIcon v-else class="h-6 w-6 text-istaht-blue" />
+          </span>
+          <span v-show="!sidebarCollapsed || mobileViewport" class="min-w-0">
+            <span class="block text-base font-bold text-istaht-navy">ISTAHT Tanger</span>
+            <span class="block truncate text-xs font-medium text-slate-500">ERP achats, stock et inventaire</span>
+          </span>
+        </Link>
+
+        <button class="ui-icon-button md:hidden" aria-label="Fermer" @click="toggleSidebar">
+          <XMarkIcon class="h-5 w-5" />
+        </button>
+      </div>
+
+      <div v-show="!sidebarCollapsed || mobileViewport" class="border-b border-slate-100 px-4 py-4">
+        <div class="relative">
+          <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+          <input
+            v-model="menuSearch"
+            type="search"
+            class="ui-input w-full pl-10"
+            placeholder="Recherche menu..."
           />
-          <CubeIcon v-else class="w-6 h-6 m-1 text-blue-600" />
         </div>
 
-        <!-- Text (hidden when collapsed on desktop) -->
-        <span v-show="!sidebarCollapsed || mobileViewport" class="text-xl font-semibold text-gray-900">
-          ISTAHT
-        </span>
-          </Link>
+        <div v-if="favoriteItems.length" class="mt-4">
+          <p class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">Favoris</p>
+          <div class="flex flex-wrap gap-2">
+            <Link
+              v-for="item in favoriteItems"
+              :key="`fav-${item.href}`"
+              :href="item.href"
+              class="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-1.5 text-xs font-bold text-istaht-navy transition hover:border-istaht-blue hover:bg-white"
+            >
+              {{ item.name }}
+            </Link>
+          </div>
+        </div>
+      </div>
 
-          <!-- Toggle button (desktop) -->
-          <button v-if="!mobileViewport" @click="toggleSidebarCollapse"
-            class="bg-slate-100 p-2 rounded-lg hover:bg-slate-200 transition-colors absolute left-1/2 transform -translate-x-1/2 -bottom-[18px]">
-            <ChevronRightIcon :class="[
-              'w-5 h-5 text-slate-600 transition-transform',
-              { 'rotate-180': !sidebarCollapsed }
-            ]" />
-          </button>
+      <nav class="flex-1 overflow-y-auto px-3 py-5">
+        <div v-for="group in visibleGroups" :key="group.label" class="mb-5 animate-fade-up">
+          <p
+            v-show="!sidebarCollapsed || mobileViewport"
+            class="mb-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-400"
+          >
+            {{ group.label }}
+          </p>
+
+          <div class="space-y-1">
+            <div v-for="item in group.items" :key="item.href" class="group/item relative">
+              <Link
+                :href="item.href"
+                :title="sidebarCollapsed && !mobileViewport ? item.name : undefined"
+                class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition duration-200"
+                :class="isActive(item.match)
+                  ? 'bg-istaht-navy text-white shadow-soft'
+                  : 'text-slate-600 hover:bg-cyan-50 hover:text-istaht-navy'"
+              >
+                <span
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition"
+                  :class="isActive(item.match)
+                    ? 'bg-white/15 text-white'
+                    : 'bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-istaht-blue'"
+                >
+                  <component :is="item.icon" class="h-5 w-5" />
+                </span>
+                <span v-show="!sidebarCollapsed || mobileViewport" class="min-w-0 flex-1 truncate">{{ item.name }}</span>
+                <span
+                  v-if="item.badge && (!sidebarCollapsed || mobileViewport)"
+                  class="rounded-full bg-istaht-amber/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700"
+                >
+                  {{ item.badge }}
+                </span>
+              </Link>
+
+              <button
+                v-show="!sidebarCollapsed || mobileViewport"
+                type="button"
+                class="absolute right-2 top-2.5 rounded-md p-1 text-slate-300 opacity-0 transition hover:bg-white hover:text-istaht-amber group-hover/item:opacity-100"
+                :class="{ 'opacity-100 text-istaht-amber': isFavorite(item.href) }"
+                :aria-label="isFavorite(item.href) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                @click.prevent="toggleFavorite(item)"
+              >
+                <StarIcon class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Sidebar Menu -->
-        <nav class="flex-1 px-3 py-6 overflow-y-auto">
-          <template v-for="(group, groupIndex) in menuGroups" :key="groupIndex">
-            <div v-if="showGroup(group)" class="mb-6">
-              <!-- Group Label -->
-              <p v-if="group.label && (!sidebarCollapsed || mobileViewport)"
-                class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                {{ group.label }}
-              </p>
+        <div v-if="visibleGroups.length === 0" class="px-3 py-10 text-center text-sm text-slate-500">
+          Aucun module ne correspond a votre recherche.
+        </div>
+      </nav>
 
-
-
-              <!-- Group Items -->
-              <div class="space-y-1">
-                <div v-for="(item, itemIndex) in group.items" :key="item.href">
-                  <Link v-if="showItem(item)" :href="item.href"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors" :class="[
-                      isActive(item.match)
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-100',
-                      sidebarCollapsed && !mobileViewport ? 'justify-center' : ''
-                    ]">
-                  <!-- Icon -->
-                  <component :is="item.icon" :class="[
-                    'w-6 h-6 shrink-0 p-1 rounded',
-                    isActive(item.match) ? 'text-blue-600' : 'text-gray-500',
-                    item.bgColor ? item.bgColor : ''
-                  ]" />
-
-                  <!-- Text -->
-                  <span v-show="!sidebarCollapsed || mobileViewport" class="text-sm font-medium">
-                    {{ item.name }}
-                  </span>
-
-                  <!-- Badge -->
-                  <!-- <span 
-                    v-if="item.badge && (!sidebarCollapsed || mobileViewport)"
-                    class="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full"
-                  >
-                    New
-                  </span> -->
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </template>
-        </nav>
-
-        <!-- Sidebar Footer -->
-        <div class="border-t border-gray-200 p-4">
-          <div class="flex items-center space-x-3" :class="sidebarCollapsed && !mobileViewport ? 'justify-center' : ''">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <span class="text-sm font-medium text-gray-600">
-                {{ user?.name?.charAt(0) || 'U' }}
-              </span>
-            </div>
-            <div v-show="!sidebarCollapsed || mobileViewport" class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900 truncate">{{ user?.name || 'Guest' }}</p>
-              <p class="text-xs text-gray-500 truncate capitalize">{{ $page.props.auth.role || 'Unknown' }}</p>
-            </div>
+      <div class="border-t border-slate-200 p-4">
+        <div class="flex items-center gap-3" :class="sidebarCollapsed && !mobileViewport ? 'justify-center' : ''">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-istaht-navy text-sm font-bold text-white">
+            {{ user?.name?.charAt(0) || 'U' }}
+          </div>
+          <div v-show="!sidebarCollapsed || mobileViewport" class="min-w-0">
+            <p class="truncate text-sm font-bold text-istaht-navy">{{ user?.name || 'Utilisateur' }}</p>
+            <p class="truncate text-xs font-medium capitalize text-slate-500">{{ currentRole }}</p>
           </div>
         </div>
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <div :class="[
-      'flex flex-col min-h-screen transition-margin duration-300',
-      {
-        'md:ml-64': !sidebarCollapsed,
-        'md:ml-20': sidebarCollapsed
-      }
-    ]">
-      <!-- Header -->
-      <header class="sticky top-0 z-20 bg-white border-b border-gray-200">
-        <div class="flex items-center justify-between px-4 py-4">
-          <!-- Left: Mobile menu toggle -->
-          <div class="flex items-center space-x-4">
-            <button @click="toggleSidebar" class="p-2 rounded-lg hover:bg-gray-100 md:hidden">
-              <Bars3Icon class="w-5 h-5 text-gray-600" />
+    <div
+      :class="[
+        'min-h-screen transition-all duration-300',
+        sidebarCollapsed ? 'md:pl-20' : 'md:pl-80',
+      ]"
+    >
+      <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div class="flex min-h-16 items-center justify-between gap-3 px-4 md:px-6">
+          <div class="flex min-w-0 items-center gap-3">
+            <button class="ui-icon-button md:hidden" aria-label="Ouvrir le menu" @click="toggleSidebar">
+              <Bars3Icon class="h-5 w-5" />
             </button>
 
-            <!-- Page Title -->
-            <h1 class="text-xl font-semibold text-gray-900">
-              {{ pageTitle || 'Dashboard' }}
-            </h1>
+            <button class="ui-icon-button hidden md:inline-flex" aria-label="Reduire le menu" @click="toggleCollapse">
+              <ChevronLeftIcon class="h-5 w-5 transition" :class="{ 'rotate-180': sidebarCollapsed }" />
+            </button>
+
+            <div class="min-w-0">
+              <h1 class="truncate text-lg font-bold text-istaht-navy md:text-xl">{{ pageTitle }}</h1>
+              <p class="hidden text-xs font-medium text-slate-500 sm:block">
+                Plateforme ERP ISTAHT pour achats, marches, stock et demandes internes
+              </p>
+            </div>
           </div>
 
-          <!-- Right: User menu -->
-          <div class="flex items-center space-x-4">
+          <div class="hidden flex-1 justify-center lg:flex">
+            <div class="flex max-w-xl gap-2 overflow-hidden">
+              <Link
+                v-for="item in shortcutItems"
+                :key="`shortcut-${item.href}`"
+                :href="item.href"
+                class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:border-istaht-blue hover:bg-cyan-50 hover:text-istaht-navy"
+                :class="{ 'border-istaht-blue bg-cyan-50 text-istaht-navy': isActive(item.match) }"
+              >
+                {{ item.name }}
+              </Link>
+            </div>
+          </div>
 
-            <!-- Notifications -->
+          <div class="flex items-center gap-2">
+            <div class="hidden rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-1.5 text-xs font-bold text-istaht-navy sm:block">
+              {{ unreadNotifications }} notification(s)
+            </div>
             <Notifications />
 
-            <!-- User Menu -->
             <div class="relative" ref="userMenuRef">
-              <button @click="toggleUserMenu" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100">
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span class="text-sm font-medium text-white">
-                    {{ user?.name?.charAt(0) || 'U' }}
-                  </span>
-                </div>
-                <span class="hidden md:inline text-sm font-medium text-gray-900">{{ user?.name }}</span>
-                <ChevronDownIcon class="w-4 h-4 text-gray-600" />
+              <button
+                @click="toggleUserMenu"
+                class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-istaht-navy"
+              >
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-istaht-navy text-xs font-bold text-white">
+                  {{ user?.name?.charAt(0) || 'U' }}
+                </span>
+                <span class="hidden max-w-40 truncate md:inline">{{ user?.name }}</span>
+                <ChevronDownIcon class="h-4 w-4" />
               </button>
 
-              <!-- User Dropdown -->
-              <div v-show="userMenuOpen"
-                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-30">
-                <Link href="/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                <UserCircleIcon class="w-4 h-4 mr-2" />
-                Your Profile
-                </Link>
-                <div class="border-t border-gray-200 my-1"></div>
-                <Link href="/logout" method="post"
-                  class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
-                <ArrowRightOnRectangleIcon class="w-4 h-4 mr-2" />
-                Sign out
-                </Link>
-              </div>
+              <Transition
+                enter-active-class="transition ease-out duration-200"
+                enter-from-class="opacity-0 translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition ease-in duration-150"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-1"
+              >
+                <div
+                  v-show="userMenuOpen"
+                  class="absolute right-0 z-30 mt-3 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-panel"
+                >
+                  <Link href="/profile" class="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-cyan-50 hover:text-istaht-navy">
+                    <UserCircleIcon class="h-5 w-5" />
+                    Profil
+                  </Link>
+                  <Link href="/logout" method="post" class="flex items-center gap-2 border-t border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-red-50 hover:text-istaht-red">
+                    <ArrowRightOnRectangleIcon class="h-5 w-5" />
+                    Se deconnecter
+                  </Link>
+                </div>
+              </Transition>
             </div>
           </div>
         </div>
       </header>
 
-      <!-- Main Content Area -->
-      <main class="flex-1 p-4 md:p-6">
-        <!-- Flash Messages Component -->
+      <main class="px-4 py-5 md:px-6 md:py-6">
         <FlashMessages />
-
-        <!-- Page Content -->
-        <div class="bg-white rounded-lg shadow-sm p-4 md:p-6">
-          <slot />
-        </div>
+        <Transition name="page" mode="out-in">
+          <div :key="currentPath" class="app-page">
+            <slot />
+          </div>
+        </Transition>
       </main>
-
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'AuthenticatedLayout',
-}
-</script>
-
-<style scoped>
-/* Custom scrollbar for sidebar */
-aside::-webkit-scrollbar {
-  width: 6px;
-}
-
-aside::-webkit-scrollbar-track {
-  background: #f3f4f6;
-}
-
-aside::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-aside::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-</style>

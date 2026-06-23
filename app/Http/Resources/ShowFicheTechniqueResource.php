@@ -44,38 +44,5 @@ class ShowFicheTechniqueResource extends JsonResource
             'created_at' => $this->created_at?->format('Y-m-d H:i'),
         ];
 
-        /*
-         <?php
-[
-    [
-        'id' => 3,
-        'prix_unitaire' => '15.00',
-        'quantite' => '3.00',
-        'taux_tva' => '7.00',
-        'etape_id' => 5,
-        'article_id' => 8,
-        'created_at' => '2025-10-17T16:52:55.000000Z',
-        'updated_at' => '2025-10-17T16:52:55.000000Z',
-        'article' => [
-            'id' => 8,
-            'reference' => 'cardon-8',
-            'designation' => 'Cardon',
-            'description' => '',
-            'quantite_stock' => '200.00',
-            'categorie_id' => 1,
-            'categorie_principale_id' => 1,
-            'nature_prestation_id' => 1,
-            'unite_mesure' => 'kg',
-            'taux_tva' => '0.00',
-            'seuil_minimal' => 0,
-            'seuil_maximal' => 0,
-            'est_actif' => true,
-            'created_at' => '2025-09-29T10:18:03.000000Z',
-            'updated_at' => '2025-10-17T14:48:04.000000Z'
-        ]
-    ]
-];
-?>
-         */
     }
 }
