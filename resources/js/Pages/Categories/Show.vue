@@ -114,6 +114,7 @@ function statusClasses(statut) {
                 <th>Unite</th>
                 <th class="text-right">Stock actuel</th>
                 <th class="text-right">Seuil minimal</th>
+                <th class="text-right">Seuil maximal</th>
                 <th>Statut</th>
                 <th class="text-right">Actions</th>
               </tr>
@@ -125,6 +126,7 @@ function statusClasses(statut) {
                 <td>{{ article.unite_mesure }}</td>
                 <td class="text-right font-bold text-istaht-navy">{{ formatNumber(article.quantite_stock, 2) }}</td>
                 <td class="text-right">{{ formatNumber(article.seuil_minimal, 2) }}</td>
+                <td class="text-right">{{ formatNumber(article.seuil_maximal, 2) }}</td>
                 <td>
                   <span :class="['ui-badge ring-1', statusClasses(article.statut)]">
                     {{ article.statut.label }}

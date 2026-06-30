@@ -300,18 +300,10 @@ class ArticleController extends Controller implements HasMiddleware
 
     private function stockStatus(Article $article): array
     {
-        $stock = (float) ($article->quantite_stock ?? 0);
-        $seuil = (float) ($article->seuil_minimal ?? 0);
-
-        if ($stock <= 0) {
-            return ['label' => 'Rupture', 'type' => 'danger'];
-        }
-
-        if ($seuil > 0 && $stock <= $seuil) {
-            return ['label' => 'Stock faible', 'type' => 'warning'];
-        }
-
-        return ['label' => 'Stock normal', 'type' => 'success'];
+        return Article::computeStockStatus(
+            (float) ($article->quantite_stock ?? 0),
+            (float) ($article->seuil_minimal ?? 0)
+        );
     }
 
     private function recentMovements(Article $article)

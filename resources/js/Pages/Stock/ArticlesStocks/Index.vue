@@ -62,8 +62,8 @@ function stockInfo(article) {
   const threshold = Number(article.seuil_minimal || 0)
 
   if (quantity <= 0) return { label: 'Rupture', tone: 'danger', border: 'status-border-danger' }
-  if (threshold > 0 && quantity <= threshold) return { label: 'Sous seuil', tone: 'warning', border: 'status-border-warning' }
-  return { label: 'Normal', tone: 'success', border: 'status-border-success' }
+  if (threshold > 0 && quantity <= threshold) return { label: 'Stock faible', tone: 'warning', border: 'status-border-warning' }
+  return { label: 'Stock normal', tone: 'success', border: 'status-border-success' }
 }
 </script>
 

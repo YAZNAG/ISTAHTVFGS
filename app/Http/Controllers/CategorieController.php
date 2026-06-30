@@ -71,6 +71,7 @@ class CategorieController extends Controller implements HasMiddleware
                 'unite_mesure' => $article->unite_mesure,
                 'quantite_stock' => (float) ($article->quantite_stock ?? 0),
                 'seuil_minimal' => (float) ($article->seuil_minimal ?? 0),
+                'seuil_maximal' => (float) ($article->seuil_maximal ?? 0),
                 'statut' => $this->articleStatus($article),
             ]);
 
@@ -199,18 +200,10 @@ class CategorieController extends Controller implements HasMiddleware
 
     private function articleStatus(Article $article): array
     {
-        $stock = (float) ($article->quantite_stock ?? 0);
-        $seuil = (float) ($article->seuil_minimal ?? 0);
-
-        if ($stock <= 0) {
-            return ['label' => 'Rupture', 'type' => 'danger'];
-        }
-
-        if ($seuil > 0 && $stock <= $seuil) {
-            return ['label' => 'Sous seuil', 'type' => 'warning'];
-        }
-
-        return ['label' => 'Disponible', 'type' => 'success'];
+        return Article::computeStockStatus(
+            (float) ($article->quantite_stock ?? 0),
+            (float) ($article->seuil_minimal ?? 0)
+        );
     }
 
     private function exportRows()

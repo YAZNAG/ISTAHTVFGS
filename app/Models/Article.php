@@ -91,12 +91,43 @@ class Article extends Model
 
     public function scopeLowStock($query)
     {
-        return $query->where('stock_actuel', '<=', \DB::raw('seuil_minimal'));
+        return $query->whereColumn('quantite_stock', '<=', 'seuil_minimal');
     }
 
     public function getEstEnRuptureAttribute()
     {
-        return $this->stock_actuel <= $this->seuil_minimal;
+        return (float) $this->quantite_stock <= 0;
+    }
+
+    /**
+     * Statut de stock unifié (seul endroit qui calcule cette règle dans l'app).
+     * Stock faible : stock <= seuil_minimal * 0.8
+     * Stock normal : stock > seuil_minimal
+     * Zone intermédiaire (seuil*0.8 < stock <= seuil) traitée comme "faible".
+     */
+    public static function computeStockStatus(float $stock, float $seuilMinimal): array
+    {
+        if ($stock <= 0) {
+            return ['label' => 'Rupture', 'type' => 'danger'];
+        }
+
+        if ($seuilMinimal > 0 && $stock <= $seuilMinimal * 0.8) {
+            return ['label' => 'Stock faible', 'type' => 'warning'];
+        }
+
+        if ($seuilMinimal > 0 && $stock <= $seuilMinimal) {
+            return ['label' => 'Stock faible', 'type' => 'warning'];
+        }
+
+        return ['label' => 'Stock normal', 'type' => 'success'];
+    }
+
+    public function getStatutStockAttribute(): array
+    {
+        return self::computeStockStatus(
+            (float) ($this->quantite_stock ?? 0),
+            (float) ($this->seuil_minimal ?? 0)
+        );
     }
 
     public function getImagePrincipaleAttribute()
