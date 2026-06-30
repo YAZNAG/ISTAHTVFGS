@@ -18,7 +18,8 @@ class DecompteController extends Controller
     public function create(BonCommande $bonCommande)
     {
         return Inertia::modal('Achats/BonCommandes/Decompte/CreateDecompteModal', [
-            'marche_id' => $bonCommande->id
+            'marche_id' => $bonCommande->id,
+            'categories' => \App\Models\Categorie::actives()->orderBy('nom')->get(['id', 'nom']),
         ])->baseRoute('bon-commandes.show', $bonCommande->id);
     }
 
@@ -26,6 +27,8 @@ class DecompteController extends Controller
     {
         $request->validate([
             'date' => 'required|date',
+            'date_debut' => 'nullable|date|before_or_equal:date',
+            'categorie_id' => 'nullable|exists:categories,id',
             'is_final' => 'boolean'
         ]);
 
@@ -38,47 +41,64 @@ class DecompteController extends Controller
 
 
         DB::transaction(function () use ($request, $bonCommande) {
-            
+
             $decompte = $bonCommande->decomptes()->create([
                 'date' => $request->date,
+                'date_debut' => $request->date_debut,
+                'categorie_id' => $request->categorie_id,
                 'final' => $request->is_final
             ]);
 
-            $receptions = Reception::with('bonLivraison.items.article')->whereHas('bonLivraison.chefCommande.bonCommande', function ($q) use ($decompte) {
-                $q->where('bon_commandes.id', $decompte->marche_id);
-            })
-            ->whereDate('created_at', '<=', $decompte->date->endOfDay())
-            ->get();
+            $receptions = Reception::with('bonLivraison.items.article.categorie', 'bonLivraison.fournisseur')
+                ->whereHas('bonLivraison.chefCommande.bonCommande', function ($q) use ($decompte) {
+                    $q->where('bon_commandes.id', $decompte->marche_id);
+                })
+                ->when($decompte->date_debut, function ($q) use ($decompte) {
+                    $q->whereDate('created_at', '>=', $decompte->date_debut);
+                })
+                ->whereDate('created_at', '<=', $decompte->date->endOfDay())
+                ->get();
 
 
             $bonLivraisons = $receptions->pluck('bonLivraison')->unique('id');
 
             $items = $bonLivraisons
-                ->flatMap(fn ($bon) => $bon->items)   // 1-dimensional collection of items
-                ->groupBy('article_id')               // or groupBy('designation')
+                ->flatMap(fn ($bon) => $bon->items->map(function ($item) use ($bon) {
+                    $item->setRelation('bonLivraison', $bon);
+                    return $item;
+                }))
+                ->when($decompte->categorie_id, function ($collection) use ($decompte) {
+                    return $collection->filter(fn ($item) => $item->article?->categorie_id === $decompte->categorie_id);
+                })
+                ->groupBy('article_id')
                 ->map(function ($rows) {
                     $first = $rows->first();
+                    $montantHt = $rows->sum('montant_ht');
+                    $montantTva = $rows->sum('montant_tva');
+
                     return [
                         'article_id'    => $first->article_id,
                         'designation'   => $first->article->designation,
                         'unite_mesure'  => $first->article->unite_mesure,
                         'quantite'      => $rows->sum('quantite'),
-                        'prix_unitaire' => number_format($first->prix_unitaire, 2, '.', ''),   // kept unchanged
+                        'prix_unitaire' => number_format($first->prix_unitaire, 2, '.', ''),
                         'taux_tva'      => $first->taux_tva,
-                        'montant_ht'    => number_format($rows->sum('montant_ht'), 2, '.', ''),
+                        'montant_ht'    => number_format($montantHt, 2, '.', ''),
+                        'montant_tva'   => number_format($montantTva, 2, '.', ''),
                         'montant_ttc'   => number_format($rows->sum('montant_ttc'), 2, '.', ''),
                     ];
                 })
                 ->values();
-            
+
 
             foreach ($items as $item) {
                 $decompte->items()->create([
                     'article_id' => $item['article_id'],
-                    'quantite' => $item['quantite'], 
+                    'quantite' => $item['quantite'],
                     'prix_unitaire' => $item['prix_unitaire'],
                     'taux_tva' => $item['taux_tva'],
                     'montant_ht' => $item['montant_ht'],
+                    'montant_tva' => $item['montant_tva'],
                     'montant_ttc' => $item['montant_ttc'],
                 ]);
             }
@@ -86,6 +106,16 @@ class DecompteController extends Controller
         });
 
         return redirect()->route('bon-commandes.show', $bonCommande->id);
+    }
+
+    public function exportExcel(Decompte $decompte)
+    {
+        $decompte->load('items.article.categorie', 'marche');
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\DecompteExport($decompte),
+            "decompte-{$decompte->marche->reference}-{$decompte->date->format('Y-m-d')}.xlsx"
+        );
     }
 
     public function download(Decompte $decompte)
@@ -101,6 +131,7 @@ class DecompteController extends Controller
                     'prix_unitaire' => number_format($item->prix_unitaire, 2, '.', ''),   // kept unchanged
                     'taux_tva'      => $item->taux_tva,
                     'montant_ht'    => number_format($item->montant_ht, 2, '.', ''),
+                    'montant_tva'   => number_format($item->montant_tva, 2, '.', ''),
                     'montant_ttc'   => number_format($item->montant_ttc, 2, '.', ''),
                 ];
             });

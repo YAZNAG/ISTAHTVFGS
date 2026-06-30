@@ -10,7 +10,9 @@ class Decompte extends Model
 
     protected $fillable = [
         'date',
+        'date_debut',
         'marche_id',
+        'categorie_id',
         'final',
     ];
 
@@ -18,6 +20,7 @@ class Decompte extends Model
     {
         return [
             'date' => 'date',
+            'date_debut' => 'date',
         ];
     }
 
@@ -25,7 +28,12 @@ class Decompte extends Model
     {
         return $this->belongsTo(BonCommande::class, 'marche_id');
     }
-    
+
+    public function categorie()
+    {
+        return $this->belongsTo(Categorie::class, 'categorie_id');
+    }
+
     public function items()
     {
         return $this->hasMany(DecompteItem::class);

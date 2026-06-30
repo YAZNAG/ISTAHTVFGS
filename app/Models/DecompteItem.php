@@ -15,6 +15,7 @@ class DecompteItem extends Model
         'prix_unitaire',
         'taux_tva',
         'montant_ht',
+        'montant_tva',
         'montant_ttc',
     ];
 
@@ -25,6 +26,7 @@ class DecompteItem extends Model
             'prix_unitaire' => 'decimal:2',
             'taux_tva' => 'decimal:2',
             'montant_ht' => 'decimal:2',
+            'montant_tva' => 'decimal:2',
             'montant_ttc' => 'decimal:2',
         ];
     }

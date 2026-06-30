@@ -42,6 +42,7 @@
                         <th class="px-3 py-2 border border-black text-right">PU HT</th>
                         <th class="px-3 py-2 border border-black text-right">TVA</th>
                         <th class="px-3 py-2 border border-black text-right">Total HT</th>
+                        <th class="px-3 py-2 border border-black text-right">Montant TVA</th>
                         <th class="px-3 py-2 border border-black text-right">Total TTC</th>
                     </tr>
                 </thead>
@@ -55,6 +56,7 @@
                         <td class="border border-black text-center p-1">{{ $row['prix_unitaire'] }}</td>
                         <td class="border border-black text-center p-1 text-right">{{ $row['taux_tva'] }}</td>
                         <td class="border border-black text-center p-1 text-right">{{ $row['montant_ht'] }}</td>
+                        <td class="border border-black text-center p-1 text-right">{{ $row['montant_tva'] }}</td>
                         <td class="border border-black text-center p-1 text-right">{{ $row['montant_ttc'] }}</td>
                     </tr>
                     @endforeach
@@ -98,7 +100,7 @@
                     </tr> -->
                     <tr>
                         <td class="border border-black p-2 italic" colspan="3">A Déduire les dépenses des acomptes precedement payées</td>
-                        <td class="border border-black p-2 text-right font-mono font-bold"></td>
+                        <td class="border border-black p-2 text-right font-mono font-bold">{{ $travaux_termine }}</td>
                     </tr>
                     <!-- <tr>
                         <td class="border border-black p-2" colspan="3">Reste à payer sur l'exercice en cours</td>

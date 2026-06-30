@@ -11,9 +11,20 @@
     <!-- Form -->
     <div>
       <div class="grid gap-4 mt-4">
-        <!-- Start date -->
         <div>
-          <InputLabel for="date">Date</InputLabel>
+          <InputLabel for="date_debut">Date début</InputLabel>
+          <input
+            id="date_debut"
+            type="date"
+            v-model="form.date_debut"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          />
+          <InputError :message="form.errors.date_debut" />
+        </div>
+
+        <!-- End date -->
+        <div>
+          <InputLabel for="date">Date fin</InputLabel>
           <input
             id="date"
             type="date"
@@ -22,6 +33,19 @@
             required
           />
           <InputError :message="form.errors.date" />
+        </div>
+
+        <div>
+          <InputLabel for="categorie_id">Categorie</InputLabel>
+          <select
+            id="categorie_id"
+            v-model="form.categorie_id"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option :value="null">Toutes les categories</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
+          </select>
+          <InputError :message="form.errors.categorie_id" />
         </div>
 
         <div class="flex items-center">
@@ -69,6 +93,7 @@ import InputError from '@/Components/InputError.vue'
 
 const props = defineProps({
   marche_id: Object,
+  categories: { type: Array, default: () => [] },
 });
 
 // Refs
@@ -77,6 +102,8 @@ const createDecompteModal = ref(null)
 // Inertia form
 const form = useForm({
   date: null,
+  date_debut: null,
+  categorie_id: null,
   is_final: false,
 })
 
