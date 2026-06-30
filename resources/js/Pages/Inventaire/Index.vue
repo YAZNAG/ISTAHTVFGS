@@ -23,7 +23,7 @@ function openUnlockModal(id) {
 }
 /* ---------- filters ---------- */
 const filters = ref({
-  mois: props.filters.mois ?? '',
+  semaine: props.filters.semaine ?? '',
   statut: props.filters.statut ?? '',   // draft | finalized | ''
 });
 
@@ -31,7 +31,7 @@ function applyFilters() {
   router.get(route('inventaires.index'), filters.value, { preserveState: true });
 }
 function resetFilters() {
-  filters.value = { mois: '', statut: '' };
+  filters.value = { semaine: '', statut: '' };
   router.get(route('inventaires.index'));
 }
 
@@ -54,7 +54,7 @@ const statutBadge = (s) =>
 
 <template>
   <AuthenticatedLayout>
-    <Head title="Inventaires mensuels" />
+    <Head title="Inventaires hebdomadaires" />
 
     <div class="space-y-6">
       <!-- ====== HEADER ====== -->
@@ -65,7 +65,7 @@ const statutBadge = (s) =>
           class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6"
         >
           <div class="flex-1">
-            <h1 class="text-3xl font-bold mb-2">Inventaires mensuels</h1>
+            <h1 class="text-3xl font-bold mb-2">Inventaires hebdomadaires</h1>
             <p class="text-blue-100 text-lg opacity-90">
               Créez, continuez ou téléchargez vos inventaires
             </p>
@@ -88,13 +88,13 @@ const statutBadge = (s) =>
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtrer les inventaires</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-          <!-- Mois -->
+          <!-- Semaine -->
           <div class="">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Mois</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Semaine</label>
             <input
-              v-model="filters.mois"
-              type="month"
-              placeholder="2025-12"
+              v-model="filters.semaine"
+              type="week"
+              placeholder="2026-W26"
               class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
@@ -138,7 +138,7 @@ const statutBadge = (s) =>
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Mois
+                  Semaine
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Statut
@@ -165,7 +165,7 @@ const statutBadge = (s) =>
                 class="hover:bg-gray-50"
               >
                 <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                  {{ inv.mois }}
+                  {{ inv.semaine }}
                 </td>
 
                 <td class="px-6 py-4">
@@ -228,7 +228,7 @@ const statutBadge = (s) =>
           <InboxIcon class="mx-auto h-12 w-12 text-gray-300" />
           <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun inventaire</h3>
           <p class="mt-1 text-sm text-gray-500">
-            Créez le premier inventaire mensuel.
+            Créez le premier inventaire hebdomadaire.
           </p>
           <div class="mt-4">
             <ModalLink

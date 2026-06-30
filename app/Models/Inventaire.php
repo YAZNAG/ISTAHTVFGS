@@ -9,6 +9,7 @@ class Inventaire extends Model
 {
     protected $fillable = [
         'mois',
+        'semaine',
         'statut',
         'finalized_at',
     ];

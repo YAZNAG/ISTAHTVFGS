@@ -6,13 +6,26 @@ import { useForm, router } from '@inertiajs/vue3'
 /* ---------- refs ---------- */
 const createInventaireModal = ref(null)
 
+/* ---------- utils ---------- */
+function currentIsoWeek() {
+  const now = new Date()
+  const target = new Date(now.valueOf())
+  const dayNr = (now.getDay() + 6) % 7
+  target.setDate(target.getDate() - dayNr + 3)
+  const firstThursday = target.valueOf()
+  target.setMonth(0, 1)
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7)
+  }
+  const week = 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000)
+  return `${now.getFullYear()}-W${String(week).padStart(2, '0')}`
+}
 
 /* ---------- form ---------- */
 const form = useForm({
-  mois: new Date().toISOString().slice(0, 7), // yyyy-mm
+  semaine: currentIsoWeek(),
 })
 
-/* ---------- utils ---------- */
 function submit() {
   form.post(route('inventaires.store'), {
     preserveScroll: true,
@@ -30,26 +43,26 @@ function submit() {
   <Modal name="createInventaireModal" ref="createInventaireModal">
     <!-- Header -->
     <div class="mb-2">
-      <h2 class="text-lg font-semibold text-gray-900">Créer un inventaire mensuel</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Créer un inventaire hebdomadaire</h2>
       <p class="text-sm text-gray-500 mt-1">
-        Un inventaire est créé mensuellement et verrouillé une fois finalisé.
+        Un inventaire est créé chaque semaine et verrouillé une fois finalisé.
       </p>
     </div>
 
     <!-- Form -->
     <form @submit.prevent="submit" class="grid gap-4 mt-4">
-      <!-- Mois -->
+      <!-- Semaine -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Mois</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Semaine</label>
         <input
-          v-model="form.mois"
-          type="month"
-          placeholder="2025-01"
+          v-model="form.semaine"
+          type="week"
+          placeholder="2026-W26"
           required
           class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
         />
-        <div v-if="form.errors.mois" class="text-red-600 text-xs mt-1">
-          {{ form.errors.mois }}
+        <div v-if="form.errors.semaine" class="text-red-600 text-xs mt-1">
+          {{ form.errors.semaine }}
         </div>
       </div>
 

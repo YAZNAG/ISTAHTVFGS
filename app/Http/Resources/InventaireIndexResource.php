@@ -20,6 +20,7 @@ class InventaireIndexResource extends JsonResource
         return [
             'id' => $this->id,
             'mois' => $this->mois,
+            'semaine' => $this->semaine,
             'statut' => $this->statut,
             'finalized_at' => $this->finalized_at,
             'progress' => $filledLignes . '/' . $totalLines,

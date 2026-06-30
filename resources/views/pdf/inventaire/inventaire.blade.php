@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Inventaire {{ $inventaire->mois }}</title>
+    <title>Inventaire {{ $inventaire->semaine }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,7 @@
             Inventaire N° {{ $inventaire->numero }}
         </div>
 
-        <p class="text-center mb-4"><span class="font-bold">Mois:</span> {{ $inventaire->mois }}</p>
+        <p class="text-center mb-4"><span class="font-bold">Semaine:</span> {{ $inventaire->semaine }}</p>
 
         <!-- ARTICLES TABLE -->
         <div class="overflow-x-auto mb-4">

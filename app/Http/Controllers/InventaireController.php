@@ -38,8 +38,8 @@ class InventaireController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         $invenrtaires = Inventaire::with(['lignes'])
-            ->when($request->mois, function ($query) use ($request) {
-                return $query->where('mois', $request->mois);
+            ->when($request->semaine, function ($query) use ($request) {
+                return $query->where('semaine', $request->semaine);
             })
             ->when($request->statut, function ($query) use ($request) {
                 return $query->where('statut', $request->statut);
@@ -48,7 +48,7 @@ class InventaireController extends Controller implements HasMiddleware
 
         return Inertia::render('Inventaire/Index', [
             'inventaires' => InventaireIndexResource::collection($invenrtaires),
-            'filters' => $request->all('mois', 'statut'),
+            'filters' => $request->all('semaine', 'statut'),
         ]);
     }
 
@@ -56,39 +56,40 @@ class InventaireController extends Controller implements HasMiddleware
     {
         /* ---------- validation ---------- */
         $request->validate([
-            'mois' => 'required|date_format:Y-m|unique:inventaires,mois',
+            'semaine' => 'required|regex:/^\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$/|unique:inventaires,semaine',
         ], [
-            'mois.unique' => 'Un inventaire existe déjà pour ce mois.',
-            'mois.date_format' => 'Le mois doit avoir le format YYYY-MM.',
+            'semaine.unique' => 'Un inventaire existe déjà pour cette semaine.',
+            'semaine.regex' => 'La semaine doit avoir le format AAAA-Wss (ex: 2026-W26).',
         ]);
 
         DB::transaction(function () use ($request) {
+            [$isoYear, $isoWeek] = explode('-W', $request->semaine);
+
+            $debut = Carbon::now()->setISODate((int) $isoYear, (int) $isoWeek)->startOfWeek();
+            $fin = $debut->copy()->endOfWeek();
+
             /* ---------- header ---------- */
             $inventaire = Inventaire::create([
-                'mois'         => $request->mois,
+                'semaine'      => $request->semaine,
+                'mois'         => $debut->format('Y-m'),
                 'statut'       => 'draft',
                 'finalized_at' => null,
             ]);
 
-            /* ---------- period ---------- */
-            $debut = $request->mois . '-01';
-            $fin   = Carbon::parse($debut)->endOfMonth();
-
-
             /* ---------- 3-query eager load ---------- */
             $articles = Article::with([
-                /* opening stock : last movement BEFORE the month */
+                /* opening stock : last movement BEFORE the week */
                 'mouvementsStock' => fn($q) => $q->where('date_mouvement', '<', $debut)
                     ->latest('date_mouvement')
                     ->limit(1)
                     ->select('article_id', 'quantite_actuelle'),
 
-                /* entries inside month */
+                /* entries inside the week */
                 'mouvementsStockEntree' => fn($q) => $q->whereBetween('date_mouvement', [$debut, $fin])
                     ->selectRaw('article_id, SUM(quantite_entree) as total_entree')
                     ->groupBy('article_id'),
 
-                /* exits inside month */
+                /* exits inside the week */
                 'mouvementsStockSortie' => fn($q) => $q->whereBetween('date_mouvement', [$debut, $fin])
                     ->selectRaw('article_id, SUM(quantite_sortie) as total_sortie')
                     ->groupBy('article_id'),
@@ -96,25 +97,32 @@ class InventaireController extends Controller implements HasMiddleware
                 ->where('est_actif', true)
                 ->get();
 
-            /* ---------- build insert array ---------- */
-            $rows = $articles->map(fn($art) => [
-                'inventaire_id'    => $inventaire->id,
-                'code_article'     => $art->reference,
-                'designation'      => $art->designation,
-                'unite_mesure'     => $art->unite_mesure,
-                'qte_entree'       => (float) ($art->mouvementsStockEntree->first()->total_entree ?? 0),
-                'qte_sortie'       => (float) ($art->mouvementsStockSortie->first()->total_sortie ?? 0),
-                'stock_theorique'  => (float) (
-                    ($art->mouvementsStock->first()->quantite_actuelle ?? 0)
-                    + ($art->mouvementsStockEntree->first()->total_entree ?? 0)
-                    - ($art->mouvementsStockSortie->first()->total_sortie ?? 0)
-                ),
-                'stock_reel'       => null,
-                'ecart'            => 0,
-                'observations'     => null,
-                'created_at'       => now(),
-                'updated_at'       => now(),
-            ]);
+            /* ---------- build insert array (uniquement stock theorique > 0) ---------- */
+            $rows = $articles
+                ->map(function ($art) use ($inventaire) {
+                    $stockTheorique = (float) (
+                        ($art->mouvementsStock->first()->quantite_actuelle ?? 0)
+                        + ($art->mouvementsStockEntree->first()->total_entree ?? 0)
+                        - ($art->mouvementsStockSortie->first()->total_sortie ?? 0)
+                    );
+
+                    return [
+                        'inventaire_id'    => $inventaire->id,
+                        'code_article'     => $art->reference,
+                        'designation'      => $art->designation,
+                        'unite_mesure'     => $art->unite_mesure,
+                        'qte_entree'       => (float) ($art->mouvementsStockEntree->first()->total_entree ?? 0),
+                        'qte_sortie'       => (float) ($art->mouvementsStockSortie->first()->total_sortie ?? 0),
+                        'stock_theorique'  => $stockTheorique,
+                        'stock_reel'       => null,
+                        'ecart'            => 0,
+                        'observations'     => null,
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
+                    ];
+                })
+                ->filter(fn ($row) => $row['stock_theorique'] > 0)
+                ->values();
 
 
             InventaireLigne::insert($rows->toArray());
@@ -181,7 +189,7 @@ class InventaireController extends Controller implements HasMiddleware
         // 4. Rediriger avec message de succès
         return redirect()
             ->route('inventaires.index')
-            ->with('success', "Inventaire {$inventaire->mois} finalisé avec succès.");
+            ->with('success', "Inventaire {$inventaire->semaine} finalisé avec succès.");
     }
 
     public function unlock(Inventaire $inventaire)
@@ -195,7 +203,7 @@ class InventaireController extends Controller implements HasMiddleware
         // 4. Rediriger avec message de succès
         return redirect()
             ->back()
-            ->with('success', "Inventaire {$inventaire->mois} déverrouillé.");
+            ->with('success', "Inventaire {$inventaire->semaine} déverrouillé.");
     }
 
     public function generatePdf(Inventaire $inventaire)
@@ -207,6 +215,6 @@ class InventaireController extends Controller implements HasMiddleware
         ])->headerView('pdf.H')
             ->footerView('pdf.F')
             ->margins(45, 5, 40,5)
-            ->format(Format::A4)->download("inventaire-{$inventaire->mois}.pdf");
+            ->format(Format::A4)->download("inventaire-{$inventaire->semaine}.pdf");
     }
 }

@@ -96,15 +96,15 @@ function openConfirmModal(id) {
 
 <template>
   <AuthenticatedLayout>
-    <Head :title="'Inventaire ' + inventaire.mois" />
+    <Head :title="'Inventaire ' + inventaire.semaine" />
 
     <div class="space-y-6">
       <!-- ====== HEADER ====== -->
       <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div class="flex-1">
-            <h1 class="text-3xl font-bold mb-2">Inventaire du mois</h1>
-            <p class="text-blue-100 text-lg opacity-90">{{ inventaire.mois }}</p>
+            <h1 class="text-3xl font-bold mb-2">Inventaire de la semaine</h1>
+            <p class="text-blue-100 text-lg opacity-90">{{ inventaire.semaine }}</p>
           </div>
         </div>
       </div>
