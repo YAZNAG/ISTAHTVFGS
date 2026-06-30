@@ -11,6 +11,7 @@ const props = defineProps({
   fichesPedagogiques: Array,  // with articles
   restaurants: Array,  // with articles
   types: Object,
+  preselect: { type: Object, default: () => ({}) },
 })
 
 const createDemandeModal = ref(null)
@@ -29,9 +30,12 @@ const form = useForm({
   demandeur: '',
   fiche_technique: "",
   motif: '',
-  demandable_id: '',
-  demandable_type: '',
+  demandable_id: props.preselect?.demandable_id ?? '',
+  demandable_type: props.preselect?.demandable_type ?? '',
 })
+
+// Si on arrive depuis un contexte (menu collectivite / fiche pedagogique), on verrouille le type/la fiche.
+const isContextual = computed(() => !!(props.preselect?.demandable_type && props.preselect?.demandable_id))
 
 const articles = ref([])
 function handleFileUpload(event) {
@@ -99,11 +103,13 @@ function submit() {
         <label class="block text-sm font-medium text-gray-700 mb-1">Type de Demande</label>
         <select
           v-model="form.demandable_type"
-          class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
+          :disabled="isContextual"
+          class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
         >
           <option disabled value="">Sélectionnez un type</option>
           <option :value="type.value" v-for="type in types" :key="type.value">{{ type.label }}</option>
         </select>
+        <p v-if="isContextual" class="text-xs text-gray-500 mt-1">Demande créée depuis le contexte sélectionné.</p>
       </div>
 
       <!-- Fiche -->
@@ -111,7 +117,8 @@ function submit() {
         <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche' }}</label>
         <select
           v-model="form.demandable_id"
-          class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
+          :disabled="isContextual"
+          class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
         >
           <option disabled value="">Sélectionnez une {{ form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche' }}</option>
           <option v-for="fiche in fiches" :key="fiche.id" :value="fiche.id">

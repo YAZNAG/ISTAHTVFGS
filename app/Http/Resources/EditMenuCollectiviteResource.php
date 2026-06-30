@@ -26,6 +26,9 @@ class EditMenuCollectiviteResource extends JsonResource
             'date' => $this->date,
             'responsable' => $this->responsable,
             'effectif' => $this->effectif,
+            'effectif_petit_dejeuner' => $this->effectif_petit_dejeuner ?? $this->effectif,
+            'effectif_dejeuner' => $this->effectif_dejeuner ?? $this->effectif,
+            'effectif_diner' => $this->effectif_diner ?? $this->effectif,
             'menus' => [
                 'petit_dejeuner' => $this->buildMenuPart($petit),
                 'dejeuner'       => $this->buildMenuPart($dej),

@@ -12,7 +12,19 @@ class MenuCollectivite extends Model
         'date',
         'responsable',
         'effectif',
+        'effectif_petit_dejeuner',
+        'effectif_dejeuner',
+        'effectif_diner',
     ];
+
+    public function effectifPourRepas(string $meal): int
+    {
+        return match ($meal) {
+            'petit_dejeuner', 'petit-dejeuner' => (int) ($this->effectif_petit_dejeuner ?? $this->effectif ?? 0),
+            'diner' => (int) ($this->effectif_diner ?? $this->effectif ?? 0),
+            default => (int) ($this->effectif_dejeuner ?? $this->effectif ?? 0),
+        };
+    }
 
     public function casts()
     {

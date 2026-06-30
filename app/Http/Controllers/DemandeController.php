@@ -108,6 +108,10 @@ class DemandeController extends Controller implements HasMiddleware
             // 'restaurants' => RestaurantDemandeResource::collection($restaurants),
 
             'types' => FicheType::toSelect(),
+            'preselect' => [
+                'demandable_type' => $request->query('demandable_type'),
+                'demandable_id' => $request->query('demandable_id') ? (int) $request->query('demandable_id') : null,
+            ],
         ];
 
 

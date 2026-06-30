@@ -24,8 +24,11 @@ class StoreMenuRequest extends FormRequest
         return [
             'date' => ['required', 'date'],
             'responsable' => ['required', 'string', 'max:255'],
-            'effectif' => ['required', 'integer', 'min:1'],
-            
+            'effectif' => ['nullable', 'integer', 'min:1'],
+            'effectif_petit_dejeuner' => ['required', 'integer', 'min:1'],
+            'effectif_dejeuner' => ['required', 'integer', 'min:1'],
+            'effectif_diner' => ['required', 'integer', 'min:1'],
+
             'menus.petit_dejeuner.entree' => ['required', 'integer', 'exists:fiches_techniques,id'],
             'menus.petit_dejeuner.plat' => ['required', 'integer', 'exists:fiches_techniques,id'],
             'menus.petit_dejeuner.dessert' => ['required', 'integer', 'exists:fiches_techniques,id'],

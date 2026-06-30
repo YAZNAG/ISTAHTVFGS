@@ -44,7 +44,9 @@
         </div>
 
         <div class="my-4">
-            <p>Nombre de couvert : {{ $menu->effectif }}</p>
+            <p>Effectif petit-déjeuner : {{ $menu->effectif_petit_dejeuner ?? $menu->effectif }}</p>
+            <p>Effectif déjeuner : {{ $menu->effectif_dejeuner ?? $menu->effectif }}</p>
+            <p>Effectif dîner : {{ $menu->effectif_diner ?? $menu->effectif }}</p>
             <p>Formateur responsable: {{ $menu->responsable }}</p>
         </div>
 

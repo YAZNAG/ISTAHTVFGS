@@ -15,7 +15,9 @@ const props = defineProps({
 const form = useForm({
   date: '',
   responsable: '',
-  effectif: 1,
+  effectif_petit_dejeuner: 1,
+  effectif_dejeuner: 1,
+  effectif_diner: 1,
   menus: {
     petit_dejeuner: { entree: '', plat: '', dessert: '', plat_special: '' },
     dejeuner:       { entree: '', plat: '', dessert: '', plat_special: '' },
@@ -115,18 +117,46 @@ function isDuplicate(id) {
               <InputError :message="form.errors.responsable" />
             </div>
 
-            <!-- Effectif -->
+            <!-- Effectif petit-dejeuner -->
             <div>
-              <InputLabel for="effectif" value="Effectif prévu" />
+              <InputLabel for="effectif_petit_dejeuner" value="Effectif petit-déjeuner" />
               <input
-                id="effectif"
-                v-model.number="form.effectif"
+                id="effectif_petit_dejeuner"
+                v-model.number="form.effectif_petit_dejeuner"
                 type="number"
                 min="1"
                 required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
-              <InputError :message="form.errors.effectif" />
+              <InputError :message="form.errors.effectif_petit_dejeuner" />
+            </div>
+
+            <!-- Effectif dejeuner -->
+            <div>
+              <InputLabel for="effectif_dejeuner" value="Effectif déjeuner" />
+              <input
+                id="effectif_dejeuner"
+                v-model.number="form.effectif_dejeuner"
+                type="number"
+                min="1"
+                required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+              <InputError :message="form.errors.effectif_dejeuner" />
+            </div>
+
+            <!-- Effectif diner -->
+            <div>
+              <InputLabel for="effectif_diner" value="Effectif dîner" />
+              <input
+                id="effectif_diner"
+                v-model.number="form.effectif_diner"
+                type="number"
+                min="1"
+                required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+              <InputError :message="form.errors.effectif_diner" />
             </div>
           </div>
         </div>

@@ -77,7 +77,10 @@ class MenuCollectiviteController extends Controller implements HasMiddleware
             $menu = MenuCollectivite::create([
                 'date' => $request->date,
                 'responsable' => $request->responsable,
-                'effectif' => $request->effectif,
+                'effectif' => $request->effectif_dejeuner,
+                'effectif_petit_dejeuner' => $request->effectif_petit_dejeuner,
+                'effectif_dejeuner' => $request->effectif_dejeuner,
+                'effectif_diner' => $request->effectif_diner,
             ]);
 
             $menus = $request->menus;
@@ -123,7 +126,10 @@ class MenuCollectiviteController extends Controller implements HasMiddleware
             $menu->update([
                 'date' => $request->date,
                 'responsable' => $request->responsable,
-                'effectif' => $request->effectif,
+                'effectif' => $request->effectif_dejeuner,
+                'effectif_petit_dejeuner' => $request->effectif_petit_dejeuner,
+                'effectif_dejeuner' => $request->effectif_dejeuner,
+                'effectif_diner' => $request->effectif_diner,
             ]);
 
             $menus = $request->menus;

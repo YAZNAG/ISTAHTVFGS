@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Modal } from '@inertiaui/modal-vue'
+import { Modal, ModalLink } from '@inertiaui/modal-vue'
 import { data } from 'autoprefixer'
 import Dump from '@/Components/Dump.vue'
 
@@ -26,6 +26,12 @@ function closeModal() {
                 <h2 class="text-2xl font-bold">
                     Fiche Technique {{ fiche.type }}
                 </h2>
+                <ModalLink
+                    :href="route('demandes.create', { demandable_type: fiche.type_label, demandable_id: fiche.id })"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold"
+                >
+                    Créer demande {{ fiche.type_label === 'pedagogique' ? 'pédagogie' : 'collectivité' }}
+                </ModalLink>
             </div>
 
             <!-- Fiche Info -->
