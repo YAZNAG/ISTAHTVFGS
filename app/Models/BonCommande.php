@@ -164,16 +164,41 @@ class BonCommande extends Model
     }
 
      // Méthode pour obtenir la quantité reçue pour un article (CORRIGÉE)
+    // Unifie le flux legacy (BonReception/LigneReception) et le flux moderne
+    // (ChefCommande -> BonLivraison -> BonLivraisonItem) pour ne pas sous-estimer
+    // les quantités reçues sur les marchés utilisant le flux moderne.
     public function getQuantiteRecuePourArticle($articleId): float
     {
-        return $this->bonReceptions()
+        $quantiteLegacy = $this->bonReceptions()
             ->with('lignesReception')
             ->get()
-            ->flatMap(function($reception) {
+            ->flatMap(function ($reception) {
                 return $reception->lignesReception;
             })
             ->where('article_id', $articleId)
             ->sum('quantite_receptionnee');
+
+        $quantiteModerne = ChefCommande::where('bon_commande_id', $this->id)
+            ->with('livraisons.items')
+            ->get()
+            ->flatMap(function (ChefCommande $chefCommande) {
+                return $chefCommande->livraisons;
+            })
+            ->flatMap(function ($livraison) {
+                return $livraison->items;
+            })
+            ->where('article_id', $articleId)
+            ->sum('quantite');
+
+        return (float) $quantiteLegacy + (float) $quantiteModerne;
+    }
+
+    /**
+     * Quantite engagee dans le marche pour un article (quantite_commandee du marche).
+     */
+    public function getQuantiteEngageePourArticle($articleId): float
+    {
+        return (float) ($this->articles->firstWhere('article_id', $articleId)?->quantite_commandee ?? 0);
     }
 
     // Méthode pour vérifier si la commande a des articles à recevoir

@@ -265,11 +265,13 @@ function formatCurrency(amount) {
                   <th>Reference</th>
                   <th>Designation</th>
                   <th>Unite</th>
-                  <th class="text-right">Qte min.</th>
-                  <th class="text-right">Qte max.</th>
+                  <th class="text-right">Qte engagee</th>
+                  <th class="text-right">Qte consommee</th>
+                  <th class="text-right">Qte restante</th>
                   <th class="text-right">Prix HT</th>
                   <th class="text-right">TVA</th>
                   <th class="text-right">TTC</th>
+                  <th>Alerte</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,11 +279,18 @@ function formatCurrency(amount) {
                   <td class="font-bold text-istaht-blue">{{ article.reference || '-' }}</td>
                   <td class="font-semibold text-slate-800">{{ article.designation }}</td>
                   <td>{{ article.unite_mesure || '-' }}</td>
-                  <td class="text-right">{{ formatNumber(article.quantite_minimale, 2) }}</td>
-                  <td class="text-right">{{ formatNumber(article.quantite_maximale, 2) }}</td>
+                  <td class="text-right">{{ formatNumber(article.quantite_engagee, 2) }}</td>
+                  <td class="text-right">{{ formatNumber(article.quantite_consommee, 2) }}</td>
+                  <td class="text-right font-bold" :class="article.alerte_quantite ? 'text-istaht-red' : 'text-istaht-navy'">
+                    {{ formatNumber(article.quantite_restante, 2) }}
+                  </td>
                   <td class="text-right">{{ formatCurrency(article.prix_unitaire_ht) }}</td>
                   <td class="text-right">{{ formatNumber(article.taux_tva, 2) }}%</td>
                   <td class="text-right font-bold text-istaht-navy">{{ formatCurrency(article.montant_ttc) }}</td>
+                  <td>
+                    <span v-if="article.alerte_quantite === 'epuise'" class="ui-badge bg-red-50 text-istaht-red ring-1 ring-red-100">Epuise</span>
+                    <span v-else-if="article.alerte_quantite === 'faible'" class="ui-badge bg-amber-50 text-istaht-amber ring-1 ring-amber-100">Faible</span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -402,6 +411,9 @@ function formatCurrency(amount) {
                   <td class="text-right">
                     <a :href="route('decompte.download-pdf', decompte.id)" target="_blank" class="ui-button ui-button-secondary px-3 py-1.5 text-xs">
                       PDF
+                    </a>
+                    <a :href="route('decompte.download-excel', decompte.id)" target="_blank" class="ui-button ui-button-secondary px-3 py-1.5 text-xs ml-1">
+                      Excel
                     </a>
                   </td>
                 </tr>
