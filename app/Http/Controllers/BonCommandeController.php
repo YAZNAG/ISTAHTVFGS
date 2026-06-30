@@ -464,6 +464,8 @@ class BonCommandeController extends Controller implements HasMiddleware
             ]);
         }
 
+        // Note : l'annulation (changement de statut) reste autorisee meme si une reception existe.
+        // C'est uniquement la suppression physique (destroy()) qui est bloquee dans ce cas (cf. hasOperationalData).
         DB::transaction(function () use ($request, $bonCommande) {
             $ancienStatut = $bonCommande->statut;
 
@@ -750,7 +752,12 @@ class BonCommandeController extends Controller implements HasMiddleware
             'reason_annulation' => $marche->reason_annulation,
             'created_at' => optional($marche->created_at)->format('d/m/Y'),
             'financial_sources' => $financials['sources'],
-            'articles' => $marche->articles->map(function (BonCommandeArticle $ligne) {
+            'articles' => $marche->articles->map(function (BonCommandeArticle $ligne) use ($marche) {
+                $quantiteEngagee = (float) $ligne->quantite_commandee;
+                $quantiteConsommee = $marche->getQuantiteRecuePourArticle($ligne->article_id);
+                $quantiteRestante = max(0, $quantiteEngagee - $quantiteConsommee);
+                $seuilAlerte = $quantiteEngagee * 0.1;
+
                 return [
                     'id' => $ligne->id,
                     'reference' => $ligne->article?->reference,
@@ -759,6 +766,12 @@ class BonCommandeController extends Controller implements HasMiddleware
                     'quantite_minimale' => (float) ($ligne->quantite_minimale ?? 0),
                     'quantite_maximale' => (float) ($ligne->quantite_maximale ?? $ligne->quantite_commandee),
                     'quantite_commandee' => (float) $ligne->quantite_commandee,
+                    'quantite_engagee' => round($quantiteEngagee, 2),
+                    'quantite_consommee' => round($quantiteConsommee, 2),
+                    'quantite_restante' => round($quantiteRestante, 2),
+                    'alerte_quantite' => $quantiteRestante <= 0
+                        ? 'epuise'
+                        : ($quantiteRestante <= $seuilAlerte ? 'faible' : null),
                     'prix_unitaire_ht' => (float) ($ligne->prix_unitaire_ht ?? 0),
                     'taux_tva' => (float) ($ligne->taux_tva ?? 0),
                     'montant_ht' => (float) ($ligne->montant_ht ?? 0),
