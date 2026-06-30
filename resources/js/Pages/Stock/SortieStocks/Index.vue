@@ -23,6 +23,7 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 const props = defineProps({
   sorties: Object,
   filters: Object,
+  categories: { type: Array, default: () => [] },
 });
 
 // Format date helper
@@ -39,10 +40,11 @@ const filters = ref({
   search: props.filters.search || '',
   start_date: props.filters.start_date || '',
   end_date: props.filters.end_date || '',
+  categorie_id: props.filters.categorie_id || '',
 })
 
 function resetFilters() {
-  filters.value = { search: '', start_date: '', end_date: '' }
+  filters.value = { search: '', start_date: '', end_date: '', categorie_id: '' }
   router.get(route('sortie-stocks.index'))
 }
 
@@ -93,6 +95,16 @@ function applyFilters() {
             </div>
           </div>
 
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Categorie</label>
+            <select
+              v-model="filters.categorie_id"
+              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Toutes les categories</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
+            </select>
+          </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Date début</label>

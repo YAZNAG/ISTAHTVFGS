@@ -21,6 +21,7 @@ const { can } = usePermission();
 const props = defineProps({
     returns: Object,        // paginated returns from server
     filters: Object,        // old filters
+    articles: { type: Array, default: () => [] },
 });
 
 /* ---------- helpers ---------- */
@@ -36,13 +37,16 @@ function formatDate(dt) {
 /* ---------- filters ---------- */
 const filters = ref({
     search: props.filters.search || '',
+    article_id: props.filters.article_id || '',
+    date_debut: props.filters.date_debut || '',
+    date_fin: props.filters.date_fin || '',
 });
 
 function applyFilters() {
     router.get(route('returns.index'), filters.value, { preserveState: true });
 }
 function resetFilters() {
-    filters.value = { search: '' };
+    filters.value = { search: '', article_id: '', date_debut: '', date_fin: '' };
     router.get(route('returns.index'));
 }
 
@@ -93,6 +97,24 @@ function deleteReturn() {
                                        focus:ring-indigo-500 focus:border-indigo-500" />
                             <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Article</label>
+                        <select v-model="filters.article_id" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Tous les articles</option>
+                            <option v-for="article in articles" :key="article.id" :value="article.id">{{ article.designation }}</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date début</label>
+                        <input v-model="filters.date_debut" type="date" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
+                        <input v-model="filters.date_fin" type="date" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500" />
                     </div>
                 </div>
 

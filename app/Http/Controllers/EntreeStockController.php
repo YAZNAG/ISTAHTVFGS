@@ -61,6 +61,12 @@ class EntreeStockController extends Controller implements HasMiddleware
 
         }
 
+        if ($request->filled('categorie_id')) {
+            $query->whereHas('article', function ($q) use ($request) {
+                $q->where('categorie_id', $request->categorie_id);
+            });
+        }
+
         // Filtrage par date
         if ($request->filled('start_date')) {
             $query->where('date_mouvement', '>=', $request->start_date);
@@ -75,17 +81,18 @@ class EntreeStockController extends Controller implements HasMiddleware
 
         return inertia('Stock/EntreeStocks/Index', [
             'entrees' => IndexEntreeStockRecource::collection($entreeStocks),
-            'filters' => $request->only(['start_date', 'end_date', 'search']),
+            'filters' => $request->only(['start_date', 'end_date', 'search', 'categorie_id']),
+            'categories' => \App\Models\Categorie::actives()->orderBy('nom')->get(['id', 'nom']),
         ]);
     }
 
-    function createExport() 
+    function createExport()
     {
-        
+
         return Inertia::modal('Stock/EntreeStocks/CreateExportModal')->baseRoute('entree-stocks.index');
     }
 
-    public function export(Request $request) 
+    public function export(Request $request)
     {
         $request->validate([
             'start_date' => 'required|date',
@@ -98,7 +105,11 @@ class EntreeStockController extends Controller implements HasMiddleware
         $data = MouvementStock::entrees()->with([
             'article',
             'referenceable',
-        ])->whereBetween('created_at', [$startDate, $endDate])->get();
+        ])
+            ->when($request->filled('categorie_id'), function ($q) use ($request) {
+                $q->whereHas('article', fn ($q2) => $q2->where('categorie_id', $request->categorie_id));
+            })
+            ->whereBetween('date_mouvement', [$startDate, $endDate])->get();
 
         $articles = ExportEntreeStockRecource::collection($data)->toArray($request);
 

@@ -51,10 +51,25 @@ class ReturnStockController extends Controller implements HasMiddleware
             });
         }
 
-        $returns = $query->paginate(10);
+        if ($request->filled('article_id')) {
+            $query->whereHas('items', function ($q) use ($request) {
+                $q->where('article_id', $request->article_id);
+            });
+        }
+
+        if ($request->filled('date_debut')) {
+            $query->whereDate('date', '>=', $request->date_debut);
+        }
+
+        if ($request->filled('date_fin')) {
+            $query->whereDate('date', '<=', $request->date_fin);
+        }
+
+        $returns = $query->paginate(10)->withQueryString();
         return Inertia::render('Stock/ReturnStocks/Index', [
             'returns' => ReturnIndexResource::collection($returns),
-            'filters' => request()->all('search')
+            'filters' => request()->all('search', 'article_id', 'date_debut', 'date_fin'),
+            'articles' => Article::actives()->orderBy('designation')->get(['id', 'reference', 'designation']),
         ]);
     }
 
