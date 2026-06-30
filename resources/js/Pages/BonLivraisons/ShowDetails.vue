@@ -100,7 +100,6 @@
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité Livrée</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix Unitaire</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taux TVA</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total TTC</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -115,21 +114,8 @@
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ formatNumber(ligne.quantite) }}</td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ formatMoney(ligne.prix_unitaire) }}</td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ ligne.taux_tva }}%</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                  {{ formatMoney(ligne.total_ttc) }}
-                </td>
               </tr>
             </tbody>
-            <tfoot class="bg-gray-50 border-t-2 border-gray-200">
-              <tr>
-                <td colspan="5" class="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                  Total TTC:
-                </td>
-                <td class="px-4 py-3 text-sm font-bold text-gray-900 text-right">
-                  {{ formatMoney(bonLivraison.total_ttc) }}
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>

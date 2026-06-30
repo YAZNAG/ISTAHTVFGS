@@ -38,11 +38,16 @@ const filteredArticles = computed(() => {
 })
 
 // Add new article
+function resteALivrer(articleId) {
+  const article = props.articles.find(a => a.id === articleId)
+  return article ? Number(article.reste_a_livrer ?? 0) : null
+}
+
 function selectArticle(article) {
   form.items.push({
     article_id: article.id,
     designation: article.designation,
-    quantite: 1,
+    quantite: Math.min(1, Number(article.reste_a_livrer ?? 1)) || 0,
     prix_unitaire: article.prix_unitaire || 0,
     taux_tva: article.taux_tva || 0,
   })
@@ -57,19 +62,6 @@ function removeItem(index) {
 function closeIdle() {
   setTimeout(() => dropdownOpen.value = false, 300)
 }
-
-// Totals
-const total_ht = computed(() =>
-  form.items.reduce((sum, i) => sum + i.prix_unitaire * i.quantite, 0).toFixed(2)
-)
-
-const total_tva = computed(() =>
-  form.items.reduce((sum, i) => sum + (i.prix_unitaire * i.quantite * (i.taux_tva / 100)), 0).toFixed(2)
-)
-
-const total_ttc = computed(() =>
-  form.items.reduce((sum, i) => sum + i.prix_unitaire * i.quantite * (1 + i.taux_tva / 100), 0).toFixed(2)
-)
 
 // Submit form
 function submit() {
@@ -144,9 +136,7 @@ function submit() {
             <tr>
               <th class="p-2 text-left">Article</th>
               <th class="p-2 text-center w-24">Quantité</th>
-              <th class="p-2 text-center w-28">Prix Unitaire</th>
-              <th class="p-2 text-center w-20">TVA (%)</th>
-              <th class="p-2 text-right w-32">Total TTC</th>
+              <th class="p-2 text-center w-24">Reste à livrer</th>
               <th class="p-2 w-8"></th>
             </tr>
           </thead>
@@ -154,21 +144,11 @@ function submit() {
             <tr v-for="(item, index) in form.items" :key="index" class="border-t hover:bg-gray-50">
               <td class="p-2">{{ item.designation }}</td>
               <td class="p-2 text-center">
-                <input type="number" min="1" v-model.number="item.quantite"
+                <input type="number" min="0" :max="resteALivrer(item.article_id) ?? undefined" v-model.number="item.quantite"
                   class="w-20 text-center border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
               </td>
-              <td class="p-2 text-center">
-                <div class="w-24 text-center border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                  {{ item.prix_unitaire }}
-                </div>
-              </td>
-              <td class="p-2 text-center">
-                <div class="w-24 text-center border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                  {{ item.taux_tva }}
-                </div>
-              </td>
-              <td class="p-2 text-right font-medium">
-                {{ (item.quantite * item.prix_unitaire * (1 + item.taux_tva / 100)).toFixed(2) }}
+              <td class="p-2 text-center text-gray-500">
+                {{ resteALivrer(item.article_id) }}
               </td>
               <td class="p-2 text-center">
                 <button type="button" @click="removeItem(index)" class="text-red-500 hover:text-red-700">
@@ -178,19 +158,12 @@ function submit() {
             </tr>
 
             <tr v-if="form.items.length === 0">
-              <td colspan="6" class="text-center text-gray-400 p-3">
+              <td colspan="4" class="text-center text-gray-400 p-3">
                 Aucun article ajouté
               </td>
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <!-- Totals -->
-      <div class="flex justify-end space-x-6 text-sm text-gray-700 pt-2">
-        <div>Total HT: <span class="font-semibold">{{ total_ht }} DH</span></div>
-        <div>TVA: <span class="font-semibold">{{ total_tva }} DH</span></div>
-        <div>Total TTC: <span class="font-semibold">{{ total_ttc }} DH</span></div>
       </div>
 
       <!-- Notes -->

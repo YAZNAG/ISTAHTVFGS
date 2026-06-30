@@ -107,12 +107,6 @@
                                     Statut
                                 </th>
                                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100/50">
-                                    Total HT
-                                </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100/50">
-                                    Total TTC
-                                </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100/50">
                                     Actions
                                 </th>
                             </tr>
@@ -143,12 +137,6 @@
                                     >
                                         {{ getStatutLabel(bon.statut) }}
                                     </span>
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                                    {{ bon.total_ht || 0 }} DH
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm text-green-600 font-semibold">
-                                    {{ bon.total_ttc || 0 }} DH
                                 </td>
 
                                 <td class="px-6 py-4 text-center">
@@ -209,12 +197,6 @@
                                     Statut
                                 </th>
                                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100/50">
-                                    Total HT
-                                </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100/50">
-                                    Total TTC
-                                </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100/50">
                                     Actions
                                 </th>
                             </tr>
@@ -245,12 +227,6 @@
                                     >
                                         {{ getStatutLabel(bon.statut) }}
                                     </span>
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                                    {{ bon.total_ht || 0 }} DH
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm text-green-600 font-semibold">
-                                    {{ bon.total_ttc || 0 }} DH
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex justify-center items-center gap-1">

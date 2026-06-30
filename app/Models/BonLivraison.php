@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BonLivraison extends Model
 {
     public const STATUS_EN_ATTENTE_LIVRAISON = 'en_attente_livraison';
+    public const STATUS_PARTIELLEMENT_LIVREE = 'partiellement_livree';
     public const STATUS_LIVREE = 'livree';
     
     public $fillable = [

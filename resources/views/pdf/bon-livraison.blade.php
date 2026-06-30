@@ -79,8 +79,6 @@
                 <th class="text-left">Désignation</th>
                 <th class="text-left w-20">Unité</th>
                 <th class="text-right w-20">Qté</th>
-                <th class="text-right w-28">Prix U.</th>
-                <th class="text-right w-28">Total TTC</th>
             </tr>
         </thead>
         <tbody>
@@ -89,29 +87,13 @@
                     <td class="text-left">{{ $ligne['designation'] ?? '-' }}</td>
                     <td>{{ $ligne['unite_mesure'] ?? '-' }}</td>
                     <td class="text-right">{{ $ligne['quantite_livree'] }}</td>
-                    <td class="text-right">{{ $ligne['prix_unitaire'] }} DH</td>
-                    <td class="text-right font-medium">{{ $ligne['total_ttc'] }} DH</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center text-black py-4">Aucun article livré</td>
+                    <td colspan="3" class="text-center text-black py-4">Aucun article livré</td>
                 </tr>
             @endforelse
         </tbody>
-        <tfoot>
-            <tr class=" font-semibold">
-                <td colspan="4" class="text-right">Total HT</td>
-                <td class="text-right">{{ number_format($livraison['totaux']['ht'], 2, ',', ' ') }} DH</td>
-            </tr>
-            <tr class=" font-semibold">
-                <td colspan="4" class="text-right">Total TVA</td>
-                <td class="text-right">{{ number_format($livraison['totaux']['tva'], 2, ',', ' ') }} DH</td>
-            </tr>
-            <tr class=" font-bold">
-                <td colspan="4" class="text-right">Total TTC</td>
-                <td class="text-right">{{ number_format($livraison['totaux']['ttc'], 2, ',', ' ') }} DH</td>
-            </tr>
-        </tfoot>
     </table>
 
     {{-- SIGNATURES --}}
