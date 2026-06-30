@@ -234,6 +234,7 @@ function confirmDelete() {
                 <th>Unite</th>
                 <th class="text-right">Stock actuel</th>
                 <th class="text-right">Seuil minimal</th>
+                <th class="text-right">Seuil maximal</th>
                 <th>Statut</th>
                 <th class="text-right">Actions</th>
               </tr>
@@ -253,6 +254,7 @@ function confirmDelete() {
                 <td class="font-semibold text-slate-700">{{ article.unite_mesure || '-' }}</td>
                 <td class="text-right font-bold text-istaht-navy">{{ formatNumber(article.quantite_stock, 2) }}</td>
                 <td class="text-right text-slate-600">{{ formatNumber(article.seuil_minimal, 2) }}</td>
+                <td class="text-right text-slate-600">{{ formatNumber(article.seuil_maximal, 2) }}</td>
                 <td>
                   <div class="flex flex-wrap gap-2">
                     <span :class="['ui-badge ring-1', statusClasses(article.est_actif)]">
@@ -319,6 +321,10 @@ function confirmDelete() {
               <div class="rounded-lg bg-slate-50 p-3">
                 <p class="text-xs font-bold uppercase text-slate-400">Seuil min.</p>
                 <p class="mt-1 font-bold text-slate-700">{{ formatNumber(article.seuil_minimal, 2) }}</p>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <p class="text-xs font-bold uppercase text-slate-400">Seuil max.</p>
+                <p class="mt-1 font-bold text-slate-700">{{ formatNumber(article.seuil_maximal, 2) }}</p>
               </div>
             </div>
 
