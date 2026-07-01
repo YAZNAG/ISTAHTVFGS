@@ -24,7 +24,7 @@ class IndexReceptionResource extends JsonResource
             'total_ht' => $this->bonLivraison->total_ht,
             'total_tva' => $this->bonLivraison->total_tva,
             'total_ttc' => $this->bonLivraison->total_ttc,
-            'items_count' => $this->bonLivraison->items->count(),
+            'items_count' => $this->bonLivraison->items_count ?? 0,
         ];
     }
 }

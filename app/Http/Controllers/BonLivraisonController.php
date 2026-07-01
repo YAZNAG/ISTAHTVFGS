@@ -36,7 +36,7 @@ class BonLivraisonController extends Controller implements HasMiddleware
     {
         $search = $request->search;
         $responsable_id = $request->responsable_id;
-        $bonLivraisons = BonLivraison::livree()->withCount('items')
+        $bonLivraisons = BonLivraison::livree()->withCount('items')->with('fournisseur:id,nom')
             ->when($search, function ($query, $search) {
                 return $query->where('numero', 'like', '%' . $search . '%')
                     ->orWhereHas('fournisseur', function ($query) use ($search) {
@@ -48,7 +48,7 @@ class BonLivraisonController extends Controller implements HasMiddleware
             })
             ->paginate(10)->withQueryString();
 
-        $pendingLivraisons = BonLivraison::pending()->withCount('items')
+        $pendingLivraisons = BonLivraison::pending()->withCount('items')->with('fournisseur:id,nom')
             ->when($search, function ($query, $search) {
                 return $query->where('numero', 'like', '%' . $search . '%')
                     ->orWhereHas('fournisseur', function ($query) use ($search) {
@@ -58,7 +58,7 @@ class BonLivraisonController extends Controller implements HasMiddleware
             ->when($responsable_id, function ($query, $responsable_id) {
                 return $query->where('responsable_id', $responsable_id);
             })
-        ->get();
+            ->get();
 
         $magasiniers = User::permission('validate_bonLivraisons')
                     ->withoutRole('manager')

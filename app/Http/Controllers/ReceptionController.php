@@ -35,8 +35,13 @@ class ReceptionController extends Controller implements HasMiddleware
     {
         $search = $request->search;
 
-        $receptions = Reception::
-            when($search, function ($query, $search) {
+        $receptions = Reception::with([
+                'bonLivraison' => fn ($q) => $q
+                    ->select(['id', 'numero', 'date_livraison', 'statut', 'total_ht', 'total_tva', 'total_ttc', 'fournisseur_id'])
+                    ->withCount('items'),
+                'bonLivraison.fournisseur:id,nom',
+            ])
+            ->when($search, function ($query, $search) {
                 return $query->where('numero', 'like', '%' . $search . '%');
             })
             ->paginate(10)->withQueryString();

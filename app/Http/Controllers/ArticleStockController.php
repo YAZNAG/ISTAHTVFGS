@@ -48,15 +48,20 @@ class ArticleStockController extends Controller implements HasMiddleware
             'articles' => $articles,
             'categories' => $categories,
             'filters' => $request->only(['search', 'categorie']),
-            'stats' => [
-                'total' => Article::withNonExists()->count(),
-                'stockTotal' => Article::withNonExists()->sum('quantite_stock'),
-                'lowStock' => Article::withNonExists()
-                    ->where('quantite_stock', '>', 0)
-                    ->whereColumn('quantite_stock', '<=', 'seuil_minimal')
-                    ->count(),
-                'rupture' => Article::withNonExists()->where('quantite_stock', '<=', 0)->count(),
-            ],
+            'stats' => (function () {
+                $row = Article::withNonExists()->selectRaw("
+                    COUNT(*) as total,
+                    COALESCE(SUM(quantite_stock), 0) as stockTotal,
+                    SUM(CASE WHEN quantite_stock > 0 AND quantite_stock <= seuil_minimal THEN 1 ELSE 0 END) as lowStock,
+                    SUM(CASE WHEN quantite_stock <= 0 THEN 1 ELSE 0 END) as rupture
+                ")->first();
+                return [
+                    'total'      => (int) $row->total,
+                    'stockTotal' => (float) $row->stockTotal,
+                    'lowStock'   => (int) $row->lowStock,
+                    'rupture'    => (int) $row->rupture,
+                ];
+            })(),
         ]);
     }
 

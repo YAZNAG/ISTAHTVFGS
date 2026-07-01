@@ -42,7 +42,7 @@ class SortieStockController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         $query = MouvementStock::sorties()->with([
-            'article',
+            'article:id,reference,designation,unite_mesure',
             'referenceable',
         ]);
 

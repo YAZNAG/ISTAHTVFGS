@@ -54,16 +54,22 @@ class ArticleController extends Controller implements HasMiddleware
             'articles' => $articles,
             'categories' => Categorie::orderBy('nom')->get(['id', 'nom', 'code', 'couleur']),
             'filters' => $request->only(['search', 'categorie_id', 'status', 'stock']),
-            'stats' => [
-                'total' => Article::withNonExists()->count(),
-                'active' => Article::withNonExists()->where('est_actif', true)->count(),
-                'inactive' => Article::withNonExists()->where('est_actif', false)->count(),
-                'lowStock' => Article::withNonExists()
-                    ->where('quantite_stock', '>', 0)
-                    ->whereColumn('quantite_stock', '<=', 'seuil_minimal')
-                    ->count(),
-                'rupture' => Article::withNonExists()->where('quantite_stock', '<=', 0)->count(),
-            ],
+            'stats' => (function () {
+                $row = Article::withNonExists()->selectRaw("
+                    COUNT(*) as total,
+                    SUM(CASE WHEN est_actif = 1 THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN est_actif = 0 THEN 1 ELSE 0 END) as inactive,
+                    SUM(CASE WHEN quantite_stock > 0 AND quantite_stock <= seuil_minimal THEN 1 ELSE 0 END) as lowStock,
+                    SUM(CASE WHEN quantite_stock <= 0 THEN 1 ELSE 0 END) as rupture
+                ")->first();
+                return [
+                    'total'    => (int) $row->total,
+                    'active'   => (int) $row->active,
+                    'inactive' => (int) $row->inactive,
+                    'lowStock' => (int) $row->lowStock,
+                    'rupture'  => (int) $row->rupture,
+                ];
+            })(),
         ]);
     }
 
@@ -204,6 +210,7 @@ class ArticleController extends Controller implements HasMiddleware
     {
         return Pdf::loadView('pdf.articles', [
             'articles' => $this->filteredArticles($request)
+                ->select(['id', 'reference', 'designation', 'categorie_id', 'unite_mesure', 'quantite_stock', 'seuil_minimal', 'seuil_maximal', 'est_actif'])
                 ->with('categorie:id,nom,code')
                 ->orderBy('designation')
                 ->get(),
