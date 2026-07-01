@@ -25,8 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BonCommandeController extends Controller implements HasMiddleware
 {
@@ -383,15 +382,11 @@ class BonCommandeController extends Controller implements HasMiddleware
 
         $cleanReference = preg_replace('/[\/\\\\]/', '-', $bonCommande->reference);
 
-        return Pdf::view('pdf.bon-commande.bon-commande', [
+        return Pdf::loadView('pdf.bon-commande.bon-commande', [
             'bonCommande' => $bonCommande,
             'articles' => $bonCommande->articles,
             'fournisseur' => $bonCommande->fournisseur,
         ])
-            ->headerView('pdf.H')
-            ->footerView('pdf.bon-commande.bon-commande-footer')
-            ->margins(45, 5, 40, 5)
-            ->format(Format::A4)
             ->download("appel-offre-{$cleanReference}.pdf");
     }
 
@@ -411,15 +406,11 @@ class BonCommandeController extends Controller implements HasMiddleware
             ? $query->whereBetween('created_at', [$startDate, $endDate])->get()
             : $query->whereDate('created_at', '>=', $startDate)->get();
 
-        return Pdf::view('pdf.list-bon-commandes', [
+        return Pdf::loadView('pdf.list-bon-commandes', [
             'bonCommandes' => ListBonCommandesExport::collection($data)->toArray($request),
             'startDate' => $startDate,
             'endDate' => $endDate,
         ])
-            ->format(Format::A4)
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 35, 5)
             ->download('list-bon-commandes.pdf');
     }
 
@@ -444,11 +435,10 @@ class BonCommandeController extends Controller implements HasMiddleware
             ->get()
             ->map(fn (BonCommande $marche) => $this->marketIndexPayload($marche));
 
-        return Pdf::view('pdf.marches', [
+        return Pdf::loadView('pdf.marches', [
             'marches' => $marches,
             'generatedAt' => now(),
         ])
-            ->format(Format::A4)
             ->download('marches.pdf');
     }
 

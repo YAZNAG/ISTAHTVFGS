@@ -18,8 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BonReceptionController extends Controller
 {
@@ -585,12 +584,8 @@ public function downloadPdf(BonReception $bonReception)
             'total_lignes' => $bonReception->lignesReception->count()
         ]);
 
-        return Pdf::view('pdf.bon-reception', compact('bonReception'))->name($fileName)
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 40,5)
-            ->format(Format::A4)
-            ->download();
+        return Pdf::loadView('pdf.bon-reception', compact('bonReception'))
+            ->download($fileName);
             ;
 }
 

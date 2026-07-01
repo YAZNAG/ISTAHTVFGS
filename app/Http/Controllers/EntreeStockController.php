@@ -22,8 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EntreeStockController extends Controller implements HasMiddleware
 {
@@ -113,12 +112,8 @@ class EntreeStockController extends Controller implements HasMiddleware
 
         $articles = ExportEntreeStockRecource::collection($data)->toArray($request);
 
-        return Pdf::view('pdf.fiche-entree', 
+        return Pdf::loadView('pdf.fiche-entree', 
                     compact('articles', 'startDate', 'endDate')
-    )->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 40,5)
-            ->format(Format::A4)
-            ->download('fiche-entree.pdf');
+    )->download('fiche-entree.pdf');
     }
 }

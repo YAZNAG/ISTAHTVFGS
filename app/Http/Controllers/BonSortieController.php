@@ -13,8 +13,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BonSortieController extends Controller implements HasMiddleware
 {
@@ -180,13 +179,9 @@ class BonSortieController extends Controller implements HasMiddleware
             'lignesSortie.article',
         ]);
 
-        return Pdf::view('pdf.bon-sortie', [
+        return Pdf::loadView('pdf.bon-sortie', [
             'sortieStock' => $bonSortie
         ])
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 40,5)
-            ->format(Format::A4)
             ->download("bon-sortie-{$bonSortie->numero}.pdf");
     }
 }

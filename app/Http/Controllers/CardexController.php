@@ -9,9 +9,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Enums\Orientation;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CardexController extends Controller implements HasMiddleware
 {
@@ -120,18 +118,14 @@ class CardexController extends Controller implements HasMiddleware
 
         $fileName = "cardex-{$article->reference}-{$year}.pdf";
 
-        return Pdf::view('pdf.cardex', [
+        return Pdf::loadView('pdf.cardex', [
             'article' => $article,
             'year' => $year,
             'cardex' => $cardex,
             'monthTotals' => $monthTotals,
             'pages' => $pages,
         ])
-            ->headerView('pdf.cardex-header', ['article' => $article])
-            ->footerView('pdf.F')
-            ->format(Format::A4)
-            ->orientation(Orientation::Landscape)
-            ->margins(0, 5, 0, 5)
+            ->setPaper('a4', 'landscape')
             ->download($fileName);
     }
 }

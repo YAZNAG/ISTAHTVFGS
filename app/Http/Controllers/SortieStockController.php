@@ -22,8 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SortieStockController extends Controller implements HasMiddleware
 {
@@ -113,13 +112,9 @@ class SortieStockController extends Controller implements HasMiddleware
 
         $articles = ExportSortieStockRecource::collection($data)->toArray($request);
 
-        return Pdf::view('pdf.fiche-sortie', 
+        return Pdf::loadView('pdf.fiche-sortie', 
                         compact('articles', 'startDate', 'endDate')
             )
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 40,5)
-            ->format(Format::A4)
             ->download('fiche-sortie.pdf');
     }
 }

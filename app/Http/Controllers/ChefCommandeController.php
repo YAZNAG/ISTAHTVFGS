@@ -22,8 +22,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ChefCommandeController extends Controller implements HasMiddleware
 {
@@ -404,11 +403,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
         $cleanReference = preg_replace('/[\/\\\\]/', '-', $chefCommande->reference);
         $fileName = "chef-commande-{$cleanReference}.pdf";
         
-        return Pdf::view('pdf.chef-commande.chef-commande', $data)
-            ->headerView('pdf.H')
-            ->footerView('pdf.chef-commande.chef-commande-footer')
-            ->margins(45, 5, 40,5)
-            ->format(Format::A4)
+        return Pdf::loadView('pdf.chef-commande.chef-commande', $data)
             ->download($fileName);
     }
 }

@@ -18,8 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ArticleController extends Controller implements HasMiddleware
 {
@@ -203,13 +202,12 @@ class ArticleController extends Controller implements HasMiddleware
 
     public function exportPdf(Request $request)
     {
-        return Pdf::view('pdf.articles', [
+        return Pdf::loadView('pdf.articles', [
             'articles' => $this->filteredArticles($request)
                 ->with('categorie:id,nom,code')
                 ->orderBy('designation')
                 ->get(),
         ])
-            ->format(Format::A4)
             ->download('articles.pdf');
     }
 

@@ -21,7 +21,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class FicheTechniqueController extends Controller implements HasMiddleware
 {
@@ -308,7 +308,7 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
         $template = $fiche->type == FicheType::PEDAGOGIQUE ? 'fiche-pedagogique' : 'fiche-collective';
 
-        return Pdf::view('pdf.' . $template, [
+        return Pdf::loadView('pdf.' . $template, [
             'fiche' => $fiche,
             'totalTtc' => $totalTtc,
             'total_effectif' => round($totalTtc / $fiche->effectif, 2)

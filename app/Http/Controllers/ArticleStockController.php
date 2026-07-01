@@ -7,8 +7,7 @@ use App\Models\Categorie;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ArticleStockController extends Controller implements HasMiddleware
 {
@@ -68,13 +67,9 @@ class ArticleStockController extends Controller implements HasMiddleware
             ->select(['id', 'reference', 'designation', 'quantite_stock', 'seuil_minimal', 'unite_mesure', 'categorie_id']);
 
         $now = now()->toDateTimeString();
-        return Pdf::view('pdf.articles-stock', [
+        return Pdf::loadView('pdf.articles-stock', [
             'rows' => $query->get(),
             'now' => $now,
-        ])->format(Format::A4)
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 40,5)
-            ->download("stock-articles-$now.pdf");
+        ])->download("stock-articles-$now.pdf");
     }
 }

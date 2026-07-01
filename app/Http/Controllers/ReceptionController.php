@@ -12,8 +12,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReceptionController extends Controller implements HasMiddleware
 {
@@ -141,11 +140,7 @@ class ReceptionController extends Controller implements HasMiddleware
 
         // return view('pdf.bon-reception', compact('reception'));
 
-        return Pdf::view('pdf.bon-reception', compact('reception'))->name($fileName)
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 40,5)
-            ->format(Format::A4)
-            ->download();
+        return Pdf::loadView('pdf.bon-reception', compact('reception'))
+            ->download($fileName);
 }
 }

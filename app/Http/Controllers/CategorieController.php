@@ -13,8 +13,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CategorieController extends Controller implements HasMiddleware
 {
@@ -156,10 +155,9 @@ class CategorieController extends Controller implements HasMiddleware
 
     public function exportPdf()
     {
-        return Pdf::view('pdf.categories', [
+        return Pdf::loadView('pdf.categories', [
             'categories' => $this->exportRows(),
         ])
-            ->format(Format::A4)
             ->download('categories.pdf');
     }
 

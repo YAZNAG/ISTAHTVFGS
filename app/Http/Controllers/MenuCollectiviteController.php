@@ -15,9 +15,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Enums\Orientation;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MenuCollectiviteController extends Controller implements HasMiddleware
 {
@@ -235,12 +233,8 @@ class MenuCollectiviteController extends Controller implements HasMiddleware
             });
 
         $fileName = "menu-collectivite-{$menu->date->format('Y-m-d')}.pdf";
-        return Pdf::view('pdf.menu-collectivite', compact('repas', 'menu', 'data'))
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(40, 0, 28, 0)
-            ->orientation(Orientation::Landscape)
-            ->format(Format::A4)
+        return Pdf::loadView('pdf.menu-collectivite', compact('repas', 'menu', 'data'))
+            ->setPaper('a4', 'landscape')
             ->download($fileName);
     }
 
@@ -265,16 +259,12 @@ class MenuCollectiviteController extends Controller implements HasMiddleware
 
 
         $fileName = "menu-collectivite-{$request->start_date}-{$request->end_date}.pdf";
-        return Pdf::view('pdf.export-menu-collectivite', [
+        return Pdf::loadView('pdf.export-menu-collectivite', [
             'menus' => ExportMenuCollectiviteResource::collection($menus)->toArray($request),
             'startDate' => Carbon::parse($request->start_date),
             'endDate' => Carbon::parse($request->end_date),
         ])
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 0, 40, 0)
-            ->orientation(Orientation::Landscape)
-            ->format(Format::A4)
+            ->setPaper('a4', 'landscape')
             ->download($fileName);
 
     }

@@ -18,8 +18,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BonLivraisonController extends Controller implements HasMiddleware
 {
@@ -226,10 +225,8 @@ class BonLivraisonController extends Controller implements HasMiddleware
         $bonLivraison = ExportBonLivraisonResource::make($bonLivraison)->toArray($request);
 
         // return response()->json($bonLivraison);
-        return Pdf::view('pdf.bon-livraison', [
+        return Pdf::loadView('pdf.bon-livraison', [
             'livraison' => $bonLivraison
-        ])->format(Format::A4)
-            ->margins(5, 5, 5, 5)
-            ->download("bon-livraison-{$bonLivraison['reference']}.pdf");
+        ])->download("bon-livraison-{$bonLivraison['reference']}.pdf");
     }
 }

@@ -10,8 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DecompteController extends Controller
 {
@@ -154,17 +153,12 @@ class DecompteController extends Controller
         $decompte_total = number_format($current_decompte_total - $previous_decompte_total, 2, '.', '');
 
         $fileName = "decompte-{$decompte->marche->reference}-{$decompte->date}.pdf";
-        return Pdf::view('pdf.decompte', [
+        return Pdf::loadView('pdf.decompte', [
             'items' => $items,
             "travaux_termine" => $travaux_termine,
             "travaux_non_termine" => $travaux_non_termine,
             "decompte_total" => $decompte_total,
             "marche" => $decompte->marche
-        ])->format(Format::A4)
-            ->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 35, 5)
-            ->download($fileName)
-            ;
+        ])->download($fileName);
     }
 }

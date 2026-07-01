@@ -13,10 +13,8 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
-use function Spatie\LaravelPdf\Support\pdf;
 
 class InventaireController extends Controller implements HasMiddleware
 {
@@ -210,11 +208,8 @@ class InventaireController extends Controller implements HasMiddleware
     {
         $inventaire->load('lignes');
 
-        return Pdf::view('pdf.inventaire.inventaire', [
+        return Pdf::loadView('pdf.inventaire.inventaire', [
             'inventaire' => $inventaire
-        ])->headerView('pdf.H')
-            ->footerView('pdf.F')
-            ->margins(45, 5, 40,5)
-            ->format(Format::A4)->download("inventaire-{$inventaire->semaine}.pdf");
+        ])->download("inventaire-{$inventaire->semaine}.pdf");
     }
 }
