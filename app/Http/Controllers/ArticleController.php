@@ -208,6 +208,7 @@ class ArticleController extends Controller implements HasMiddleware
                 ->orderBy('designation')
                 ->get(),
         ])
+            ->setPaper('a4', 'landscape')
             ->download('articles.pdf');
     }
 
