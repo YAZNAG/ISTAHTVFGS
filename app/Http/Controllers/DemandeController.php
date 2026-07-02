@@ -191,7 +191,7 @@ class DemandeController extends Controller implements HasMiddleware
             'statut' => DemandeStatut::EN_ATTENTE_VALIDATION,
         ]);
 
-        $usersToNotify = User::permission('validate_demandes')->get();
+        $usersToNotify = User::permission('validate_demandes')->get(['id', 'email', 'name']);
         foreach ($usersToNotify as $user) {
             $user->notify(new NewDemandeCreated($demande));
         }
@@ -268,7 +268,7 @@ class DemandeController extends Controller implements HasMiddleware
     public function show(Demande $demande) {
         $this->authorize('show', $demande);
         
-        $demande->load(['articles', 'valideur']);
+        $demande->load(['articles.article:id,designation,quantite_stock,unite_mesure', 'valideur:id,name']);
 
         return Inertia::modal('Demandes/ShowDemandeModal', [
             'demande' => ShowDemendeResource::make($demande)

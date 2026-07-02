@@ -35,7 +35,10 @@ class InventaireController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        $invenrtaires = Inventaire::with(['lignes'])
+        $invenrtaires = Inventaire::withCount([
+                'lignes as articles_count',
+                'lignes as filled_count' => fn ($q) => $q->whereNotNull('stock_reel'),
+            ])
             ->when($request->semaine, function ($query) use ($request) {
                 return $query->where('semaine', $request->semaine);
             })

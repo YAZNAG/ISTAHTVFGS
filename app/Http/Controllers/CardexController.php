@@ -46,31 +46,37 @@ class CardexController extends Controller implements HasMiddleware
             12 => 'DECEMBRE'
         ];
 
+        // 1 query for the whole year, grouped by month+day
+        $typeEntree = MouvementStock::TYPE_ENTREE;
+        $typeSortie = MouvementStock::TYPE_SORTIE;
+
+        $movements = MouvementStock::parArticle($article->id)
+            ->whereYear('date_mouvement', $year)
+            ->selectRaw(
+                'MONTH(date_mouvement) as mois, DAY(date_mouvement) as jour,
+                 SUM(CASE WHEN type = ? THEN quantite_entree ELSE 0 END) as entrees,
+                 SUM(CASE WHEN type = ? THEN quantite_sortie ELSE 0 END) as sorties',
+                [$typeEntree, $typeSortie]
+            )
+            ->groupBy(\Illuminate\Support\Facades\DB::raw('MONTH(date_mouvement)'), \Illuminate\Support\Facades\DB::raw('DAY(date_mouvement)'))
+            ->orderBy(\Illuminate\Support\Facades\DB::raw('MONTH(date_mouvement)'))
+            ->orderBy(\Illuminate\Support\Facades\DB::raw('DAY(date_mouvement)'))
+            ->get()
+            ->keyBy(fn ($r) => "{$r->mois}-{$r->jour}");
+
         $cardex = [];
         $monthTotals = [];
         $stockPreviousDay = 0;
 
-        // === Build cardex data ===
         for ($month = 1; $month <= 12; $month++) {
             $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
-
             $totalEntrees = 0;
             $totalSorties = 0;
-            $stockFinalMonth = 0;
 
             for ($day = 1; $day <= $daysInMonth; $day++) {
-                $date = Carbon::create($year, $month, $day);
-
-                $entrees = MouvementStock::parArticle($article->id)
-                    ->whereDate('date_mouvement', $date)
-                    ->where('type', MouvementStock::TYPE_ENTREE)
-                    ->sum('quantite_entree');
-
-                $sorties = MouvementStock::parArticle($article->id)
-                    ->whereDate('date_mouvement', $date)
-                    ->where('type', MouvementStock::TYPE_SORTIE)
-                    ->sum('quantite_sortie');
-
+                $row = $movements->get("{$month}-{$day}");
+                $entrees = $row ? (float) $row->entrees : 0;
+                $sorties = $row ? (float) $row->sorties : 0;
                 $stockFinal = $stockPreviousDay + $entrees - $sorties;
 
                 $cardex[$month][$day] = [
@@ -81,14 +87,13 @@ class CardexController extends Controller implements HasMiddleware
 
                 $totalEntrees += $entrees;
                 $totalSorties += $sorties;
-                $stockFinalMonth = $stockFinal;
                 $stockPreviousDay = $stockFinal;
             }
 
             $monthTotals[$month] = [
                 'total_entrees' => $totalEntrees,
                 'total_sorties' => $totalSorties,
-                'stock_final' => $stockFinalMonth,
+                'stock_final' => $stockPreviousDay,
             ];
         }
 

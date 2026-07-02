@@ -23,7 +23,7 @@ class MesDemendesResource extends JsonResource
             'date_validation' => $this->date_validation,
             'valide_par' => $this->valideur?->name,
             'fiche_technique' => $this->getFirstMediaUrl('fiches_techniques'),
-            'articles_count' => $this->articles()->count()
+            'articles_count' => $this->articles_count ?? $this->articles()->count()
         ];
     }
 }

@@ -14,8 +14,8 @@ class InventaireIndexResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $totalLines = $this->lignes->count();
-        $filledLignes = $this->lignes->whereNotNull('stock_reel')->count();
+        $totalLines = $this->articles_count ?? 0;
+        $filledLignes = $this->filled_count ?? 0;
 
         return [
             'id' => $this->id,

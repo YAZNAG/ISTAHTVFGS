@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
+import Apexchart from 'vue3-apexcharts'
 import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,

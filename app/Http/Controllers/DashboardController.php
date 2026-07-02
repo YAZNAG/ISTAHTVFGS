@@ -102,7 +102,7 @@ class DashboardController extends Controller
             ->whereNotNull('article_id')
             ->groupBy('article_id')
             ->orderByDesc('total_sorties')
-            ->with('article')
+            ->with('article:id,reference,designation,unite_mesure')
             ->take(10)
             ->get()
             ->filter(fn ($movement) => $movement->article)
@@ -155,32 +155,44 @@ class DashboardController extends Controller
             ])
             ->values();
 
+        // Consolidate article stats: 4 queries → 1
+        $articleRow = Article::withNonExists()->selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN est_actif = 1 THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN quantite_stock > 0 AND quantite_stock <= seuil_minimal THEN 1 ELSE 0 END) as low_stock,
+            SUM(CASE WHEN quantite_stock <= 0 THEN 1 ELSE 0 END) as rupture
+        ")->first();
+
+        // Consolidate BonCommande stats: 5 queries → 2
+        $today = today();
+        $bcRow = BonCommande::selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN statut IN (?,?,?) THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN date_fin < ? AND statut != ? THEN 1 ELSE 0 END) as expired,
+            SUM(CASE WHEN date_fin BETWEEN ? AND ? AND statut != ? THEN 1 ELSE 0 END) as expiring_soon
+        ", [
+            BonCommande::STATUT_CREE, BonCommande::STATUT_ATTENTE_LIVRAISON, BonCommande::STATUT_LIVRE_PARTIELLEMENT,
+            $today, BonCommande::STATUT_ANNULE,
+            $today, $today->copy()->addDays(30), BonCommande::STATUT_ANNULE,
+        ])->first();
+
+        $activeMarches = BonCommande::current()
+            ->whereNotIn('statut', [BonCommande::STATUT_CREE, BonCommande::STATUT_ANNULE])
+            ->count();
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'totalUsers' => User::count(),
                 'activeFournisseurs' => Fournisseur::where('est_actif', true)->count(),
-                'totalArticles' => Article::withNonExists()->count(),
-                'activeArticles' => Article::withNonExists()->where('est_actif', true)->count(),
-                'lowStockArticles' => Article::withNonExists()
-                    ->where('quantite_stock', '>', 0)
-                    ->whereColumn('quantite_stock', '<=', 'seuil_minimal')
-                    ->count(),
-                'ruptureArticles' => Article::withNonExists()->where('quantite_stock', '<=', 0)->count(),
-                'totalBCs' => BonCommande::count(),
-                'activeMarches' => BonCommande::current()
-                    ->whereNotIn('statut', [BonCommande::STATUT_CREE, BonCommande::STATUT_ANNULE])
-                    ->count(),
-                'pendingMarches' => BonCommande::whereIn('statut', [
-                    BonCommande::STATUT_CREE,
-                    BonCommande::STATUT_ATTENTE_LIVRAISON,
-                    BonCommande::STATUT_LIVRE_PARTIELLEMENT,
-                ])->count(),
-                'expiredMarches' => BonCommande::whereDate('date_fin', '<', today())
-                    ->where('statut', '!=', BonCommande::STATUT_ANNULE)
-                    ->count(),
-                'expiringSoonMarches' => BonCommande::whereBetween('date_fin', [today(), today()->copy()->addDays(30)])
-                    ->where('statut', '!=', BonCommande::STATUT_ANNULE)
-                    ->count(),
+                'totalArticles' => (int) $articleRow->total,
+                'activeArticles' => (int) $articleRow->active,
+                'lowStockArticles' => (int) $articleRow->low_stock,
+                'ruptureArticles' => (int) $articleRow->rupture,
+                'totalBCs' => (int) $bcRow->total,
+                'activeMarches' => $activeMarches,
+                'pendingMarches' => (int) $bcRow->pending,
+                'expiredMarches' => (int) $bcRow->expired,
+                'expiringSoonMarches' => (int) $bcRow->expiring_soon,
                 'engagedAmount' => round($engagedAmount, 2),
                 'consumedAmount' => round($consumedAmount, 2),
                 'remainingAmount' => round(max($engagedAmount - $consumedAmount, 0), 2),

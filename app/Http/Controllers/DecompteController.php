@@ -119,7 +119,7 @@ class DecompteController extends Controller
 
     public function download(Decompte $decompte)
     {
-        $decompte->load('items', 'marche.fournisseur');
+        $decompte->load('items.article:id,designation,unite_mesure', 'marche.fournisseur:id,nom,ice');
 
         $items = $decompte->items->map(function ($item) {
                 return [
@@ -135,12 +135,10 @@ class DecompteController extends Controller
                 ];
             });
 
-        $previous_decompte_total = Decompte::with('items')->where('marche_id', $decompte->marche_id)->where('date', '<', $decompte->date)
-            ->latest()
-            ->get()
-            ->sum(function ($decompte) {
-                return number_format($decompte->items->sum('montant_ttc'), 2, '.', '');
-            });
+        $previous_decompte_total = \App\Models\DecompteItem::whereHas('decompte', fn ($q) => $q
+                ->where('marche_id', $decompte->marche_id)
+                ->where('date', '<', $decompte->date)
+            )->sum('montant_ttc');
         
         $current_decompte_total = $decompte->items->sum('montant_ttc');
 

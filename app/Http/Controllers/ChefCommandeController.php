@@ -160,7 +160,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
         }
         
         if ($request->type == 'submit') {
-            $usersToNotify = User::permission('validate_chefCommandes')->get();
+            $usersToNotify = User::permission('validate_chefCommandes')->get(['id', 'email', 'name']);
 
             foreach ($usersToNotify as $user) {
                 $user->notify(new NewChefCommadeCreated($chefCommande));
