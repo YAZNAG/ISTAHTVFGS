@@ -52,15 +52,19 @@ const submit = () => {
 
             <div class="mt-12 max-w-md">
               <p class="text-sm font-bold uppercase text-istaht-turquoise">Espace sécurisé</p>
-              <h1 class="mt-3 text-3xl font-bold leading-tight">Achats, stocks et demandes internes</h1>
+              <h1 class="mt-3 text-3xl font-bold leading-tight">Gestion des achats, stocks et marchés</h1>
               <p class="mt-4 text-sm leading-6 text-blue-100">
-                Accès réservé aux utilisateurs autorisés de la plateforme ISPITSRK / ISTAHT.
+                Plateforme de gestion administrative ISTAHT Tanger — Achats, approvisionnements, marchés et inventaires.
               </p>
+              <div class="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-cyan-100">
+                <span class="h-2 w-2 rounded-full bg-green-400"></span>
+                Système opérationnel — v2.0
+              </div>
             </div>
           </div>
 
           <p class="mt-10 text-xs text-blue-100">
-            © {{ new Date().getFullYear() }} ISTAHT. Tous droits réservés.
+            © {{ new Date().getFullYear() }} ISTAHT Tanger. Tous droits réservés. — stock.istahttanger.ma
           </p>
         </section>
 
