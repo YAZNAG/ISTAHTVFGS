@@ -1,10 +1,9 @@
 <script setup>
 import { ref } from 'vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { CubeIcon, EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/vue/24/outline'
 
 defineProps({
-  canResetPassword: { type: Boolean, default: true },
   status: { type: String, default: '' },
 })
 
