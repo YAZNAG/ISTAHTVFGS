@@ -142,12 +142,12 @@ function confirmDelete() {
           </div>
 
           <div class="flex flex-wrap gap-2">
-            <Link :href="route('articles.export.pdf', exportParams)" class="ui-button ui-button-ghost">
+            <a :href="route('articles.export.pdf', exportParams)" class="ui-button ui-button-ghost" target="_blank" rel="noopener">
               Export PDF
-            </Link>
-            <Link :href="route('articles.export.excel', exportParams)" class="ui-button ui-button-secondary">
+            </a>
+            <a :href="route('articles.export.excel', exportParams)" class="ui-button ui-button-secondary" target="_blank" rel="noopener">
               Export Excel
-            </Link>
+            </a>
             <ModalLink
               v-if="can('create_articles')"
               :href="route('articles.create')"

@@ -125,7 +125,7 @@ const submit = () => {
                 <p v-if="form.errors.password" class="ui-error mt-1.5">{{ form.errors.password }}</p>
               </div>
 
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center">
                 <label class="inline-flex items-center gap-2">
                   <input
                     v-model="form.remember"
@@ -135,14 +135,6 @@ const submit = () => {
                   />
                   <span class="text-sm font-medium text-slate-600">Se souvenir de moi</span>
                 </label>
-
-                <Link
-                  v-if="canResetPassword"
-                  :href="route('password.request')"
-                  class="text-sm font-semibold text-istaht-blue transition hover:text-istaht-cyan"
-                >
-                  Mot de passe oublié ?
-                </Link>
               </div>
 
               <button

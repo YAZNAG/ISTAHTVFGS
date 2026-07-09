@@ -39,12 +39,12 @@ class ArticleController extends Controller implements HasMiddleware
                 'categorie:id,nom,code,couleur',
                 'images:id,article_id,image_path,est_principale',
             ])
-            ->withCount([
-                'bonCommandeArticles as marches_count',
-                'mouvementsStock as mouvements_count',
-                'lignesReception as receptions_count',
-                'lignesSortieStock as sorties_count',
-            ])
+            ->selectRaw('articles.*, (
+                EXISTS (SELECT 1 FROM bon_commande_articles WHERE bon_commande_articles.article_id = articles.id)
+                OR EXISTS (SELECT 1 FROM mouvement_stocks WHERE mouvement_stocks.article_id = articles.id)
+                OR EXISTS (SELECT 1 FROM ligne_receptions WHERE ligne_receptions.article_id = articles.id)
+                OR EXISTS (SELECT 1 FROM ligne_sortie_stocks WHERE ligne_sortie_stocks.article_id = articles.id)
+            ) as is_used_raw')
             ->latest()
             ->paginate(10)
             ->withQueryString()
@@ -274,7 +274,7 @@ class ArticleController extends Controller implements HasMiddleware
             'seuil_maximal' => (float) ($article->seuil_maximal ?? 0),
             'est_actif' => (bool) $article->est_actif,
             'stock_status' => $this->stockStatus($article),
-            'is_used' => ((int) $article->marches_count + (int) $article->mouvements_count + (int) $article->receptions_count + (int) $article->sorties_count) > 0,
+            'is_used' => (bool) $article->is_used_raw,
             'image_url' => $image ? asset('storage/'.$image->image_path) : null,
         ];
     }

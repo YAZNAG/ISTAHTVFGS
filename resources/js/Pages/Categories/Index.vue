@@ -112,12 +112,12 @@ function confirmDelete() {
           </div>
 
           <div class="flex flex-wrap gap-2">
-            <Link :href="route('categories.export.pdf')" class="ui-button ui-button-ghost">
+            <a :href="route('categories.export.pdf')" class="ui-button ui-button-ghost" target="_blank" rel="noopener">
               Export PDF
-            </Link>
-            <Link :href="route('categories.export.excel')" class="ui-button ui-button-secondary">
+            </a>
+            <a :href="route('categories.export.excel')" class="ui-button ui-button-secondary" target="_blank" rel="noopener">
               Export Excel
-            </Link>
+            </a>
             <ModalLink
               v-if="can('create_categories')"
               href="#create-categorie-modal"
