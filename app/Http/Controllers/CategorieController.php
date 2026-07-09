@@ -155,6 +155,8 @@ class CategorieController extends Controller implements HasMiddleware
 
     public function exportPdf()
     {
+        ini_set('memory_limit', '256M');
+
         return Pdf::loadView('pdf.categories', [
             'categories' => $this->exportRows(),
         ])

@@ -208,13 +208,16 @@ class ArticleController extends Controller implements HasMiddleware
 
     public function exportPdf(Request $request)
     {
-        return Pdf::loadView('pdf.articles', [
-            'articles' => $this->filteredArticles($request)
-                ->select(['id', 'reference', 'designation', 'categorie_id', 'unite_mesure', 'quantite_stock', 'seuil_minimal', 'seuil_maximal', 'est_actif'])
-                ->with('categorie:id,nom,code')
-                ->orderBy('designation')
-                ->get(),
-        ])
+        ini_set('memory_limit', '256M');
+
+        $articles = $this->filteredArticles($request)
+            ->select(['id', 'reference', 'designation', 'categorie_id', 'unite_mesure', 'quantite_stock', 'seuil_minimal', 'seuil_maximal', 'est_actif'])
+            ->with('categorie:id,nom,code')
+            ->orderBy('designation')
+            ->limit(500)
+            ->get();
+
+        return Pdf::loadView('pdf.articles', compact('articles'))
             ->setPaper('a4', 'landscape')
             ->download('articles.pdf');
     }
