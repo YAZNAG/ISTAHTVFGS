@@ -370,6 +370,8 @@ class BonCommandeController extends Controller implements HasMiddleware
 
     public function generatePdf(BonCommande $bonCommande)
     {
+        ini_set('memory_limit', '256M');
+
         if (in_array($bonCommande->statut, [BonCommande::STATUT_CREE, BonCommande::STATUT_ANNULE], true)) {
             abort(403, 'PDF non disponible pour ce statut');
         }
@@ -387,6 +389,7 @@ class BonCommandeController extends Controller implements HasMiddleware
             'articles' => $bonCommande->articles,
             'fournisseur' => $bonCommande->fournisseur,
         ])
+            ->setPaper('a4', 'portrait')
             ->download("appel-offre-{$cleanReference}.pdf");
     }
 
@@ -429,6 +432,8 @@ class BonCommandeController extends Controller implements HasMiddleware
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '256M');
+
         $marches = $this->filteredMarches($request)
             ->with($this->indexRelations())
             ->latest()
@@ -439,6 +444,7 @@ class BonCommandeController extends Controller implements HasMiddleware
             'marches' => $marches,
             'generatedAt' => now(),
         ])
+            ->setPaper('a4', 'landscape')
             ->download('marches.pdf');
     }
 

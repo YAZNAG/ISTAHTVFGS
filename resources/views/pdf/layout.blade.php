@@ -185,6 +185,8 @@
         .badge-faible   { background: #fef9c3; color: #854d0e; }
         .badge-rupture  { background: #fee2e2; color: #991b1b; }
         .badge-normal   { background: #dcfce7; color: #166534; }
+        .badge-info     { background: #dbeafe; color: #1e40af; }
+        .badge-warning  { background: #fef3c7; color: #92400e; }
 
         /* ══════════════════════════════════════
            RÉSUMÉ / COMPTEUR

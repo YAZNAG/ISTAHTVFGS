@@ -217,20 +217,24 @@ function confirmDelete() {
           </div>
 
           <div class="flex flex-wrap gap-2">
-            <Link
+            <a
               v-if="can('export_marches')"
               :href="route('bon-commandes.export.pdf', exportParams)"
               class="ui-button ui-button-ghost"
+              target="_blank"
+              rel="noopener"
             >
               Export PDF
-            </Link>
-            <Link
+            </a>
+            <a
               v-if="can('export_marches')"
               :href="route('bon-commandes.export.excel', exportParams)"
               class="ui-button ui-button-secondary"
+              target="_blank"
+              rel="noopener"
             >
               Export Excel
-            </Link>
+            </a>
             <ModalLink
               v-if="can('create_marches')"
               :href="route('bon-commandes.create')"

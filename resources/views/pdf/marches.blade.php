@@ -1,107 +1,96 @@
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <title>Export marches</title>
-    <style>
-        body {
-            font-family: DejaVu Sans, Arial, sans-serif;
-            color: #132238;
-            font-size: 10px;
-        }
+@extends('pdf.layout')
 
-        h1 {
-            margin: 0 0 6px;
-            color: #0f3b63;
-            font-size: 22px;
-        }
+@section('title', 'Liste des marchés')
 
-        .muted {
-            color: #64748b;
-            margin-bottom: 18px;
-        }
+@section('summary')
+    <strong>{{ count($marches) }}</strong> marché(s) exporté(s) &nbsp;·&nbsp;
+    Généré le {{ optional($generatedAt)->format('d/m/Y à H:i') }}
+@endsection
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #0f3b63;
-            color: #fff;
-            text-align: left;
-            padding: 7px;
-        }
-
-        td {
-            border-bottom: 1px solid #d8e0ea;
-            padding: 7px;
-            vertical-align: top;
-        }
-
-        .amount {
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        .badge {
-            border-radius: 999px;
-            padding: 3px 8px;
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-        .info { background: #e0f2fe; color: #075985; }
-        .warning { background: #fef3c7; color: #92400e; }
-        .success { background: #dcfce7; color: #166534; }
-        .danger { background: #fee2e2; color: #991b1b; }
-    </style>
-</head>
-<body>
-    <h1>Liste des marches</h1>
-    <div class="muted">Genere le {{ optional($generatedAt)->format('d/m/Y H:i') }}</div>
-
-    <table>
-        <thead>
+@section('content')
+<table>
+    <thead>
+        <tr>
+            <th style="width:11%">Référence</th>
+            <th style="width:28%">Objet</th>
+            <th style="width:14%">Catégorie</th>
+            <th style="width:13%">Fournisseur</th>
+            <th style="width:12%">Période</th>
+            <th style="width:9%">Statut</th>
+            <th style="width:7%;text-align:right">HT (DH)</th>
+            <th style="width:7%;text-align:right">TTC (DH)</th>
+            <th style="width:6%;text-align:right">Consommé</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse ($marches as $marche)
+            @php
+                [$badgeClass, $badgeLabel] = match($marche['statut']) {
+                    'cree'               => ['badge-info',    'Créé'],
+                    'attente_livraison'  => ['badge-warning', 'En attente'],
+                    'livre_partiellement'=> ['badge-warning', 'Partiel'],
+                    'livre_completement' => ['badge-active',  'Livré'],
+                    'annule'             => ['badge-inactive','Annulé'],
+                    default              => ['badge-info',    $marche['statut']],
+                };
+                $pct = (float) ($marche['consumption_percent'] ?? 0);
+                $pctClass = $pct >= 90 ? 'badge-inactive' : ($pct >= 60 ? 'badge-warning' : 'badge-active');
+            @endphp
             <tr>
-                <th>Reference</th>
-                <th>Objet</th>
-                <th>Categorie</th>
-                <th>Fournisseur</th>
-                <th>Dates</th>
-                <th>Statut</th>
-                <th class="amount">HT</th>
-                <th class="amount">TTC</th>
-                <th class="amount">Consomme</th>
+                <td><strong>{{ $marche['reference'] }}</strong></td>
+                <td style="font-size:9.5px">{{ $marche['objet'] }}</td>
+                <td style="font-size:9px">{{ $marche['categorie']['nom'] ?? '—' }}</td>
+                <td style="font-size:9px">{{ $marche['fournisseur']['nom_affichage'] ?? 'Non attribué' }}</td>
+                <td style="font-size:9px;text-align:center">
+                    {{ $marche['date_debut'] ?? '—' }}<br>
+                    <span style="color:#64748b">au {{ $marche['date_fin'] ?? '—' }}</span>
+                </td>
+                <td style="text-align:center">
+                    <span class="badge {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                </td>
+                <td style="text-align:right;font-variant-numeric:tabular-nums">
+                    {{ number_format((float)($marche['total_ht'] ?? 0), 2, ',', ' ') }}
+                </td>
+                <td style="text-align:right;font-variant-numeric:tabular-nums;font-weight:700">
+                    {{ number_format((float)($marche['total_ttc'] ?? 0), 2, ',', ' ') }}
+                </td>
+                <td style="text-align:center">
+                    <span class="badge {{ $pctClass }}">{{ number_format($pct, 1, ',', ' ') }}%</span>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach ($marches as $marche)
-                @php
-                    $tone = match($marche['statut']) {
-                        'cree' => 'info',
-                        'attente_livraison', 'livre_partiellement' => 'warning',
-                        'livre_completement' => 'success',
-                        'annule' => 'danger',
-                        default => 'info',
-                    };
-                @endphp
-                <tr>
-                    <td>{{ $marche['reference'] }}</td>
-                    <td>{{ $marche['objet'] }}</td>
-                    <td>{{ $marche['categorie']['nom'] ?? '-' }}</td>
-                    <td>{{ $marche['fournisseur']['nom_affichage'] ?? 'Non attribue' }}</td>
-                    <td>
-                        {{ $marche['date_debut'] ?? '-' }}<br>
-                        {{ $marche['date_fin'] ?? '-' }}
-                    </td>
-                    <td><span class="badge {{ $tone }}">{{ $marche['statut'] }}</span></td>
-                    <td class="amount">{{ number_format($marche['total_ht'], 2, ',', ' ') }}</td>
-                    <td class="amount">{{ number_format($marche['total_ttc'], 2, ',', ' ') }}</td>
-                    <td class="amount">{{ number_format($marche['consumption_percent'], 1, ',', ' ') }}%</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-</body>
-</html>
+        @empty
+            <tr>
+                <td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">
+                    Aucun marché à exporter.
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
+{{-- Totaux --}}
+@if(count($marches) > 0)
+@php
+    $totalHT  = collect($marches)->sum('total_ht');
+    $totalTTC = collect($marches)->sum('total_ttc');
+@endphp
+<table style="margin-top:10px;width:340px;margin-left:auto">
+    <tr>
+        <td style="padding:5px 10px;font-weight:700;font-size:10px;color:#0c3260;border:1px solid #dce4ef;background:#f4f7fb">
+            Total HT
+        </td>
+        <td style="padding:5px 10px;text-align:right;font-variant-numeric:tabular-nums;border:1px solid #dce4ef;background:#f4f7fb">
+            {{ number_format($totalHT, 2, ',', ' ') }} DH
+        </td>
+    </tr>
+    <tr>
+        <td style="padding:6px 10px;font-weight:800;font-size:11px;color:#fff;background:#0c3260;border:1px solid #071f3e">
+            Total TTC
+        </td>
+        <td style="padding:6px 10px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:#fff;background:#0c3260;border:1px solid #071f3e">
+            {{ number_format($totalTTC, 2, ',', ' ') }} DH
+        </td>
+    </tr>
+</table>
+@endif
+@endsection
