@@ -956,11 +956,13 @@ class BonCommandeController extends Controller implements HasMiddleware
     private function decomptePayload(BonCommande $marche)
     {
         return $marche->decomptes->map(fn (Decompte $decompte) => [
-            'id' => $decompte->id,
-            'date' => optional($decompte->date)->toDateString(),
-            'final' => (bool) $decompte->final,
-            'total_termine' => number_format((float) $decompte->items->sum('montant_ttc'), 2, ',', ' ').' DH',
-            'total_ttc' => (float) $decompte->items->sum('montant_ttc'),
+            'id'         => $decompte->id,
+            'numero'     => $decompte->numero ?? ('DC-'.str_pad($decompte->id, 4, '0', STR_PAD_LEFT)),
+            'date'       => optional($decompte->date)->toDateString(),
+            'date_debut' => optional($decompte->date_debut)->toDateString(),
+            'final'      => (bool) $decompte->final,
+            'total_ttc'  => (float) $decompte->items->sum('montant_ttc'),
+            'nb_articles' => $decompte->items->count(),
         ]);
     }
 

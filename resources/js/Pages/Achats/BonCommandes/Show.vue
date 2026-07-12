@@ -393,33 +393,59 @@ function formatCurrency(amount) {
             <p v-if="!marche.receptions?.length" class="py-8 text-center text-sm text-slate-500">Aucune reception rattachee.</p>
           </div>
 
-          <div v-if="activeTab === 'decomptes'" class="overflow-x-auto">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th class="text-right">Montant TTC</th>
-                  <th class="text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="decompte in decomptes" :key="decompte.id" class="hover:bg-slate-50">
-                  <td>{{ formatDate(decompte.date) }}</td>
-                  <td><UiBadge :tone="decompte.final ? 'success' : 'info'">{{ decompte.final ? 'Final' : 'Provisoire' }}</UiBadge></td>
-                  <td class="text-right font-bold text-istaht-navy">{{ formatCurrency(decompte.total_ttc) }}</td>
-                  <td class="text-right">
-                    <a :href="route('decompte.download-pdf', decompte.id)" target="_blank" class="ui-button ui-button-secondary px-3 py-1.5 text-xs">
-                      PDF
-                    </a>
-                    <a :href="route('decompte.download-excel', decompte.id)" target="_blank" class="ui-button ui-button-secondary px-3 py-1.5 text-xs ml-1">
-                      Excel
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p v-if="!decomptes?.length" class="py-8 text-center text-sm text-slate-500">Aucun decompte genere.</p>
+          <div v-if="activeTab === 'decomptes'">
+            <div class="mb-3 flex items-center justify-between">
+              <p class="text-sm text-slate-500">{{ decomptes?.length || 0 }} decompte(s) genere(s) pour ce marche.</p>
+              <ModalLink
+                v-if="marche.statut !== 'cree' && marche.statut !== 'annule'"
+                :href="route('decompte.create', marche.id)"
+                class="ui-button ui-button-primary px-3 py-1.5 text-xs"
+              >
+                + Nouveau decompte
+              </ModalLink>
+            </div>
+            <div v-if="decomptes?.length" class="overflow-x-auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Periode</th>
+                    <th>Type</th>
+                    <th class="text-right">Articles</th>
+                    <th class="text-right">Montant TTC</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="decompte in decomptes" :key="decompte.id" class="hover:bg-slate-50">
+                    <td class="font-bold text-istaht-blue">{{ decompte.numero }}</td>
+                    <td>
+                      <span class="text-slate-700">
+                        {{ decompte.date_debut ? formatDate(decompte.date_debut) : 'Debut marche' }}
+                      </span>
+                      <span class="mx-1 text-slate-400">→</span>
+                      <span class="font-semibold text-slate-700">{{ formatDate(decompte.date) }}</span>
+                    </td>
+                    <td>
+                      <UiBadge :tone="decompte.final ? 'success' : 'warning'">
+                        {{ decompte.final ? 'Definitif' : 'Provisoire' }}
+                      </UiBadge>
+                    </td>
+                    <td class="text-right text-slate-600">{{ decompte.nb_articles }}</td>
+                    <td class="text-right font-bold text-istaht-navy">{{ formatCurrency(decompte.total_ttc) }}</td>
+                    <td class="text-right">
+                      <a :href="route('decompte.download-pdf', decompte.id)" target="_blank" class="ui-button ui-button-secondary px-3 py-1.5 text-xs">
+                        PDF
+                      </a>
+                      <a :href="route('decompte.download-excel', decompte.id)" target="_blank" class="ui-button ui-button-secondary px-3 py-1.5 text-xs ml-1">
+                        Excel
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p v-else class="py-8 text-center text-sm text-slate-500">Aucun decompte genere pour ce marche.</p>
           </div>
         </div>
       </div>
