@@ -3,13 +3,17 @@
 namespace App\Exports;
 
 use App\Models\Decompte;
+use App\Exports\Concerns\WithIstahtHeader;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class DecompteExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class DecompteExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
 {
+    use WithIstahtHeader;
+
     public function __construct(protected Decompte $decompte)
     {
     }

@@ -3,13 +3,17 @@
 namespace App\Exports;
 
 use App\Models\Categorie;
+use App\Exports\Concerns\WithIstahtHeader;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class CategoriesExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class CategoriesExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
 {
+    use WithIstahtHeader;
+
     public function collection()
     {
         return Categorie::query()

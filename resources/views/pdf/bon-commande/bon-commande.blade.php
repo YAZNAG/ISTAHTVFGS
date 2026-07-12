@@ -6,6 +6,9 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        /* ── Espace réservé pour l'image header sur chaque page ── */
+        @page { margin-top: 120px; margin-bottom: 52px; }
+
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 11px;
@@ -14,106 +17,36 @@
             line-height: 1.45;
         }
 
-        /* ══ BANDEAU SOUVERAINETÉ ══ */
-        .sovereignty {
-            background: #0c3260;
-            color: rgba(255,255,255,.9);
-            text-align: center;
-            padding: 6px 20px;
-            font-size: 9px;
-            letter-spacing: .8px;
-            text-transform: uppercase;
+        /* ══ EN-TÊTE IMAGE FIXE (répété sur chaque page) ══ */
+        .pdf-header {
+            position: fixed;
+            top: -120px;
+            left: 0;
+            right: 0;
+            height: 116px;
         }
-        .sovereignty .ar {
-            font-size: 11.5px;
-            letter-spacing: 1.5px;
-            margin: 0 16px;
-        }
-
-        /* ══ FILET OR ══ */
-        .gold-rule {
-            height: 3px;
-            background: #b8963e;
-        }
-
-        /* ══ EN-TÊTE ══ */
-        .header {
-            padding: 16px 24px 14px;
-            border-bottom: 2px solid #0c3260;
-            display: table;
+        .pdf-header img {
             width: 100%;
+            height: 108px;
+            display: block;
         }
-        .header-logo-cell {
-            display: table-cell;
-            width: 70px;
-            vertical-align: middle;
-        }
-        .logo-box {
-            width: 62px;
-            height: 62px;
-            background: #0c3260;
-            border-radius: 7px;
-            text-align: center;
-            line-height: 1;
-            padding-top: 10px;
-            border: 2px solid #b8963e;
-        }
-        .logo-init { color: #fff; font-size: 19px; font-weight: 800; letter-spacing: 1px; }
-        .logo-sub  { color: #d4af62; font-size: 7.5px; letter-spacing: 2.5px; margin-top: 3px; text-transform: uppercase; }
-
-        .header-center-cell {
-            display: table-cell;
-            text-align: center;
-            vertical-align: middle;
-            padding: 0 10px;
-        }
-        .header-ministere {
-            font-size: 8.5px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-            margin-bottom: 3px;
-        }
-        .header-etab {
-            font-size: 14px;
-            font-weight: 800;
-            color: #0c3260;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            line-height: 1.25;
-        }
-        .header-ville {
-            font-size: 10px;
-            font-weight: 700;
-            color: #b8963e;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-
-        .header-right-cell {
-            display: table-cell;
-            width: 115px;
-            text-align: right;
-            vertical-align: top;
-            padding-top: 4px;
-        }
-        .ref-label { font-size: 8px; text-transform: uppercase; letter-spacing: .8px; color: #64748b; font-weight: 700; }
-        .ref-value { font-size: 13px; font-weight: 800; color: #0c3260; margin-top: 2px; }
+        .pdf-header-navy { height: 3px; background: #0c3260; }
+        .pdf-header-gold { height: 2px; background: #b8963e; }
 
         /* ══ TITRE DOCUMENT ══ */
         .doc-title-bar {
             text-align: center;
-            padding: 11px 24px 9px;
+            padding: 10px 24px 9px;
             border-bottom: 1px solid #dce4ef;
+            margin-bottom: 12px;
         }
-        .doc-title-label {
-            font-size: 8.5px;
+        .doc-label {
+            font-size: 8px;
             color: #64748b;
             text-transform: uppercase;
             letter-spacing: .8px;
         }
-        .doc-title-text {
+        .doc-title {
             font-size: 15px;
             font-weight: 800;
             color: #0c3260;
@@ -123,9 +56,9 @@
         }
 
         /* ══ BODY ══ */
-        .body-wrap { padding: 14px 24px 90px; }
+        .body-wrap { padding: 0 24px 90px; }
 
-        /* Bloc fournisseur */
+        /* Bloc fournisseur / infos marché */
         .bloc-fournisseur {
             display: table;
             width: 100%;
@@ -177,6 +110,19 @@
             vertical-align: top;
         }
 
+        /* ══ NUMÉRO COMMANDE (badge) ══ */
+        .ref-badge {
+            display: inline-block;
+            background: #0c3260;
+            color: #fff;
+            border-radius: 4px;
+            padding: 3px 10px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            margin-bottom: 10px;
+        }
+
         /* ══ TABLEAU ARTICLES ══ */
         table.articles {
             width: 100%;
@@ -197,6 +143,7 @@
             border: 1px solid #071f3e;
         }
         table.articles thead th.right { text-align: right; }
+        table.articles thead th.center { text-align: center; }
 
         table.articles tbody td {
             padding: 6px 8px;
@@ -205,14 +152,13 @@
         }
         table.articles tbody tr:nth-child(even) td { background: #f4f7fb; }
 
-        /* Ligne totaux */
-        table.articles tbody tr.total-row td {
+        tr.total-row td {
             background: #f4f7fb;
             font-weight: 700;
             border-color: #c5d3e4;
             font-size: 10px;
         }
-        table.articles tbody tr.grand-total td {
+        tr.grand-total td {
             background: #0c3260;
             color: #fff;
             font-weight: 800;
@@ -234,11 +180,7 @@
         .arrete span { color: #b8963e; font-size: 12px; }
 
         /* ══ SIGNATURES ══ */
-        .signatures {
-            display: table;
-            width: 100%;
-            margin-top: 28px;
-        }
+        .signatures { display: table; width: 100%; margin-top: 30px; }
         .sig-cell {
             display: table-cell;
             width: 33.33%;
@@ -247,79 +189,66 @@
         }
         .sig-label {
             font-size: 9.5px;
-            font-weight: 700;
+            font-weight: 800;
             color: #0c3260;
             text-transform: uppercase;
             letter-spacing: .5px;
-            margin-bottom: 40px;
         }
         .sig-line {
             border-bottom: 1px dashed #0c3260;
-            margin-top: 36px;
+            margin-top: 40px;
             padding-bottom: 4px;
             font-size: 8.5px;
             color: #64748b;
         }
 
-        /* ══ PIED DE PAGE ══ */
-        .footer {
+        /* ══ PIED DE PAGE FIXE ══ */
+        .pdf-footer {
             position: fixed;
-            bottom: 0;
+            bottom: -52px;
             left: 0;
             right: 0;
+            height: 42px;
             border-top: 2px solid #0c3260;
-            padding: 7px 24px;
-            display: table;
-            width: 100%;
+            padding-top: 7px;
             font-size: 8.5px;
             color: #64748b;
             background: #fff;
+            display: table;
+            width: 100%;
         }
-        .footer-left  { display: table-cell; text-align: left; }
+        .footer-left  { display: table-cell; text-align: left; color: #475569; }
         .footer-left strong { color: #0c3260; }
-        .footer-center { display: table-cell; text-align: center; color: #b8963e; font-weight: 700; font-size: 9px; }
+        .footer-center { display: table-cell; text-align: center; color: #b8963e; font-weight: 700; }
         .footer-right { display: table-cell; text-align: right; }
     </style>
 </head>
 <body>
 
-{{-- Bandeau Royaume --}}
-<div class="sovereignty">
-    <span class="ar">المملكة المغربية</span>
-    —
-    Royaume du Maroc &nbsp;·&nbsp; Ministère du Tourisme, de l'Artisanat et de l'Économie Sociale et Solidaire
-</div>
-<div class="gold-rule"></div>
-
-{{-- En-tête établissement --}}
-<div class="header">
-    <div class="header-logo-cell">
-        <div class="logo-box">
-            <div class="logo-init">IS</div>
-            <div class="logo-sub">TAHT</div>
-        </div>
-    </div>
-    <div class="header-center-cell">
-        <div class="header-ministere">Institut Spécialisé de Technologie Appliquée</div>
-        <div class="header-etab">Hôtelière et Touristique</div>
-        <div class="header-ville">— Tanger —</div>
-    </div>
-    <div class="header-right-cell">
-        <div class="ref-label">Référence marché</div>
-        <div class="ref-value">{{ $bonCommande->reference }}</div>
-        <div style="font-size:8.5px;color:#64748b;margin-top:6px">
-            {{ \Carbon\Carbon::now()->format('d/m/Y') }}
-        </div>
-    </div>
+{{-- ════ IMAGE HEADER FIXE (répétée sur chaque page) ════ --}}
+<div class="pdf-header">
+    @if(file_exists(public_path('images/pdf-header.jpg')))
+        <img src="{{ public_path('images/pdf-header.jpg') }}" alt="En-tête officiel ISTAHT Tanger">
+    @endif
+    <div class="pdf-header-navy"></div>
+    <div class="pdf-header-gold"></div>
 </div>
 
-{{-- Titre document --}}
+{{-- ════ TITRE DOCUMENT ════ --}}
 <div class="doc-title-bar">
-    <div class="doc-title-label">Document officiel</div>
-    <div class="doc-title-text">Appel d'Offre N° {{ $bonCommande->reference }}</div>
+    <div class="doc-label">Document officiel</div>
+    <div class="doc-title">Appel d'Offre N° {{ $bonCommande->reference }}</div>
 </div>
 
 <div class="body-wrap">
+
+    {{-- Numéro de référence --}}
+    <div>
+        <span class="ref-badge">Réf. : {{ $bonCommande->reference }}</span>
+        <span style="font-size:9px;color:#64748b;margin-left:8px">
+            Édité le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}
+        </span>
+    </div>
 
     {{-- Bloc fournisseur + infos marché --}}
     <div class="bloc-fournisseur">
@@ -335,7 +264,7 @@
                     <div class="info-value">{{ $fournisseur->adresse ?? '—' }}</div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">Tél. :</div>
+                    <div class="info-label">Téléphone :</div>
                     <div class="info-value">{{ $fournisseur->telephone ?? '—' }}</div>
                 </div>
                 <div class="info-row">
@@ -343,7 +272,7 @@
                     <div class="info-value">{{ $fournisseur->ice ?? '—' }}</div>
                 </div>
             @else
-                <div style="color:#64748b;font-style:italic">Non attribué</div>
+                <div style="color:#64748b;font-style:italic;font-size:10px">Non attribué</div>
             @endif
         </div>
         <div class="bloc-right">
@@ -357,7 +286,7 @@
                 <div class="info-value">{{ \Carbon\Carbon::parse($bonCommande->date_mise_ligne)->format('d/m/Y') }}</div>
             </div>
             <div class="info-row">
-                <div class="info-label">Limite de réception :</div>
+                <div class="info-label">Limite réception :</div>
                 <div class="info-value">{{ \Carbon\Carbon::parse($bonCommande->date_limite_reception)->format('d/m/Y') }}</div>
             </div>
             <div class="info-row">
@@ -375,21 +304,19 @@
     </div>
 
     {{-- Tableau des articles --}}
-    @php
-        $totalHT = $totalTVA = $totalTTC = 0;
-    @endphp
+    @php $totalHT = $totalTVA = $totalTTC = 0; @endphp
     <table class="articles">
         <thead>
             <tr>
                 <th style="width:9%">Code</th>
-                <th style="width:32%">Désignation</th>
-                <th style="width:7%">Unité</th>
-                <th style="width:9%;text-align:right">Qté Min</th>
-                <th style="width:9%;text-align:right">Qté Max</th>
-                <th style="width:9%;text-align:right">Qté Cde</th>
-                <th style="width:10%;text-align:right">P.U. HT (DH)</th>
-                <th style="width:6%;text-align:center">TVA</th>
-                <th style="width:10%;text-align:right">Montant TTC</th>
+                <th style="width:30%">Désignation</th>
+                <th class="center" style="width:7%">Unité</th>
+                <th class="right" style="width:8%">Qté Min</th>
+                <th class="right" style="width:8%">Qté Max</th>
+                <th class="right" style="width:8%">Qté Cde</th>
+                <th class="right" style="width:11%">P.U. HT (DH)</th>
+                <th class="center" style="width:6%">TVA</th>
+                <th class="right" style="width:13%">Montant TTC</th>
             </tr>
         </thead>
         <tbody>
@@ -417,24 +344,16 @@
                     <td style="text-align:right;font-weight:700">{{ number_format($mTTC, 2, ',', ' ') }}</td>
                 </tr>
             @endforeach
-
-            {{-- Sous-totaux --}}
             <tr class="total-row">
-                <td colspan="8" style="text-align:right;font-size:9.5px;letter-spacing:.3px">
-                    TOTAL HORS TAXE
-                </td>
+                <td colspan="8" style="text-align:right;font-size:9.5px;letter-spacing:.3px">TOTAL HORS TAXE</td>
                 <td style="text-align:right">{{ number_format($totalHT, 2, ',', ' ') }} DH</td>
             </tr>
             <tr class="total-row">
-                <td colspan="8" style="text-align:right;font-size:9.5px;letter-spacing:.3px">
-                    TOTAL TVA
-                </td>
+                <td colspan="8" style="text-align:right;font-size:9.5px;letter-spacing:.3px">TOTAL TVA</td>
                 <td style="text-align:right">{{ number_format($totalTVA, 2, ',', ' ') }} DH</td>
             </tr>
             <tr class="grand-total">
-                <td colspan="8" style="text-align:right;letter-spacing:.5px">
-                    TOTAL TOUTES TAXES COMPRISES
-                </td>
+                <td colspan="8" style="text-align:right;letter-spacing:.5px">TOTAL TOUTES TAXES COMPRISES</td>
                 <td style="text-align:right">{{ number_format($totalTTC, 2, ',', ' ') }} DH</td>
             </tr>
         </tbody>
@@ -464,15 +383,11 @@
 
 </div>
 
-{{-- Pied de page --}}
-<div class="footer">
-    <div class="footer-left">
-        <strong>ISTAHT Tanger</strong> — Gestion des achats &amp; marchés
-    </div>
+{{-- ════ PIED DE PAGE FIXE ════ --}}
+<div class="pdf-footer">
+    <div class="footer-left"><strong>ISTAHT Tanger</strong> — Gestion des achats &amp; marchés</div>
     <div class="footer-center">stock.istahttanger.ma</div>
-    <div class="footer-right">
-        Imprimé le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}
-    </div>
+    <div class="footer-right">Imprimé le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
 </div>
 
 </body>

@@ -3,16 +3,18 @@
 namespace App\Exports;
 
 use App\Models\Fournisseur;
+use App\Exports\Concerns\WithIstahtHeader;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class FournisseursExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
+class FournisseursExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithEvents
 {
+    use WithIstahtHeader;
+
     public function __construct(private array $filters = [])
     {
     }
@@ -52,26 +54,6 @@ class FournisseursExport implements FromCollection, ShouldAutoSize, WithHeadings
             $fournisseur->est_actif ? 'Actif' : 'Inactif',
             (int) $fournisseur->marches_count,
         ];
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        $sheet->getStyle('A1:I1')->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => 'solid',
-                'color' => ['rgb' => '1B2D6B'],
-            ],
-            'alignment' => [
-                'horizontal' => 'center',
-                'vertical' => 'center',
-            ],
-        ]);
-
-        return [];
     }
 
     private function query(): Builder

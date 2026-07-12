@@ -4,13 +4,17 @@ namespace App\Exports;
 
 use App\Models\BonCommande;
 use Illuminate\Database\Eloquent\Builder;
+use App\Exports\Concerns\WithIstahtHeader;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class MarchesExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class MarchesExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
 {
+    use WithIstahtHeader;
+
     public function __construct(private array $filters = [])
     {
     }
