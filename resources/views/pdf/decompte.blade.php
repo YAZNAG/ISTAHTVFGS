@@ -6,22 +6,51 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        @page { margin: 10px 28px 52px 28px; }
+        /*
+         * DomPDF fixed header pattern :
+         *   @page margin-top = hauteur réservée pour le header
+         *   .pdf-header top  = négatif de ce même espace
+         * → l'élément se place dans la marge et se répète sur CHAQUE page.
+         */
+        @page {
+            margin-top:    130px;
+            margin-bottom:  52px;
+            margin-left:    28px;
+            margin-right:   28px;
+        }
 
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
-            font-size: 10.5px;
+            font-size: 10px;
             color: #1a2233;
             background: #fff;
             line-height: 1.5;
         }
 
+        /* ══ HEADER FIXE — répété sur CHAQUE page ══ */
+        .pdf-header {
+            position: fixed;
+            top:   -130px;
+            left:  -28px;
+            right: -28px;
+            height: 128px;
+            background: #fff;
+        }
+        .pdf-header img {
+            display: block;
+            width:  100%;
+            height: 120px;
+        }
+        .pdf-header-navy { height: 4px; background: #0c3260; }
+        .pdf-header-gold { height: 3px; background: #b8963e; }
+
         /* ══ FOOTER FIXE ══ */
         .pdf-footer {
             position: fixed;
             bottom: -52px;
-            left: 0; right: 0;
-            height: 42px;
+            left:  -28px;
+            right: -28px;
+            height: 44px;
             border-top: 2px solid #0c3260;
             padding-top: 6px;
             font-size: 8px;
@@ -30,28 +59,10 @@
             display: table;
             width: 100%;
         }
-        .footer-left   { display: table-cell; text-align: left; color: #475569; }
+        .footer-left   { display: table-cell; text-align: left;   padding-left: 28px; }
         .footer-left strong { color: #0c3260; }
         .footer-center { display: table-cell; text-align: center; color: #b8963e; font-weight: 700; }
-        .footer-right  { display: table-cell; text-align: right; }
-
-        /* ══ TABLE WRAPPER (thead répète sur chaque page) ══ */
-        table.page-wrapper {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table.page-wrapper > thead > tr > td {
-            padding: 0 0 8px 0;
-        }
-        table.page-wrapper > tbody > tr > td {
-            padding: 0;
-            vertical-align: top;
-        }
-
-        /* ══ HEADER IMAGE ══ */
-        .header-img { width: 100%; display: block; }
-        .header-navy { height: 4px; background: #0c3260; }
-        .header-gold  { height: 3px; background: #b8963e; }
+        .footer-right  { display: table-cell; text-align: right;  padding-right: 28px; }
 
         /* ══ TITRE DOCUMENT ══ */
         .doc-title-bar {
@@ -60,23 +71,9 @@
             border-bottom: 2px solid #0c3260;
             margin-bottom: 14px;
         }
-        .doc-label { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: .8px; }
-        .doc-title { font-size: 15px; font-weight: 800; color: #0c3260; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 3px; }
-        .doc-sub   { font-size: 9px; color: #64748b; margin-top: 4px; }
-
-        /* ══ BLOC INFO 2 colonnes ══ */
-        .info-grid { display: table; width: 100%; margin-bottom: 14px; border: 1px solid #dce4ef; }
-        .info-col  { display: table-cell; width: 50%; padding: 10px 14px; vertical-align: top; }
-        .info-col-right { border-left: 1px solid #dce4ef; }
-        .info-section-title {
-            font-size: 8px; font-weight: 800; text-transform: uppercase;
-            letter-spacing: .7px; color: #0c3260;
-            border-bottom: 1px solid #dce4ef;
-            padding-bottom: 5px; margin-bottom: 7px;
-        }
-        .info-row { display: table; width: 100%; margin-bottom: 4px; }
-        .info-lbl { display: table-cell; width: 40%; font-size: 9px; font-weight: 700; color: #3d4f6a; }
-        .info-val { display: table-cell; font-size: 9.5px; color: #1a2233; }
+        .doc-label { font-size: 7.5px; color: #64748b; text-transform: uppercase; letter-spacing: .8px; }
+        .doc-title { font-size: 14px; font-weight: 800; color: #0c3260; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+        .doc-sub   { font-size: 8.5px; color: #64748b; margin-top: 4px; }
 
         /* ══ BADGE PÉRIODE ══ */
         .periode-badge {
@@ -85,32 +82,46 @@
             border: 1px solid #bfdbfe;
             color: #1e40af;
             padding: 4px 12px;
-            font-size: 9.5px;
+            font-size: 9px;
             font-weight: 700;
             margin-bottom: 12px;
         }
 
+        /* ══ BLOC INFO 2 colonnes ══ */
+        .info-grid         { display: table; width: 100%; margin-bottom: 14px; border: 1px solid #dce4ef; }
+        .info-col          { display: table-cell; width: 50%; padding: 9px 12px; vertical-align: top; }
+        .info-col-right    { border-left: 1px solid #dce4ef; }
+        .info-section-title {
+            font-size: 7.5px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .7px; color: #0c3260;
+            border-bottom: 1px solid #dce4ef;
+            padding-bottom: 4px; margin-bottom: 6px;
+        }
+        .info-row { display: table; width: 100%; margin-bottom: 3px; }
+        .info-lbl { display: table-cell; width: 38%; font-size: 8.5px; font-weight: 700; color: #3d4f6a; }
+        .info-val { display: table-cell; font-size: 9px; color: #1a2233; }
+
         /* ══ SECTION TITLE ══ */
         .section-title {
-            font-size: 10px; font-weight: 800; color: #0c3260;
-            text-transform: uppercase; letter-spacing: .6px;
+            font-size: 9px; font-weight: 800; color: #0c3260;
+            text-transform: uppercase; letter-spacing: .5px;
             border-left: 3px solid #b8963e;
-            padding-left: 8px;
-            margin-bottom: 8px; margin-top: 16px;
+            padding-left: 7px;
+            margin-bottom: 8px; margin-top: 14px;
         }
 
         /* ══ TABLEAU ARTICLES ══ */
         table.articles {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9.5px;
+            font-size: 8.5px;
             margin-bottom: 6px;
         }
         table.articles thead th {
             background: #0c3260;
             color: #fff;
-            padding: 6px 7px;
-            font-size: 8.5px;
+            padding: 5px 6px;
+            font-size: 7.5px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .3px;
@@ -119,61 +130,75 @@
         table.articles thead th.r { text-align: right; }
         table.articles thead th.c { text-align: center; }
         table.articles tbody td {
-            padding: 5px 7px;
+            padding: 4px 6px;
             border: 1px solid #dce4ef;
             vertical-align: middle;
         }
         table.articles tbody tr:nth-child(even) td { background: #f4f7fb; }
         table.articles tfoot td {
-            padding: 6px 7px;
+            padding: 5px 6px;
             border: 1px solid #c5d3e4;
             font-weight: 700;
         }
-        .tr-total-ht  td { background: #f4f7fb; }
-        .tr-total-tva td { background: #f4f7fb; }
-        .tr-grand-ttc td { background: #0c3260; color: #fff; font-size: 10.5px; border-color: #071f3e; }
+        .tr-total-ht  td { background: #eef2f7; }
+        .tr-total-tva td { background: #eef2f7; }
+        .tr-grand-ttc td { background: #0c3260; color: #fff; font-size: 10px; border-color: #071f3e; }
 
         /* ══ TABLEAU RÉCAPITULATIF ══ */
         table.recap {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9.5px;
+            font-size: 9px;
             margin-top: 6px;
         }
         table.recap thead th {
             background: #1e3a5f;
             color: #fff;
-            padding: 6px 10px;
-            font-size: 8.5px;
+            padding: 5px 9px;
+            font-size: 8px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .3px;
             border: 1px solid #071f3e;
-            text-decoration: underline;
         }
         table.recap tbody td {
-            padding: 7px 10px;
+            padding: 6px 9px;
             border: 1px solid #dce4ef;
         }
         .recap-highlight td {
             background: #0c3260;
             color: #fff;
             font-weight: 800;
-            font-size: 11px;
+            font-size: 10.5px;
             border-color: #071f3e;
         }
 
         /* ══ ZONE SIGNATURE ══ */
-        .signatures { display: table; width: 100%; margin-top: 36px; }
-        .sig-cell   { display: table-cell; width: 50%; text-align: center; padding: 0 24px; }
-        .sig-label  { font-size: 10px; font-weight: 800; color: #0c3260; text-transform: uppercase; }
-        .sig-line   { border-bottom: 1px dashed #0c3260; margin-top: 48px; padding-bottom: 4px; font-size: 8px; color: #64748b; }
+        .signatures { display: table; width: 100%; margin-top: 32px; }
+        .sig-cell   { display: table-cell; width: 50%; text-align: center; padding: 0 20px; }
+        .sig-label  { font-size: 9.5px; font-weight: 800; color: #0c3260; text-transform: uppercase; }
+        .sig-line   { border-bottom: 1px dashed #0c3260; margin-top: 44px; padding-bottom: 4px; font-size: 7.5px; color: #64748b; }
 
         .text-right  { text-align: right; }
         .text-center { text-align: center; }
+        .body-wrap   { padding-bottom: 60px; }
     </style>
 </head>
 <body>
+
+{{-- ════ HEADER IMAGE — position:fixed → répété sur chaque page ════ --}}
+@php
+    $__imgPath = public_path('images/pdf-header.jpg');
+    $__imgData = file_exists($__imgPath) ? @file_get_contents($__imgPath) : false;
+    $pdfHeaderSrc = ($__imgData !== false) ? 'data:image/jpeg;base64,' . base64_encode($__imgData) : null;
+@endphp
+<div class="pdf-header">
+    @if($pdfHeaderSrc)
+        <img src="{{ $pdfHeaderSrc }}" alt="ISTAHT Tanger">
+    @endif
+    <div class="pdf-header-navy"></div>
+    <div class="pdf-header-gold"></div>
+</div>
 
 {{-- ════ FOOTER FIXE ════ --}}
 <div class="pdf-footer">
@@ -182,29 +207,7 @@
     <div class="footer-right">Imprimé le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
 </div>
 
-{{-- ════ WRAPPER TABLE : thead répété sur chaque page ════ --}}
-@php
-    $__imgPath = public_path('images/pdf-header.jpg');
-    $pdfHeader = file_exists($__imgPath)
-        ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($__imgPath))
-        : null;
-@endphp
-
-<table class="page-wrapper">
-    <thead>
-        <tr>
-            <td>
-                @if($pdfHeader)
-                    <img src="{{ $pdfHeader }}" class="header-img" alt="ISTAHT Tanger">
-                @endif
-                <div class="header-navy"></div>
-                <div class="header-gold"></div>
-            </td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
+<div class="body-wrap">
 
 {{-- ════ TITRE DOCUMENT ════ --}}
 <div class="doc-title-bar">
@@ -220,10 +223,11 @@
         du {{ \Carbon\Carbon::parse($date_debut)->format('d/m/Y') }}
     @endif
     au {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
+    &nbsp;—&nbsp;
     @if($decompte_final)
-        &nbsp;—&nbsp;<strong>Décompte DÉFINITIF</strong>
+        <strong>Décompte DÉFINITIF</strong>
     @else
-        &nbsp;—&nbsp;Décompte provisoire
+        Décompte provisoire
     @endif
 </div>
 
@@ -259,26 +263,27 @@
             <div class="info-lbl">Adresse :</div>
             <div class="info-val">{{ $f->adresse ?? '—' }}</div>
         </div>
-        @if($f->tp ?? null)
+        @if(!empty($f->tp))
         <div class="info-row">
             <div class="info-lbl">TP :</div><div class="info-val">{{ $f->tp }}</div>
         </div>
         @endif
-        @if($f->if ?? null)
+        @if(!empty($f->if))
         <div class="info-row">
             <div class="info-lbl">IF :</div><div class="info-val">{{ $f->if }}</div>
         </div>
         @endif
-        @if($f->rc ?? null)
+        @if(!empty($f->rc))
         <div class="info-row">
             <div class="info-lbl">RC :</div><div class="info-val">{{ $f->rc }}</div>
         </div>
         @endif
+        @if(!empty($f->ice))
         <div class="info-row">
-            <div class="info-lbl">ICE :</div>
-            <div class="info-val">{{ $f->ice ?? '—' }}</div>
+            <div class="info-lbl">ICE :</div><div class="info-val">{{ $f->ice }}</div>
         </div>
-        @if($f->cb ?? null)
+        @endif
+        @if(!empty($f->cb))
         <div class="info-row">
             <div class="info-lbl">RIB / CB :</div><div class="info-val">{{ $f->cb }}</div>
         </div>
@@ -289,11 +294,7 @@
 {{-- ════ TABLEAU DES ARTICLES LIVRÉS ════ --}}
 <div class="section-title">Articles livrés sur la période</div>
 
-@php
-    $totalHT  = 0;
-    $totalTVA = 0;
-    $totalTTC = 0;
-@endphp
+@php $totalHT = 0; $totalTVA = 0; $totalTTC = 0; @endphp
 
 <table class="articles">
     <thead>
@@ -325,14 +326,14 @@
                 <td class="text-center">{{ $row['unite_mesure'] }}</td>
                 <td class="text-right" style="font-weight:700">{{ number_format((float)$row['quantite'], 2, ',', ' ') }}</td>
                 <td class="text-right">{{ number_format((float)$row['prix_unitaire'], 2, ',', ' ') }}</td>
-                <td class="text-center" style="color:#64748b">{{ (float)$row['taux_tva'] > 0 ? $row['taux_tva'].'%' : 'Exo.' }}</td>
+                <td class="text-center" style="color:#475569">{{ (float)$row['taux_tva'] > 0 ? $row['taux_tva'].'%' : 'Exo.' }}</td>
                 <td class="text-right">{{ number_format($mHT, 2, ',', ' ') }}</td>
                 <td class="text-right">{{ number_format($mTVA, 2, ',', ' ') }}</td>
                 <td class="text-right" style="font-weight:700">{{ number_format($mTTC, 2, ',', ' ') }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="9" class="text-center" style="padding:16px;color:#64748b;font-style:italic">
+                <td colspan="9" class="text-center" style="padding:14px;color:#64748b;font-style:italic">
                     Aucun article livré sur cette période.
                 </td>
             </tr>
@@ -340,13 +341,13 @@
     </tbody>
     <tfoot>
         <tr class="tr-total-ht">
-            <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL HORS TAXE</td>
+            <td colspan="6" class="text-right" style="font-size:8px;letter-spacing:.3px;color:#3d4f6a">TOTAL HORS TAXE</td>
             <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }}</td>
             <td></td>
             <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }} DH</td>
         </tr>
         <tr class="tr-total-tva">
-            <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL TVA</td>
+            <td colspan="6" class="text-right" style="font-size:8px;letter-spacing:.3px;color:#3d4f6a">TOTAL TVA</td>
             <td></td>
             <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }}</td>
             <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }} DH</td>
@@ -359,7 +360,7 @@
 </table>
 
 {{-- ════ RÉCAPITULATIF ACOMPTES ════ --}}
-<div class="section-title" style="margin-top:20px">Récapitulation — Acomptes</div>
+<div class="section-title" style="margin-top:18px">Récapitulation — Acomptes</div>
 
 <table class="recap">
     <thead>
@@ -397,9 +398,9 @@
 </table>
 
 {{-- ════ ARRÊTÉ ════ --}}
-<div style="border:1px solid #0c3260;background:#f4f7fb;padding:9px 14px;margin-top:14px;font-size:10px;font-weight:700;color:#0c3260;">
+<div style="border:1px solid #0c3260;background:#f4f7fb;padding:8px 14px;margin-top:14px;font-size:9.5px;font-weight:700;color:#0c3260;">
     Arrêté le présent décompte à la somme de :
-    <span style="color:#b8963e;font-size:12px">
+    <span style="color:#b8963e;font-size:11.5px">
         {{ number_format((float)$decompte_total, 2, ',', ' ') }} Dirhams TTC
     </span>
 </div>
@@ -416,10 +417,6 @@
     </div>
 </div>
 
-            </td>
-        </tr>
-    </tbody>
-</table>
-
+</div>{{-- /body-wrap --}}
 </body>
 </html>
