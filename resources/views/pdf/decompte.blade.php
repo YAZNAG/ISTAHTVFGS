@@ -6,7 +6,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        @page { margin-top: 125px; margin-bottom: 55px; }
+        @page { margin: 10px 28px 52px 28px; }
 
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
@@ -16,26 +16,15 @@
             line-height: 1.5;
         }
 
-        /* ══ HEADER FIXE — répété sur chaque page ══ */
-        .pdf-header {
-            position: fixed;
-            top: -125px;
-            left: 0; right: 0;
-            height: 122px;
-        }
-        .pdf-header img { width: 100%; height: 114px; display: block; object-fit: cover; }
-        .pdf-header-navy { height: 4px; background: #0c3260; }
-        .pdf-header-gold  { height: 3px; background: #b8963e; }
-
         /* ══ FOOTER FIXE ══ */
         .pdf-footer {
             position: fixed;
-            bottom: -55px;
+            bottom: -52px;
             left: 0; right: 0;
-            height: 44px;
+            height: 42px;
             border-top: 2px solid #0c3260;
-            padding-top: 7px;
-            font-size: 8.5px;
+            padding-top: 6px;
+            font-size: 8px;
             color: #64748b;
             background: #fff;
             display: table;
@@ -45,6 +34,24 @@
         .footer-left strong { color: #0c3260; }
         .footer-center { display: table-cell; text-align: center; color: #b8963e; font-weight: 700; }
         .footer-right  { display: table-cell; text-align: right; }
+
+        /* ══ TABLE WRAPPER (thead répète sur chaque page) ══ */
+        table.page-wrapper {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.page-wrapper > thead > tr > td {
+            padding: 0 0 8px 0;
+        }
+        table.page-wrapper > tbody > tr > td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        /* ══ HEADER IMAGE ══ */
+        .header-img { width: 100%; display: block; }
+        .header-navy { height: 4px; background: #0c3260; }
+        .header-gold  { height: 3px; background: #b8963e; }
 
         /* ══ TITRE DOCUMENT ══ */
         .doc-title-bar {
@@ -58,7 +65,7 @@
         .doc-sub   { font-size: 9px; color: #64748b; margin-top: 4px; }
 
         /* ══ BLOC INFO 2 colonnes ══ */
-        .info-grid { display: table; width: 100%; margin-bottom: 14px; border: 1px solid #dce4ef; border-radius: 4px; }
+        .info-grid { display: table; width: 100%; margin-bottom: 14px; border: 1px solid #dce4ef; }
         .info-col  { display: table-cell; width: 50%; padding: 10px 14px; vertical-align: top; }
         .info-col-right { border-left: 1px solid #dce4ef; }
         .info-section-title {
@@ -77,7 +84,6 @@
             background: #eff6ff;
             border: 1px solid #bfdbfe;
             color: #1e40af;
-            border-radius: 4px;
             padding: 4px 12px;
             font-size: 9.5px;
             font-weight: 700;
@@ -99,7 +105,6 @@
             border-collapse: collapse;
             font-size: 9.5px;
             margin-bottom: 6px;
-            font-variant-numeric: tabular-nums;
         }
         table.articles thead th {
             background: #0c3260;
@@ -134,7 +139,6 @@
             border-collapse: collapse;
             font-size: 9.5px;
             margin-top: 6px;
-            font-variant-numeric: tabular-nums;
         }
         table.recap thead th {
             background: #1e3a5f;
@@ -165,27 +169,11 @@
         .sig-label  { font-size: 10px; font-weight: 800; color: #0c3260; text-transform: uppercase; }
         .sig-line   { border-bottom: 1px dashed #0c3260; margin-top: 48px; padding-bottom: 4px; font-size: 8px; color: #64748b; }
 
-        .body-wrap { padding: 0 20px 80px; }
-        .text-right { text-align: right; }
+        .text-right  { text-align: right; }
         .text-center { text-align: center; }
     </style>
 </head>
 <body>
-
-{{-- ════ HEADER IMAGE FIXE ════ --}}
-@php
-    if (empty($pdfHeader)) {
-        $__p = public_path('images/pdf-header.jpg');
-        $pdfHeader = file_exists($__p) ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($__p)) : null;
-    }
-@endphp
-<div class="pdf-header">
-    @if(!empty($pdfHeader))
-        <img src="{{ $pdfHeader }}" alt="En-tête ISTAHT Tanger" style="width:100%;height:108px;display:block;">
-    @endif
-    <div class="pdf-header-navy"></div>
-    <div class="pdf-header-gold"></div>
-</div>
 
 {{-- ════ FOOTER FIXE ════ --}}
 <div class="pdf-footer">
@@ -194,6 +182,30 @@
     <div class="footer-right">Imprimé le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
 </div>
 
+{{-- ════ WRAPPER TABLE : thead répété sur chaque page ════ --}}
+@php
+    $__imgPath = public_path('images/pdf-header.jpg');
+    $pdfHeader = file_exists($__imgPath)
+        ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($__imgPath))
+        : null;
+@endphp
+
+<table class="page-wrapper">
+    <thead>
+        <tr>
+            <td>
+                @if($pdfHeader)
+                    <img src="{{ $pdfHeader }}" class="header-img" alt="ISTAHT Tanger">
+                @endif
+                <div class="header-navy"></div>
+                <div class="header-gold"></div>
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+
 {{-- ════ TITRE DOCUMENT ════ --}}
 <div class="doc-title-bar">
     <div class="doc-label">Document officiel — Institut Spécialisé de Technologie Appliquée Hôtelière et Touristique Tanger</div>
@@ -201,211 +213,213 @@
     <div class="doc-sub">Généré le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
 </div>
 
-<div class="body-wrap">
-
-    {{-- ════ PÉRIODE ════ --}}
-    <div class="periode-badge">
-        Période couverte :
-        @if(!empty($date_debut))
-            du {{ \Carbon\Carbon::parse($date_debut)->format('d/m/Y') }}
-        @endif
-        au {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
-        @if($decompte_final)
-            &nbsp;—&nbsp;<strong>Décompte DÉFINITIF</strong>
-        @else
-            &nbsp;—&nbsp;Décompte provisoire
-        @endif
-    </div>
-
-    {{-- ════ BLOC MARCHÉ + FOURNISSEUR ════ --}}
-    <div class="info-grid">
-        <div class="info-col">
-            <div class="info-section-title">Informations du marché</div>
-            <div class="info-row">
-                <div class="info-lbl">Référence :</div>
-                <div class="info-val"><strong>{{ $marche->reference }}</strong></div>
-            </div>
-            <div class="info-row">
-                <div class="info-lbl">Objet :</div>
-                <div class="info-val">{{ $marche->objet }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-lbl">Catégorie :</div>
-                <div class="info-val">{{ $marche->categorie?->nom ?? '—' }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-lbl">Montant marché :</div>
-                <div class="info-val"><strong>{{ number_format((float)$marche->total_ttc, 2, ',', ' ') }} DH TTC</strong></div>
-            </div>
-        </div>
-        <div class="info-col info-col-right">
-            <div class="info-section-title">Fournisseur attributaire</div>
-            @php $f = $marche->fournisseur; @endphp
-            <div class="info-row">
-                <div class="info-lbl">Raison sociale :</div>
-                <div class="info-val"><strong>{{ $f->raison_sociale ?? $f->nom ?? '—' }}</strong></div>
-            </div>
-            <div class="info-row">
-                <div class="info-lbl">Adresse :</div>
-                <div class="info-val">{{ $f->adresse ?? '—' }}</div>
-            </div>
-            @if($f->tp ?? null)
-            <div class="info-row">
-                <div class="info-lbl">TP :</div><div class="info-val">{{ $f->tp }}</div>
-            </div>
-            @endif
-            @if($f->if ?? null)
-            <div class="info-row">
-                <div class="info-lbl">IF :</div><div class="info-val">{{ $f->if }}</div>
-            </div>
-            @endif
-            @if($f->rc ?? null)
-            <div class="info-row">
-                <div class="info-lbl">RC :</div><div class="info-val">{{ $f->rc }}</div>
-            </div>
-            @endif
-            <div class="info-row">
-                <div class="info-lbl">ICE :</div>
-                <div class="info-val">{{ $f->ice ?? '—' }}</div>
-            </div>
-            @if($f->cb ?? null)
-            <div class="info-row">
-                <div class="info-lbl">RIB / CB :</div><div class="info-val">{{ $f->cb }}</div>
-            </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- ════ TABLEAU DES ARTICLES LIVRÉS ════ --}}
-    <div class="section-title">Articles livrés sur la période</div>
-
-    @php
-        $totalHT  = 0;
-        $totalTVA = 0;
-        $totalTTC = 0;
-    @endphp
-
-    <table class="articles">
-        <thead>
-            <tr>
-                <th style="width:4%"  class="c">N°</th>
-                <th style="width:28%">Désignation</th>
-                <th style="width:7%"  class="c">Unité</th>
-                <th style="width:9%"  class="r">Qté livrée</th>
-                <th style="width:11%" class="r">P.U. HT (DH)</th>
-                <th style="width:7%"  class="c">TVA %</th>
-                <th style="width:11%" class="r">Montant HT</th>
-                <th style="width:11%" class="r">Montant TVA</th>
-                <th style="width:12%" class="r">Total TTC (DH)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($items as $row)
-                @php
-                    $mHT  = (float)$row['montant_ht'];
-                    $mTVA = (float)$row['montant_tva'];
-                    $mTTC = (float)$row['montant_ttc'];
-                    $totalHT  += $mHT;
-                    $totalTVA += $mTVA;
-                    $totalTTC += $mTTC;
-                @endphp
-                <tr>
-                    <td class="text-center">{{ $loop->iteration }}</td>
-                    <td><strong style="color:#0c3260">{{ $row['designation'] }}</strong></td>
-                    <td class="text-center">{{ $row['unite_mesure'] }}</td>
-                    <td class="text-right" style="font-weight:700">{{ number_format((float)$row['quantite'], 2, ',', ' ') }}</td>
-                    <td class="text-right">{{ number_format((float)$row['prix_unitaire'], 2, ',', ' ') }}</td>
-                    <td class="text-center" style="color:#64748b">{{ (float)$row['taux_tva'] > 0 ? $row['taux_tva'].'%' : 'Exo.' }}</td>
-                    <td class="text-right">{{ number_format($mHT, 2, ',', ' ') }}</td>
-                    <td class="text-right">{{ number_format($mTVA, 2, ',', ' ') }}</td>
-                    <td class="text-right" style="font-weight:700">{{ number_format($mTTC, 2, ',', ' ') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="9" class="text-center" style="padding:16px;color:#64748b;font-style:italic">
-                        Aucun article livré sur cette période.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-        <tfoot>
-            <tr class="tr-total-ht">
-                <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL HORS TAXE</td>
-                <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }}</td>
-                <td></td>
-                <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }} DH</td>
-            </tr>
-            <tr class="tr-total-tva">
-                <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL TVA</td>
-                <td></td>
-                <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }}</td>
-                <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }} DH</td>
-            </tr>
-            <tr class="tr-grand-ttc">
-                <td colspan="8" class="text-right" style="letter-spacing:.5px">TOTAL TOUTES TAXES COMPRISES</td>
-                <td class="text-right">{{ number_format($totalTTC, 2, ',', ' ') }} DH</td>
-            </tr>
-        </tfoot>
-    </table>
-
-    {{-- ════ RÉCAPITULATIF ACOMPTES ════ --}}
-    <div class="section-title" style="margin-top:20px">Récapitulation — Acomptes</div>
-
-    <table class="recap">
-        <thead>
-            <tr>
-                <th style="width:52%;text-align:left">Nature des dépenses</th>
-                <th style="width:16%;text-align:right">Dépenses faites</th>
-                <th style="width:16%;text-align:right">Retenues garantie</th>
-                <th style="width:16%;text-align:right">Reste</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Travaux terminés (décomptes antérieurs)</td>
-                <td class="text-right"></td>
-                <td class="text-right"></td>
-                <td class="text-right" style="font-weight:700">{{ number_format((float)$travaux_termine, 2, ',', ' ') }} DH</td>
-            </tr>
-            <tr>
-                <td>Travaux non terminés (solde restant)</td>
-                <td class="text-right"></td>
-                <td class="text-right"></td>
-                <td class="text-right">{{ number_format((float)$travaux_non_termine, 2, ',', ' ') }} DH</td>
-            </tr>
-            <tr>
-                <td colspan="3" style="font-style:italic;color:#475569">
-                    À déduire : acomptes précédemment payés
-                </td>
-                <td class="text-right" style="font-weight:700">{{ number_format((float)$travaux_termine, 2, ',', ' ') }} DH</td>
-            </tr>
-            <tr class="recap-highlight">
-                <td colspan="3">Montant de l'acompte à délivrer</td>
-                <td class="text-right">{{ number_format((float)$decompte_total, 2, ',', ' ') }} DH</td>
-            </tr>
-        </tbody>
-    </table>
-
-    {{-- ════ ARRÊTÉ ════ --}}
-    <div style="border:1px solid #0c3260;background:#f4f7fb;padding:9px 14px;margin-top:14px;font-size:10px;font-weight:700;color:#0c3260;border-radius:3px;">
-        Arrêté le présent décompte à la somme de :
-        <span style="color:#b8963e;font-size:12px">
-            {{ number_format((float)$decompte_total, 2, ',', ' ') }} Dirhams TTC
-        </span>
-    </div>
-
-    {{-- ════ SIGNATURES ════ --}}
-    <div class="signatures">
-        <div class="sig-cell">
-            <div class="sig-label">L'Économe</div>
-            <div class="sig-line">Nom &amp; Signature</div>
-        </div>
-        <div class="sig-cell">
-            <div class="sig-label">Le Directeur</div>
-            <div class="sig-line">Cachet &amp; Signature</div>
-        </div>
-    </div>
-
+{{-- ════ PÉRIODE ════ --}}
+<div class="periode-badge">
+    Période couverte :
+    @if(!empty($date_debut))
+        du {{ \Carbon\Carbon::parse($date_debut)->format('d/m/Y') }}
+    @endif
+    au {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
+    @if($decompte_final)
+        &nbsp;—&nbsp;<strong>Décompte DÉFINITIF</strong>
+    @else
+        &nbsp;—&nbsp;Décompte provisoire
+    @endif
 </div>
+
+{{-- ════ BLOC MARCHÉ + FOURNISSEUR ════ --}}
+<div class="info-grid">
+    <div class="info-col">
+        <div class="info-section-title">Informations du marché</div>
+        <div class="info-row">
+            <div class="info-lbl">Référence :</div>
+            <div class="info-val"><strong>{{ $marche->reference }}</strong></div>
+        </div>
+        <div class="info-row">
+            <div class="info-lbl">Objet :</div>
+            <div class="info-val">{{ $marche->objet }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-lbl">Catégorie :</div>
+            <div class="info-val">{{ $marche->categorie?->nom ?? '—' }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-lbl">Montant marché :</div>
+            <div class="info-val"><strong>{{ number_format((float)$marche->total_ttc, 2, ',', ' ') }} DH TTC</strong></div>
+        </div>
+    </div>
+    <div class="info-col info-col-right">
+        <div class="info-section-title">Fournisseur attributaire</div>
+        @php $f = $marche->fournisseur; @endphp
+        <div class="info-row">
+            <div class="info-lbl">Raison sociale :</div>
+            <div class="info-val"><strong>{{ $f->raison_sociale ?? $f->nom ?? '—' }}</strong></div>
+        </div>
+        <div class="info-row">
+            <div class="info-lbl">Adresse :</div>
+            <div class="info-val">{{ $f->adresse ?? '—' }}</div>
+        </div>
+        @if($f->tp ?? null)
+        <div class="info-row">
+            <div class="info-lbl">TP :</div><div class="info-val">{{ $f->tp }}</div>
+        </div>
+        @endif
+        @if($f->if ?? null)
+        <div class="info-row">
+            <div class="info-lbl">IF :</div><div class="info-val">{{ $f->if }}</div>
+        </div>
+        @endif
+        @if($f->rc ?? null)
+        <div class="info-row">
+            <div class="info-lbl">RC :</div><div class="info-val">{{ $f->rc }}</div>
+        </div>
+        @endif
+        <div class="info-row">
+            <div class="info-lbl">ICE :</div>
+            <div class="info-val">{{ $f->ice ?? '—' }}</div>
+        </div>
+        @if($f->cb ?? null)
+        <div class="info-row">
+            <div class="info-lbl">RIB / CB :</div><div class="info-val">{{ $f->cb }}</div>
+        </div>
+        @endif
+    </div>
+</div>
+
+{{-- ════ TABLEAU DES ARTICLES LIVRÉS ════ --}}
+<div class="section-title">Articles livrés sur la période</div>
+
+@php
+    $totalHT  = 0;
+    $totalTVA = 0;
+    $totalTTC = 0;
+@endphp
+
+<table class="articles">
+    <thead>
+        <tr>
+            <th style="width:4%"  class="c">N°</th>
+            <th style="width:28%">Désignation</th>
+            <th style="width:7%"  class="c">Unité</th>
+            <th style="width:9%"  class="r">Qté livrée</th>
+            <th style="width:11%" class="r">P.U. HT (DH)</th>
+            <th style="width:7%"  class="c">TVA %</th>
+            <th style="width:11%" class="r">Montant HT</th>
+            <th style="width:11%" class="r">Montant TVA</th>
+            <th style="width:12%" class="r">Total TTC (DH)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($items as $row)
+            @php
+                $mHT  = (float)$row['montant_ht'];
+                $mTVA = (float)$row['montant_tva'];
+                $mTTC = (float)$row['montant_ttc'];
+                $totalHT  += $mHT;
+                $totalTVA += $mTVA;
+                $totalTTC += $mTTC;
+            @endphp
+            <tr>
+                <td class="text-center">{{ $loop->iteration }}</td>
+                <td><strong style="color:#0c3260">{{ $row['designation'] }}</strong></td>
+                <td class="text-center">{{ $row['unite_mesure'] }}</td>
+                <td class="text-right" style="font-weight:700">{{ number_format((float)$row['quantite'], 2, ',', ' ') }}</td>
+                <td class="text-right">{{ number_format((float)$row['prix_unitaire'], 2, ',', ' ') }}</td>
+                <td class="text-center" style="color:#64748b">{{ (float)$row['taux_tva'] > 0 ? $row['taux_tva'].'%' : 'Exo.' }}</td>
+                <td class="text-right">{{ number_format($mHT, 2, ',', ' ') }}</td>
+                <td class="text-right">{{ number_format($mTVA, 2, ',', ' ') }}</td>
+                <td class="text-right" style="font-weight:700">{{ number_format($mTTC, 2, ',', ' ') }}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="9" class="text-center" style="padding:16px;color:#64748b;font-style:italic">
+                    Aucun article livré sur cette période.
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+    <tfoot>
+        <tr class="tr-total-ht">
+            <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL HORS TAXE</td>
+            <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }}</td>
+            <td></td>
+            <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }} DH</td>
+        </tr>
+        <tr class="tr-total-tva">
+            <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL TVA</td>
+            <td></td>
+            <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }}</td>
+            <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }} DH</td>
+        </tr>
+        <tr class="tr-grand-ttc">
+            <td colspan="8" class="text-right" style="letter-spacing:.5px">TOTAL TOUTES TAXES COMPRISES</td>
+            <td class="text-right">{{ number_format($totalTTC, 2, ',', ' ') }} DH</td>
+        </tr>
+    </tfoot>
+</table>
+
+{{-- ════ RÉCAPITULATIF ACOMPTES ════ --}}
+<div class="section-title" style="margin-top:20px">Récapitulation — Acomptes</div>
+
+<table class="recap">
+    <thead>
+        <tr>
+            <th style="width:52%;text-align:left">Nature des dépenses</th>
+            <th style="width:16%;text-align:right">Dépenses faites</th>
+            <th style="width:16%;text-align:right">Retenues garantie</th>
+            <th style="width:16%;text-align:right">Reste</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Travaux terminés (décomptes antérieurs)</td>
+            <td class="text-right"></td>
+            <td class="text-right"></td>
+            <td class="text-right" style="font-weight:700">{{ number_format((float)$travaux_termine, 2, ',', ' ') }} DH</td>
+        </tr>
+        <tr>
+            <td>Travaux non terminés (solde restant)</td>
+            <td class="text-right"></td>
+            <td class="text-right"></td>
+            <td class="text-right">{{ number_format((float)$travaux_non_termine, 2, ',', ' ') }} DH</td>
+        </tr>
+        <tr>
+            <td colspan="3" style="font-style:italic;color:#475569">
+                À déduire : acomptes précédemment payés
+            </td>
+            <td class="text-right" style="font-weight:700">{{ number_format((float)$travaux_termine, 2, ',', ' ') }} DH</td>
+        </tr>
+        <tr class="recap-highlight">
+            <td colspan="3">Montant de l'acompte à délivrer</td>
+            <td class="text-right">{{ number_format((float)$decompte_total, 2, ',', ' ') }} DH</td>
+        </tr>
+    </tbody>
+</table>
+
+{{-- ════ ARRÊTÉ ════ --}}
+<div style="border:1px solid #0c3260;background:#f4f7fb;padding:9px 14px;margin-top:14px;font-size:10px;font-weight:700;color:#0c3260;">
+    Arrêté le présent décompte à la somme de :
+    <span style="color:#b8963e;font-size:12px">
+        {{ number_format((float)$decompte_total, 2, ',', ' ') }} Dirhams TTC
+    </span>
+</div>
+
+{{-- ════ SIGNATURES ════ --}}
+<div class="signatures">
+    <div class="sig-cell">
+        <div class="sig-label">L'Économe</div>
+        <div class="sig-line">Nom &amp; Signature</div>
+    </div>
+    <div class="sig-cell">
+        <div class="sig-label">Le Directeur</div>
+        <div class="sig-line">Cachet &amp; Signature</div>
+    </div>
+</div>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 </body>
 </html>
