@@ -227,14 +227,14 @@
 
 {{-- ════ IMAGE HEADER FIXE (répétée sur chaque page) ════ --}}
 @php
-    $headerPath = public_path('images/pdf-header.jpg');
-    $headerSrc  = file_exists($headerPath)
-        ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($headerPath))
-        : null;
+    if (empty($pdfHeader)) {
+        $__p = public_path('images/pdf-header.jpg');
+        $pdfHeader = file_exists($__p) ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($__p)) : null;
+    }
 @endphp
 <div class="pdf-header">
-    @if($headerSrc)
-        <img src="{{ $headerSrc }}" alt="En-tête officiel ISTAHT Tanger">
+    @if(!empty($pdfHeader))
+        <img src="{{ $pdfHeader }}" alt="En-tête officiel ISTAHT Tanger">
     @endif
     <div class="pdf-header-navy"></div>
     <div class="pdf-header-gold"></div>
