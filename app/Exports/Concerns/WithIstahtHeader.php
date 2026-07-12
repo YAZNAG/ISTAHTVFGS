@@ -50,7 +50,7 @@ trait WithIstahtHeader
                 $sheet->mergeCells("A1:{$lastCol}7");
 
                 // ── 3. Insérer l'image header ──
-                $headerPath = public_path('images/pdf-header.jpg');
+                $headerPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, public_path('images/pdf-header.jpg'));
                 if (file_exists($headerPath)) {
                     $drawing = new Drawing();
                     $drawing->setName('ISTAHT Header');
