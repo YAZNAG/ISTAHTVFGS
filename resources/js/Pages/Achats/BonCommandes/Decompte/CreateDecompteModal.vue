@@ -1,105 +1,106 @@
 <template>
-  <Modal ref="createDecompteModal">
+  <Modal>
     <!-- Header -->
-    <div class="mb-2">
-      <h2 class="text-lg font-semibold text-gray-900">Exporter les marchés</h2>
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Créer un décompte</h2>
       <p class="text-sm text-gray-500 mt-1">
-        Sélectionnez une plage de dates pour exporter les marchés correspondants.
+        Sélectionnez la période de livraison pour générer le décompte du marché.
       </p>
     </div>
 
     <!-- Form -->
-    <div>
-      <div class="grid gap-4 mt-4">
-        <div>
-          <InputLabel for="date_debut">Date début</InputLabel>
-          <input
-            id="date_debut"
-            type="date"
-            v-model="form.date_debut"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          <InputError :message="form.errors.date_debut" />
-        </div>
+    <div class="grid gap-4">
 
-        <!-- End date -->
-        <div>
-          <InputLabel for="date">Date fin</InputLabel>
-          <input
-            id="date"
-            type="date"
-            v-model="form.date"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
-          />
-          <InputError :message="form.errors.date" />
-        </div>
-
-        <div>
-          <InputLabel for="categorie_id">Categorie</InputLabel>
-          <select
-            id="categorie_id"
-            v-model="form.categorie_id"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option :value="null">Toutes les categories</option>
-            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
-          </select>
-          <InputError :message="form.errors.categorie_id" />
-        </div>
-
-        <div class="flex items-center">
-          <input
-            id="is_final"
-            type="checkbox"
-            v-model="form.is_final"
-            class="h-4 w-4 text-blue-600 border-gray-300 rounded"
-          />
-          <InputLabel for="is_final" class="ml-2 block text-sm text-gray-700">est finale</InputLabel>
-          <InputError :message="form.errors.is_final" />
-        </div>
+      <!-- Date début -->
+      <div>
+        <InputLabel for="date_debut">Date début <span class="text-gray-400 text-xs">(optionnelle)</span></InputLabel>
+        <input
+          id="date_debut"
+          type="date"
+          v-model="form.date_debut"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+        <InputError :message="form.errors.date_debut" />
       </div>
 
-      <!-- Footer Actions -->
-      <div class="mt-6 flex justify-end gap-2">
-        <button
-          type="button"
-          variant="outline"
-          @click="close"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
-        </button>
-
-        <button
-          @click="submit"
-          target="_blank"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          :class="{ 'opacity-50 cursor-not-allowed': !form.date }"
-        >
-          Enregistrer
-        </button>
-        
+      <!-- Date fin -->
+      <div>
+        <InputLabel for="date">Date fin <span class="text-red-500">*</span></InputLabel>
+        <input
+          id="date"
+          type="date"
+          v-model="form.date"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          required
+        />
+        <InputError :message="form.errors.date" />
       </div>
+
+      <!-- Catégorie -->
+      <div>
+        <InputLabel for="categorie_id">Catégorie</InputLabel>
+        <select
+          id="categorie_id"
+          v-model="form.categorie_id"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        >
+          <option :value="null">Toutes les catégories</option>
+          <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
+        </select>
+        <InputError :message="form.errors.categorie_id" />
+      </div>
+
+      <!-- Final -->
+      <div class="flex items-center gap-2">
+        <input
+          id="is_final"
+          type="checkbox"
+          v-model="form.is_final"
+          class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+        />
+        <InputLabel for="is_final" class="mb-0 cursor-pointer">Décompte définitif</InputLabel>
+        <InputError :message="form.errors.is_final" />
+      </div>
+    </div>
+
+    <!-- Résumé période -->
+    <div v-if="form.date" class="mt-4 rounded-md bg-blue-50 border border-blue-100 px-4 py-2 text-sm text-blue-700">
+      Période :
+      <strong>{{ form.date_debut ? formatDate(form.date_debut) + ' → ' : 'Début du marché → ' }}</strong>
+      <strong>{{ formatDate(form.date) }}</strong>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-6 flex justify-end gap-2">
+      <button
+        type="button"
+        @click="$modal.close()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        Annuler
+      </button>
+      <button
+        @click="submit"
+        :disabled="!form.date || form.processing"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ form.processing ? 'Génération...' : 'Générer le décompte' }}
+      </button>
     </div>
   </Modal>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { Modal } from '@inertiaui/modal-vue'
 import { useForm } from '@inertiajs/vue3'
 import InputLabel from '@/Components/InputLabel.vue'
 import InputError from '@/Components/InputError.vue'
 
 const props = defineProps({
-  marche_id: Object,
+  marche_id: [Number, String],
   categories: { type: Array, default: () => [] },
-});
+})
 
-// Refs
-const createDecompteModal = ref(null)
-
-// Inertia form
 const form = useForm({
   date: null,
   date_debut: null,
@@ -107,17 +108,17 @@ const form = useForm({
   is_final: false,
 })
 
-
-// Close modal
-function close() {
-  createDecompteModal.value?.close()
+function formatDate(d) {
+  if (!d) return ''
+  const [y, m, j] = d.split('-')
+  return `${j}/${m}/${y}`
 }
 
-function submit(event) {
-    form.post(route('decompte.store', props.marche_id), {
-      onSuccess: () => {
-        createDecompteModal.value.close()
-      }
-    });
-  }
+function submit() {
+  form.post(route('decompte.store', props.marche_id), {
+    onSuccess: () => {
+      // @inertiaui/modal-vue ferme automatiquement via baseRoute redirect
+    },
+  })
+}
 </script>
