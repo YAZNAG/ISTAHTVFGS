@@ -353,6 +353,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/marches/{bonCommande}/decompte', [DecompteController::class, 'store'])->name('decompte.store');
     Route::get('/marches/{decompte}/download', [DecompteController::class, 'download'])->name('decompte.download-pdf');
     Route::get('/marches/{decompte}/download-excel', [DecompteController::class, 'exportExcel'])->name('decompte.download-excel');
+    Route::delete('/marches/decompte/{decompte}', [DecompteController::class, 'destroy'])->name('decompte.destroy');
 
     #### Menu Collectivite ####
     Route::get('/menu-collectivite', [MenuCollectiviteController::class, 'index'])->name('menus.index');

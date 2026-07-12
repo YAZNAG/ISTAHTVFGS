@@ -117,6 +117,14 @@ class DecompteController extends Controller
         );
     }
 
+    public function destroy(Decompte $decompte)
+    {
+        $marcheId = $decompte->marche_id;
+        $decompte->items()->delete();
+        $decompte->delete();
+        return redirect()->route('bon-commandes.show', $marcheId);
+    }
+
     public function download(Decompte $decompte)
     {
         ini_set('memory_limit', '512M');

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import { ModalLink } from '@inertiaui/modal-vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import UiBadge from '@/Components/UI/Badge.vue'
@@ -116,6 +116,11 @@ function formatCurrency(amount) {
     currency: 'MAD',
     minimumFractionDigits: 2,
   }).format(Number(amount || 0))
+}
+
+function deleteDecompte(decompte) {
+  if (!confirm(`Supprimer le decompte ${decompte.numero} (${formatDate(decompte.date_debut) || 'Debut'} → ${formatDate(decompte.date)}) ?`)) return
+  router.delete(route('decompte.destroy', decompte.id), { preserveScroll: true })
 }
 </script>
 
@@ -440,6 +445,13 @@ function formatCurrency(amount) {
                       <a :href="route('decompte.download-excel', decompte.id)" target="_blank" class="ui-button ui-button-secondary px-3 py-1.5 text-xs ml-1">
                         Excel
                       </a>
+                      <button
+                        type="button"
+                        class="ui-button ui-button-danger px-3 py-1.5 text-xs ml-1"
+                        @click="deleteDecompte(decompte)"
+                      >
+                        Supprimer
+                      </button>
                     </td>
                   </tr>
                 </tbody>
