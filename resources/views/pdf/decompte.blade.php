@@ -33,13 +33,12 @@
             top:   -130px;
             left:  -28px;
             right: -28px;
-            height: 128px;
-            background: #fff;
+            height: 123px;
         }
-        .pdf-header img {
+        .pdf-header-img {
             display: block;
-            width:  100%;
-            height: 120px;
+            width: 100%;
+            height: 116px;
         }
         .pdf-header-navy { height: 4px; background: #0c3260; }
         .pdf-header-gold { height: 3px; background: #b8963e; }
@@ -187,14 +186,9 @@
 <body>
 
 {{-- ════ HEADER IMAGE — position:fixed → répété sur chaque page ════ --}}
-@php
-    $__imgPath = public_path('images/pdf-header.jpg');
-    $__imgData = file_exists($__imgPath) ? @file_get_contents($__imgPath) : false;
-    $pdfHeaderSrc = ($__imgData !== false) ? 'data:image/jpeg;base64,' . base64_encode($__imgData) : null;
-@endphp
 <div class="pdf-header">
-    @if($pdfHeaderSrc)
-        <img src="{{ $pdfHeaderSrc }}" alt="ISTAHT Tanger">
+    @if(!empty($pdfHeaderSrc))
+        <img class="pdf-header-img" src="{{ $pdfHeaderSrc }}" alt="ISTAHT Tanger">
     @endif
     <div class="pdf-header-navy"></div>
     <div class="pdf-header-gold"></div>

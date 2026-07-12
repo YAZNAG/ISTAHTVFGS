@@ -163,6 +163,12 @@ class DecompteController extends Controller
         $cleanRef  = preg_replace('/[\/\\\\]/', '-', $decompte->marche->reference);
         $fileName  = "decompte-{$cleanRef}-{$decompte->date->format('Y-m-d')}.pdf";
 
+        $imgPath  = public_path('images/pdf-header.jpg');
+        $imgData  = file_exists($imgPath) ? @file_get_contents($imgPath) : false;
+        $pdfHeaderSrc = $imgData !== false
+            ? 'data:image/jpeg;base64,' . base64_encode($imgData)
+            : null;
+
         return Pdf::loadView('pdf.decompte', [
             'items'              => $items,
             'marche'             => $decompte->marche,
@@ -172,6 +178,10 @@ class DecompteController extends Controller
             'travaux_termine'    => $travaux_termine,
             'travaux_non_termine'=> $travaux_non_termine,
             'decompte_total'     => $decompte_total,
-        ])->setPaper('a4', 'portrait')->download($fileName);
+            'pdfHeaderSrc'       => $pdfHeaderSrc,
+        ])
+        ->setOptions(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true, 'dpi' => 96])
+        ->setPaper('a4', 'portrait')
+        ->download($fileName);
     }
 }
