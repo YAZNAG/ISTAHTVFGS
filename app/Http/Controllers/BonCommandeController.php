@@ -510,7 +510,7 @@ class BonCommandeController extends Controller implements HasMiddleware
             'articles.article:id,reference,designation,unite_mesure',
             'bonReceptions:id,bon_commande_id,date_reception,fichier_bonlivraison',
             'bonReceptions.lignesReception:id,bon_reception_id,article_id,quantite_receptionnee,prix_total,montant_tva',
-            'decomptes:id,marche_id,date,final',
+            'decomptes:id,marche_id,date,date_debut,final,categorie_id',
             'decomptes.items:id,decompte_id,article_id,montant_ttc',
             'chefCommandes:id,bon_commande_id,user_id,numero,statut,created_at',
             'chefCommandes.items:id,chef_commande_id,article_id',
@@ -955,15 +955,17 @@ class BonCommandeController extends Controller implements HasMiddleware
 
     private function decomptePayload(BonCommande $marche)
     {
-        return $marche->decomptes->map(fn (Decompte $decompte) => [
-            'id'         => $decompte->id,
-            'numero'     => $decompte->numero ?? ('DC-'.str_pad($decompte->id, 4, '0', STR_PAD_LEFT)),
-            'date'       => optional($decompte->date)->toDateString(),
-            'date_debut' => optional($decompte->date_debut)->toDateString(),
-            'final'      => (bool) $decompte->final,
-            'total_ttc'  => (float) $decompte->items->sum('montant_ttc'),
-            'nb_articles' => $decompte->items->count(),
-        ]);
+        return $marche->decomptes
+            ->when($marche->categorie_id, fn ($col) => $col->where('categorie_id', $marche->categorie_id))
+            ->map(fn (Decompte $decompte) => [
+                'id'          => $decompte->id,
+                'numero'      => $decompte->numero ?? ('DC-'.str_pad($decompte->id, 4, '0', STR_PAD_LEFT)),
+                'date'        => optional($decompte->date)->toDateString(),
+                'date_debut'  => optional($decompte->date_debut)->toDateString(),
+                'final'       => (bool) $decompte->final,
+                'total_ttc'   => (float) $decompte->items->sum('montant_ttc'),
+                'nb_articles' => $decompte->items->count(),
+            ])->values();
     }
 
     private function marketHasOperationalData(BonCommande $marche): bool

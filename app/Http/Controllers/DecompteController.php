@@ -17,8 +17,9 @@ class DecompteController extends Controller
     public function create(BonCommande $bonCommande)
     {
         return Inertia::modal('Achats/BonCommandes/Decompte/CreateDecompteModal', [
-            'marche_id' => $bonCommande->id,
-            'categories' => \App\Models\Categorie::actives()->orderBy('nom')->get(['id', 'nom']),
+            'marche_id'          => $bonCommande->id,
+            'default_categorie_id' => $bonCommande->categorie_id,
+            'categories'         => \App\Models\Categorie::actives()->orderBy('nom')->get(['id', 'nom']),
         ])->baseRoute('bon-commandes.show', $bonCommande->id);
     }
 

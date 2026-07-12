@@ -36,7 +36,7 @@
         <InputError :message="form.errors.date" />
       </div>
 
-      <!-- Catégorie -->
+      <!-- Catégorie (pré-sélectionnée depuis le marché) -->
       <div>
         <InputLabel for="categorie_id">Catégorie</InputLabel>
         <select
@@ -91,21 +91,24 @@
 </template>
 
 <script setup>
-import { Modal } from '@inertiaui/modal-vue'
+import { Modal, useModal } from '@inertiaui/modal-vue'
 import { useForm } from '@inertiajs/vue3'
 import InputLabel from '@/Components/InputLabel.vue'
 import InputError from '@/Components/InputError.vue'
 
 const props = defineProps({
-  marche_id: [Number, String],
-  categories: { type: Array, default: () => [] },
+  marche_id:            [Number, String],
+  default_categorie_id: { type: [Number, String], default: null },
+  categories:           { type: Array, default: () => [] },
 })
 
+const modal = useModal()
+
 const form = useForm({
-  date: null,
-  date_debut: null,
-  categorie_id: null,
-  is_final: false,
+  date:         null,
+  date_debut:   null,
+  categorie_id: props.default_categorie_id,
+  is_final:     false,
 })
 
 function formatDate(d) {
@@ -116,9 +119,7 @@ function formatDate(d) {
 
 function submit() {
   form.post(route('decompte.store', props.marche_id), {
-    onSuccess: () => {
-      // @inertiaui/modal-vue ferme automatiquement via baseRoute redirect
-    },
+    onSuccess: () => modal.close(),
   })
 }
 </script>
