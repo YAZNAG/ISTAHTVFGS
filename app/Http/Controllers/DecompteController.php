@@ -119,7 +119,8 @@ class DecompteController extends Controller
 
     public function download(Decompte $decompte)
     {
-        ini_set('memory_limit', '256M');
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', '120');
 
         $decompte->load([
             'items.article:id,designation,unite_mesure',
