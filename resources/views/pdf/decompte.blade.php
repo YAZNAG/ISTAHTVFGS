@@ -6,7 +6,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        @page { margin-top: 120px; margin-bottom: 55px; }
+        @page { margin-top: 125px; margin-bottom: 55px; }
 
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
@@ -16,16 +16,16 @@
             line-height: 1.5;
         }
 
-        /* ══ HEADER FIXE ══ */
+        /* ══ HEADER FIXE — répété sur chaque page ══ */
         .pdf-header {
             position: fixed;
-            top: -120px;
+            top: -125px;
             left: 0; right: 0;
-            height: 116px;
+            height: 122px;
         }
-        .pdf-header img { width: 100%; height: 108px; display: block; }
-        .pdf-header-navy { height: 3px; background: #0c3260; }
-        .pdf-header-gold  { height: 2px; background: #b8963e; }
+        .pdf-header img { width: 100%; height: 114px; display: block; object-fit: cover; }
+        .pdf-header-navy { height: 4px; background: #0c3260; }
+        .pdf-header-gold  { height: 3px; background: #b8963e; }
 
         /* ══ FOOTER FIXE ══ */
         .pdf-footer {
@@ -173,9 +173,15 @@
 <body>
 
 {{-- ════ HEADER IMAGE FIXE ════ --}}
+@php
+    if (empty($pdfHeader)) {
+        $__p = public_path('images/pdf-header.jpg');
+        $pdfHeader = file_exists($__p) ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($__p)) : null;
+    }
+@endphp
 <div class="pdf-header">
     @if(!empty($pdfHeader))
-        <img src="{{ $pdfHeader }}" alt="En-tête ISTAHT Tanger">
+        <img src="{{ $pdfHeader }}" alt="En-tête ISTAHT Tanger" style="width:100%;height:108px;display:block;">
     @endif
     <div class="pdf-header-navy"></div>
     <div class="pdf-header-gold"></div>
