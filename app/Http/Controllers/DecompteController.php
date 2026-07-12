@@ -119,44 +119,49 @@ class DecompteController extends Controller
 
     public function download(Decompte $decompte)
     {
-        $decompte->load('items.article:id,designation,unite_mesure', 'marche.fournisseur:id,nom,ice');
+        ini_set('memory_limit', '256M');
 
-        $items = $decompte->items->map(function ($item) {
-                return [
-                    'article_id'    => $item->article_id,
-                    'designation'   => $item->article->designation,
-                    'unite_mesure'  => $item->article->unite_mesure,
-                    'quantite'      => $item->quantite,
-                    'prix_unitaire' => number_format($item->prix_unitaire, 2, '.', ''),   // kept unchanged
-                    'taux_tva'      => $item->taux_tva,
-                    'montant_ht'    => number_format($item->montant_ht, 2, '.', ''),
-                    'montant_tva'   => number_format($item->montant_tva, 2, '.', ''),
-                    'montant_ttc'   => number_format($item->montant_ttc, 2, '.', ''),
-                ];
-            });
+        $decompte->load([
+            'items.article:id,designation,unite_mesure',
+            'marche.fournisseur:id,nom,raison_sociale,adresse,ville,telephone,ice,tp,rc,if,cb',
+            'marche.categorie:id,nom',
+        ]);
+
+        $items = $decompte->items->map(fn ($item) => [
+            'article_id'    => $item->article_id,
+            'designation'   => $item->article->designation,
+            'unite_mesure'  => $item->article->unite_mesure,
+            'quantite'      => $item->quantite,
+            'prix_unitaire' => number_format((float) $item->prix_unitaire, 2, '.', ''),
+            'taux_tva'      => $item->taux_tva,
+            'montant_ht'    => number_format((float) $item->montant_ht, 2, '.', ''),
+            'montant_tva'   => number_format((float) $item->montant_tva, 2, '.', ''),
+            'montant_ttc'   => number_format((float) $item->montant_ttc, 2, '.', ''),
+        ]);
 
         $previous_decompte_total = \App\Models\DecompteItem::whereHas('decompte', fn ($q) => $q
-                ->where('marche_id', $decompte->marche_id)
-                ->where('date', '<', $decompte->date)
-            )->sum('montant_ttc');
-        
-        $current_decompte_total = $decompte->items->sum('montant_ttc');
+            ->where('marche_id', $decompte->marche_id)
+            ->where('date', '<', $decompte->date)
+        )->sum('montant_ttc');
 
-        $marche_total = number_format($decompte->marche->total_ttc, 2, '.', '');
+        $current_decompte_total  = $decompte->items->sum('montant_ttc');
+        $marche_total            = (float) $decompte->marche->total_ttc;
+        $travaux_termine         = number_format((float) $previous_decompte_total, 2, '.', '');
+        $travaux_non_termine     = number_format($marche_total - (float) $previous_decompte_total, 2, '.', '');
+        $decompte_total          = number_format($current_decompte_total - (float) $previous_decompte_total, 2, '.', '');
 
-        $travaux_termine = number_format($previous_decompte_total, 2, '.', '');
+        $cleanRef  = preg_replace('/[\/\\\\]/', '-', $decompte->marche->reference);
+        $fileName  = "decompte-{$cleanRef}-{$decompte->date->format('Y-m-d')}.pdf";
 
-        $travaux_non_termine = number_format($marche_total - $travaux_termine, 2, '.', '');
-
-        $decompte_total = number_format($current_decompte_total - $previous_decompte_total, 2, '.', '');
-
-        $fileName = "decompte-{$decompte->marche->reference}-{$decompte->date}.pdf";
         return Pdf::loadView('pdf.decompte', [
-            'items' => $items,
-            "travaux_termine" => $travaux_termine,
-            "travaux_non_termine" => $travaux_non_termine,
-            "decompte_total" => $decompte_total,
-            "marche" => $decompte->marche
-        ])->download($fileName);
+            'items'              => $items,
+            'marche'             => $decompte->marche,
+            'date'               => $decompte->date,
+            'date_debut'         => $decompte->date_debut,
+            'decompte_final'     => (bool) $decompte->final,
+            'travaux_termine'    => $travaux_termine,
+            'travaux_non_termine'=> $travaux_non_termine,
+            'decompte_total'     => $decompte_total,
+        ])->setPaper('a4', 'portrait')->download($fileName);
     }
 }

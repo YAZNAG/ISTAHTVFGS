@@ -1,120 +1,405 @@
 <!doctype html>
-<html>
-
+<html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Decompte</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Décompte — {{ $marche->reference }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page { margin-top: 120px; margin-bottom: 55px; }
+
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 10.5px;
+            color: #1a2233;
+            background: #fff;
+            line-height: 1.5;
+        }
+
+        /* ══ HEADER FIXE ══ */
+        .pdf-header {
+            position: fixed;
+            top: -120px;
+            left: 0; right: 0;
+            height: 116px;
+        }
+        .pdf-header img { width: 100%; height: 108px; display: block; }
+        .pdf-header-navy { height: 3px; background: #0c3260; }
+        .pdf-header-gold  { height: 2px; background: #b8963e; }
+
+        /* ══ FOOTER FIXE ══ */
+        .pdf-footer {
+            position: fixed;
+            bottom: -55px;
+            left: 0; right: 0;
+            height: 44px;
+            border-top: 2px solid #0c3260;
+            padding-top: 7px;
+            font-size: 8.5px;
+            color: #64748b;
+            background: #fff;
+            display: table;
+            width: 100%;
+        }
+        .footer-left   { display: table-cell; text-align: left; color: #475569; }
+        .footer-left strong { color: #0c3260; }
+        .footer-center { display: table-cell; text-align: center; color: #b8963e; font-weight: 700; }
+        .footer-right  { display: table-cell; text-align: right; }
+
+        /* ══ TITRE DOCUMENT ══ */
+        .doc-title-bar {
+            text-align: center;
+            padding: 10px 0 8px;
+            border-bottom: 2px solid #0c3260;
+            margin-bottom: 14px;
+        }
+        .doc-label { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: .8px; }
+        .doc-title { font-size: 15px; font-weight: 800; color: #0c3260; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 3px; }
+        .doc-sub   { font-size: 9px; color: #64748b; margin-top: 4px; }
+
+        /* ══ BLOC INFO 2 colonnes ══ */
+        .info-grid { display: table; width: 100%; margin-bottom: 14px; border: 1px solid #dce4ef; border-radius: 4px; }
+        .info-col  { display: table-cell; width: 50%; padding: 10px 14px; vertical-align: top; }
+        .info-col-right { border-left: 1px solid #dce4ef; }
+        .info-section-title {
+            font-size: 8px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .7px; color: #0c3260;
+            border-bottom: 1px solid #dce4ef;
+            padding-bottom: 5px; margin-bottom: 7px;
+        }
+        .info-row { display: table; width: 100%; margin-bottom: 4px; }
+        .info-lbl { display: table-cell; width: 40%; font-size: 9px; font-weight: 700; color: #3d4f6a; }
+        .info-val { display: table-cell; font-size: 9.5px; color: #1a2233; }
+
+        /* ══ BADGE PÉRIODE ══ */
+        .periode-badge {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            border-radius: 4px;
+            padding: 4px 12px;
+            font-size: 9.5px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        /* ══ SECTION TITLE ══ */
+        .section-title {
+            font-size: 10px; font-weight: 800; color: #0c3260;
+            text-transform: uppercase; letter-spacing: .6px;
+            border-left: 3px solid #b8963e;
+            padding-left: 8px;
+            margin-bottom: 8px; margin-top: 16px;
+        }
+
+        /* ══ TABLEAU ARTICLES ══ */
+        table.articles {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5px;
+            margin-bottom: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+        table.articles thead th {
+            background: #0c3260;
+            color: #fff;
+            padding: 6px 7px;
+            font-size: 8.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+            border: 1px solid #071f3e;
+        }
+        table.articles thead th.r { text-align: right; }
+        table.articles thead th.c { text-align: center; }
+        table.articles tbody td {
+            padding: 5px 7px;
+            border: 1px solid #dce4ef;
+            vertical-align: middle;
+        }
+        table.articles tbody tr:nth-child(even) td { background: #f4f7fb; }
+        table.articles tfoot td {
+            padding: 6px 7px;
+            border: 1px solid #c5d3e4;
+            font-weight: 700;
+        }
+        .tr-total-ht  td { background: #f4f7fb; }
+        .tr-total-tva td { background: #f4f7fb; }
+        .tr-grand-ttc td { background: #0c3260; color: #fff; font-size: 10.5px; border-color: #071f3e; }
+
+        /* ══ TABLEAU RÉCAPITULATIF ══ */
+        table.recap {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5px;
+            margin-top: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+        table.recap thead th {
+            background: #1e3a5f;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 8.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+            border: 1px solid #071f3e;
+            text-decoration: underline;
+        }
+        table.recap tbody td {
+            padding: 7px 10px;
+            border: 1px solid #dce4ef;
+        }
+        .recap-highlight td {
+            background: #0c3260;
+            color: #fff;
+            font-weight: 800;
+            font-size: 11px;
+            border-color: #071f3e;
+        }
+
+        /* ══ ZONE SIGNATURE ══ */
+        .signatures { display: table; width: 100%; margin-top: 36px; }
+        .sig-cell   { display: table-cell; width: 50%; text-align: center; padding: 0 24px; }
+        .sig-label  { font-size: 10px; font-weight: 800; color: #0c3260; text-transform: uppercase; }
+        .sig-line   { border-bottom: 1px dashed #0c3260; margin-top: 48px; padding-bottom: 4px; font-size: 8px; color: #64748b; }
+
+        .body-wrap { padding: 0 20px 80px; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+    </style>
 </head>
+<body>
 
-<body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
-    <div class="flex-1 p-5">
-        <!-- TITLE -->
-        <!-- <div class="text-center font-bold text-2xl uppercase underline mb-2">
-            Decompte
-        </div> -->
-        <div class="mb-4">
-            <div class="grid grid-cols-2">
-                <p>Marché cadre: {{ $marche->reference }}</p>
-                <p>Objet: {{ $marche->objet}}</p>
+{{-- ════ HEADER IMAGE FIXE ════ --}}
+<div class="pdf-header">
+    @if(!empty($pdfHeader))
+        <img src="{{ $pdfHeader }}" alt="En-tête ISTAHT Tanger">
+    @endif
+    <div class="pdf-header-navy"></div>
+    <div class="pdf-header-gold"></div>
+</div>
+
+{{-- ════ FOOTER FIXE ════ --}}
+<div class="pdf-footer">
+    <div class="footer-left"><strong>ISTAHT Tanger</strong> — Gestion des marchés &amp; achats</div>
+    <div class="footer-center">stock.istahttanger.ma</div>
+    <div class="footer-right">Imprimé le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
+</div>
+
+{{-- ════ TITRE DOCUMENT ════ --}}
+<div class="doc-title-bar">
+    <div class="doc-label">Document officiel — Institut Spécialisé de Technologie Appliquée Hôtelière et Touristique Tanger</div>
+    <div class="doc-title">Décompte de Marché N° {{ $marche->reference }}</div>
+    <div class="doc-sub">Généré le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
+</div>
+
+<div class="body-wrap">
+
+    {{-- ════ PÉRIODE ════ --}}
+    <div class="periode-badge">
+        Période couverte :
+        @if(!empty($date_debut))
+            du {{ \Carbon\Carbon::parse($date_debut)->format('d/m/Y') }}
+        @endif
+        au {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
+        @if($decompte_final)
+            &nbsp;—&nbsp;<strong>Décompte DÉFINITIF</strong>
+        @else
+            &nbsp;—&nbsp;Décompte provisoire
+        @endif
+    </div>
+
+    {{-- ════ BLOC MARCHÉ + FOURNISSEUR ════ --}}
+    <div class="info-grid">
+        <div class="info-col">
+            <div class="info-section-title">Informations du marché</div>
+            <div class="info-row">
+                <div class="info-lbl">Référence :</div>
+                <div class="info-val"><strong>{{ $marche->reference }}</strong></div>
             </div>
-            
-            <div class="grid grid-cols-4">
-                <p class="col-span-2">Titulaire : {{ $marche->fournisseur->nom }}</p>
-                <p class="col-span-2">Adresse: {{ $marche->fournisseur->adresse }}</p>
-                <p>TP: {{ $marche->fournisseur->tp }}</p>
-                <p>IF: {{ $marche->fournisseur->if }}</p>
-                <p>RC: {{ $marche->fournisseur->rc }}</p>
-                <p>CNSS: {{ $marche->fournisseur->cnss }}</p>
-                <p class="col-span-2">CB: {{ $marche->fournisseur->cb }}</p>
-
+            <div class="info-row">
+                <div class="info-lbl">Objet :</div>
+                <div class="info-val">{{ $marche->objet }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-lbl">Catégorie :</div>
+                <div class="info-val">{{ $marche->categorie?->nom ?? '—' }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-lbl">Montant marché :</div>
+                <div class="info-val"><strong>{{ number_format((float)$marche->total_ttc, 2, ',', ' ') }} DH TTC</strong></div>
             </div>
         </div>
-
-        <div class="overflow-x-auto mb-4">
-            <table class="w-full border border-black border-collapse text-xs">
-                <thead class="font-bold">
-                    <tr>
-                        <th class="px-3 py-2 border border-black text-center ">N°</th>
-                        <th class="px-3 py-2 border border-black text-center ">Désignation</th>
-                        <th class="px-3 py-2 border border-black text-center ">Unité</th>
-                        <th class="px-3 py-2 border border-black text-center">Qté</th>
-                        <th class="px-3 py-2 border border-black text-right">PU HT</th>
-                        <th class="px-3 py-2 border border-black text-right">TVA</th>
-                        <th class="px-3 py-2 border border-black text-right">Total HT</th>
-                        <th class="px-3 py-2 border border-black text-right">Montant TVA</th>
-                        <th class="px-3 py-2 border border-black text-right">Total TTC</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($items as $row)
-                    <tr>
-                        <td class="border border-black text-center p-1">{{ $loop->iteration }}</td>
-                        <td class="border border-black text-center p-1">{{ $row['designation'] }}</td>
-                        <td class="border border-black text-center p-1">{{ $row['unite_mesure'] }}</td>
-                        <td class="border border-black text-center p-1">{{ $row['quantite'] }}</td>
-                        <td class="border border-black text-center p-1">{{ $row['prix_unitaire'] }}</td>
-                        <td class="border border-black text-center p-1 text-right">{{ $row['taux_tva'] }}</td>
-                        <td class="border border-black text-center p-1 text-right">{{ $row['montant_ht'] }}</td>
-                        <td class="border border-black text-center p-1 text-right">{{ $row['montant_tva'] }}</td>
-                        <td class="border border-black text-center p-1 text-right">{{ $row['montant_ttc'] }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- RECAPITULATION TABLE -->
-        <div class="mt-6">
-            <div class="text-center font-bold text-lg uppercase underline mb-3">
-                Recapitulation
+        <div class="info-col info-col-right">
+            <div class="info-section-title">Fournisseur attributaire</div>
+            @php $f = $marche->fournisseur; @endphp
+            <div class="info-row">
+                <div class="info-lbl">Raison sociale :</div>
+                <div class="info-val"><strong>{{ $f->raison_sociale ?? $f->nom ?? '—' }}</strong></div>
             </div>
-
-            <table class="w-full border border-black border-collapse text-xs">
-                <thead class="font-bold">
-                    <tr>
-                        <th class="px-3 py-2 border border-black text-center underline">Nature des dépenses</th>
-                        <th class="px-3 py-2 border border-black text-center underline">Dépenses faites</th>
-                        <th class="px-3 py-2 border border-black text-center underline">Retenues de Garanties</th>
-                        <th class="px-3 py-2 border border-black text-center underline">Reste</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-black p-2">Travaux terminés</td>
-                        <td class="border border-black p-2 text-right font-mono font-bold"></td>
-                        <td class="border border-black p-2 text-right font-mono font-bold"></td>
-                        <td class="border border-black p-2 text-right font-mono font-bold">{{ $travaux_termine }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black p-2">Travaux non terminés</td>
-                        <td class="border border-black p-2 text-right font-mono"></td>
-                        <td class="border border-black p-2 text-right font-mono"></td>
-                        <td class="border border-black p-2 text-right font-mono">{{ $travaux_non_termine }}</td>
-                    </tr>
-                    <!-- <tr>
-                        <td class="border border-black p-2">Approvisionnement</td>
-                        <td class="border border-black p-2 text-right font-mono"></td>
-                        <td class="border border-black p-2 text-right font-mono"></td>
-                        <td class="border border-black p-2 text-right font-mono"></td>
-                    </tr> -->
-                    <tr>
-                        <td class="border border-black p-2 italic" colspan="3">A Déduire les dépenses des acomptes precedement payées</td>
-                        <td class="border border-black p-2 text-right font-mono font-bold">{{ $travaux_termine }}</td>
-                    </tr>
-                    <!-- <tr>
-                        <td class="border border-black p-2" colspan="3">Reste à payer sur l'exercice en cours</td>
-                        <td class="border border-black p-2 text-right font-mono"></td>
-                    </tr> -->
-                    <tr class="bg-gray-100 font-bold">
-                        <td class="border border-black p-2 border-2" colspan="3">Montant de l'acompte à délivrer</td>
-                        <td class="border border-black p-2 text-right font-mono border-2">{{ $decompte_total }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="info-row">
+                <div class="info-lbl">Adresse :</div>
+                <div class="info-val">{{ $f->adresse ?? '—' }}</div>
+            </div>
+            @if($f->tp ?? null)
+            <div class="info-row">
+                <div class="info-lbl">TP :</div><div class="info-val">{{ $f->tp }}</div>
+            </div>
+            @endif
+            @if($f->if ?? null)
+            <div class="info-row">
+                <div class="info-lbl">IF :</div><div class="info-val">{{ $f->if }}</div>
+            </div>
+            @endif
+            @if($f->rc ?? null)
+            <div class="info-row">
+                <div class="info-lbl">RC :</div><div class="info-val">{{ $f->rc }}</div>
+            </div>
+            @endif
+            <div class="info-row">
+                <div class="info-lbl">ICE :</div>
+                <div class="info-val">{{ $f->ice ?? '—' }}</div>
+            </div>
+            @if($f->cb ?? null)
+            <div class="info-row">
+                <div class="info-lbl">RIB / CB :</div><div class="info-val">{{ $f->cb }}</div>
+            </div>
+            @endif
         </div>
     </div>
+
+    {{-- ════ TABLEAU DES ARTICLES LIVRÉS ════ --}}
+    <div class="section-title">Articles livrés sur la période</div>
+
+    @php
+        $totalHT  = 0;
+        $totalTVA = 0;
+        $totalTTC = 0;
+    @endphp
+
+    <table class="articles">
+        <thead>
+            <tr>
+                <th style="width:4%"  class="c">N°</th>
+                <th style="width:28%">Désignation</th>
+                <th style="width:7%"  class="c">Unité</th>
+                <th style="width:9%"  class="r">Qté livrée</th>
+                <th style="width:11%" class="r">P.U. HT (DH)</th>
+                <th style="width:7%"  class="c">TVA %</th>
+                <th style="width:11%" class="r">Montant HT</th>
+                <th style="width:11%" class="r">Montant TVA</th>
+                <th style="width:12%" class="r">Total TTC (DH)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($items as $row)
+                @php
+                    $mHT  = (float)$row['montant_ht'];
+                    $mTVA = (float)$row['montant_tva'];
+                    $mTTC = (float)$row['montant_ttc'];
+                    $totalHT  += $mHT;
+                    $totalTVA += $mTVA;
+                    $totalTTC += $mTTC;
+                @endphp
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td><strong style="color:#0c3260">{{ $row['designation'] }}</strong></td>
+                    <td class="text-center">{{ $row['unite_mesure'] }}</td>
+                    <td class="text-right" style="font-weight:700">{{ number_format((float)$row['quantite'], 2, ',', ' ') }}</td>
+                    <td class="text-right">{{ number_format((float)$row['prix_unitaire'], 2, ',', ' ') }}</td>
+                    <td class="text-center" style="color:#64748b">{{ (float)$row['taux_tva'] > 0 ? $row['taux_tva'].'%' : 'Exo.' }}</td>
+                    <td class="text-right">{{ number_format($mHT, 2, ',', ' ') }}</td>
+                    <td class="text-right">{{ number_format($mTVA, 2, ',', ' ') }}</td>
+                    <td class="text-right" style="font-weight:700">{{ number_format($mTTC, 2, ',', ' ') }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="9" class="text-center" style="padding:16px;color:#64748b;font-style:italic">
+                        Aucun article livré sur cette période.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+        <tfoot>
+            <tr class="tr-total-ht">
+                <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL HORS TAXE</td>
+                <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }}</td>
+                <td></td>
+                <td class="text-right">{{ number_format($totalHT, 2, ',', ' ') }} DH</td>
+            </tr>
+            <tr class="tr-total-tva">
+                <td colspan="6" class="text-right" style="font-size:9px;letter-spacing:.3px">TOTAL TVA</td>
+                <td></td>
+                <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }}</td>
+                <td class="text-right">{{ number_format($totalTVA, 2, ',', ' ') }} DH</td>
+            </tr>
+            <tr class="tr-grand-ttc">
+                <td colspan="8" class="text-right" style="letter-spacing:.5px">TOTAL TOUTES TAXES COMPRISES</td>
+                <td class="text-right">{{ number_format($totalTTC, 2, ',', ' ') }} DH</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {{-- ════ RÉCAPITULATIF ACOMPTES ════ --}}
+    <div class="section-title" style="margin-top:20px">Récapitulation — Acomptes</div>
+
+    <table class="recap">
+        <thead>
+            <tr>
+                <th style="width:52%;text-align:left">Nature des dépenses</th>
+                <th style="width:16%;text-align:right">Dépenses faites</th>
+                <th style="width:16%;text-align:right">Retenues garantie</th>
+                <th style="width:16%;text-align:right">Reste</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Travaux terminés (décomptes antérieurs)</td>
+                <td class="text-right"></td>
+                <td class="text-right"></td>
+                <td class="text-right" style="font-weight:700">{{ number_format((float)$travaux_termine, 2, ',', ' ') }} DH</td>
+            </tr>
+            <tr>
+                <td>Travaux non terminés (solde restant)</td>
+                <td class="text-right"></td>
+                <td class="text-right"></td>
+                <td class="text-right">{{ number_format((float)$travaux_non_termine, 2, ',', ' ') }} DH</td>
+            </tr>
+            <tr>
+                <td colspan="3" style="font-style:italic;color:#475569">
+                    À déduire : acomptes précédemment payés
+                </td>
+                <td class="text-right" style="font-weight:700">{{ number_format((float)$travaux_termine, 2, ',', ' ') }} DH</td>
+            </tr>
+            <tr class="recap-highlight">
+                <td colspan="3">Montant de l'acompte à délivrer</td>
+                <td class="text-right">{{ number_format((float)$decompte_total, 2, ',', ' ') }} DH</td>
+            </tr>
+        </tbody>
+    </table>
+
+    {{-- ════ ARRÊTÉ ════ --}}
+    <div style="border:1px solid #0c3260;background:#f4f7fb;padding:9px 14px;margin-top:14px;font-size:10px;font-weight:700;color:#0c3260;border-radius:3px;">
+        Arrêté le présent décompte à la somme de :
+        <span style="color:#b8963e;font-size:12px">
+            {{ number_format((float)$decompte_total, 2, ',', ' ') }} Dirhams TTC
+        </span>
     </div>
+
+    {{-- ════ SIGNATURES ════ --}}
+    <div class="signatures">
+        <div class="sig-cell">
+            <div class="sig-label">L'Économe</div>
+            <div class="sig-line">Nom &amp; Signature</div>
+        </div>
+        <div class="sig-cell">
+            <div class="sig-label">Le Directeur</div>
+            <div class="sig-line">Cachet &amp; Signature</div>
+        </div>
+    </div>
+
+</div>
 </body>
-
 </html>
