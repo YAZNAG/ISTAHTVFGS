@@ -158,9 +158,11 @@ class CategorieController extends Controller implements HasMiddleware
         ini_set('memory_limit', '256M');
 
         return Pdf::loadView('pdf.categories', [
-            'categories' => $this->exportRows(),
+            'categories'   => $this->exportRows(),
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
         ])
-            ->download('categories.pdf');
+        ->setOptions(['isRemoteEnabled' => true, 'dpi' => 96])
+        ->download('categories.pdf');
     }
 
     private function validatedPayload(Request $request, ?int $categorieId = null): array

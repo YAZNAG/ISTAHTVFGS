@@ -26,15 +26,14 @@
             right: 0;
             height: 110px;
         }
-        .pdf-header img {
+        .pdf-header-img {
+            display: block;
             width: 100%;
             height: 100px;
-            display: block;
         }
         .pdf-header-border {
             height: 3px;
             background: #0c3260;
-            margin-top: 2px;
         }
         .pdf-header-gold {
             height: 2px;
@@ -176,15 +175,15 @@
 
     {{-- ════ EN-TÊTE OFFICIEL FIXE (répété sur chaque page) ════ --}}
     @php
-        // $pdfHeader peut être injecté par le controller ; sinon fallback local
-        if (empty($pdfHeader)) {
+        if (empty($pdfHeaderSrc)) {
             $__p = public_path('images/pdf-header.jpg');
-            $pdfHeader = file_exists($__p) ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($__p)) : null;
+            $__d = file_exists($__p) ? @file_get_contents($__p) : false;
+            $pdfHeaderSrc = $__d !== false ? 'data:image/jpeg;base64,' . base64_encode($__d) : null;
         }
     @endphp
     <div class="pdf-header">
-        @if(!empty($pdfHeader))
-            <img src="{{ $pdfHeader }}" alt="En-tête ISTAHT Tanger">
+        @if(!empty($pdfHeaderSrc))
+            <img class="pdf-header-img" src="{{ $pdfHeaderSrc }}" alt="En-tête ISTAHT Tanger">
         @endif
         <div class="pdf-header-border"></div>
         <div class="pdf-header-gold"></div>

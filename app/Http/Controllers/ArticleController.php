@@ -217,9 +217,13 @@ class ArticleController extends Controller implements HasMiddleware
             ->limit(500)
             ->get();
 
-        return Pdf::loadView('pdf.articles', compact('articles'))
-            ->setPaper('a4', 'landscape')
-            ->download('articles.pdf');
+        return Pdf::loadView('pdf.articles', [
+            'articles'     => $articles,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
+        ->setOptions(['isRemoteEnabled' => true, 'dpi' => 96])
+        ->setPaper('a4', 'landscape')
+        ->download('articles.pdf');
     }
 
     private function filteredArticles(Request $request)
