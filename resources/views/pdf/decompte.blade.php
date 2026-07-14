@@ -31,8 +31,8 @@
         .pdf-header {
             position: fixed;
             top:   -130px;
-            left:  -28px;
-            right: -28px;
+            left:  0;
+            right: 0;
             height: 123px;
         }
         .pdf-header-img {
@@ -47,8 +47,8 @@
         .pdf-footer {
             position: fixed;
             bottom: -52px;
-            left:  -28px;
-            right: -28px;
+            left:  0;
+            right: 0;
             height: 44px;
             border-top: 2px solid #0c3260;
             padding-top: 6px;
@@ -58,10 +58,10 @@
             display: table;
             width: 100%;
         }
-        .footer-left   { display: table-cell; text-align: left;   padding-left: 28px; }
+        .footer-left   { display: table-cell; text-align: left; }
         .footer-left strong { color: #0c3260; }
         .footer-center { display: table-cell; text-align: center; color: #b8963e; font-weight: 700; }
-        .footer-right  { display: table-cell; text-align: right;  padding-right: 28px; }
+        .footer-right  { display: table-cell; text-align: right; }
 
         /* ══ TITRE DOCUMENT ══ */
         .doc-title-bar {
