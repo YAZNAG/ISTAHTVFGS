@@ -161,7 +161,6 @@ class CategorieController extends Controller implements HasMiddleware
             'categories'   => $this->exportRows(),
             'pdfHeaderSrc' => $this->pdfHeaderBase64(),
         ])
-        ->setOptions(['isRemoteEnabled' => true, 'dpi' => 96])
         ->download('categories.pdf');
     }
 

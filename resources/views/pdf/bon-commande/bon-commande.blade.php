@@ -4,7 +4,11 @@
     <meta charset="utf-8">
     <title>Appel d'offre {{ $bonCommande->reference }}</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* PAS de reset universel `* { margin:0 }` : dans DomPDF il ecrase les marges @page
+           et fait disparaitre le header fixe. Reset cible uniquement. */
+        html, body, div, p, h1, h2, h3, table, thead, tbody, tfoot, tr, th, td, span, img {
+            box-sizing: border-box; margin: 0; padding: 0;
+        }
 
         /* ── Espace réservé pour l'image header sur chaque page ── */
         @page { margin-top: 120px; margin-bottom: 52px; }

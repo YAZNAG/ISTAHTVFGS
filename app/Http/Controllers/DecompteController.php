@@ -180,7 +180,6 @@ class DecompteController extends Controller
             'decompte_total'     => $decompte_total,
             'pdfHeaderSrc'       => $pdfHeaderSrc,
         ])
-        ->setOptions(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true, 'dpi' => 96])
         ->setPaper('a4', 'portrait')
         ->download($fileName);
     }

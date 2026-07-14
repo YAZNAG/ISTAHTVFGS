@@ -221,7 +221,6 @@ class ArticleController extends Controller implements HasMiddleware
             'articles'     => $articles,
             'pdfHeaderSrc' => $this->pdfHeaderBase64(),
         ])
-        ->setOptions(['isRemoteEnabled' => true, 'dpi' => 96])
         ->setPaper('a4', 'landscape')
         ->download('articles.pdf');
     }
