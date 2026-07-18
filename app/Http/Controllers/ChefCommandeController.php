@@ -48,6 +48,7 @@ class ChefCommandeController extends Controller implements HasMiddleware
         $canListAll = $user->hasPermissionTo('validate_chefCommandes');
 
         $chefCommandes = ChefCommande::withCount('articles')
+            ->with(['user:id,name', 'categorie:id,nom'])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('numero', 'like', "%{$search}%")
@@ -58,12 +59,25 @@ class ChefCommandeController extends Controller implements HasMiddleware
             ->when($status, fn($query) => $query->where('statut', $status))
             ->when($startDate, fn($query) => $query->whereDate('created_at', '>=', $startDate))
             ->when($endDate, fn($query) => $query->whereDate('created_at', '<=', $endDate))
+            ->latest()
             ->paginate(10)
             ->withQueryString();
-        
-        
+
+        $byStatut = ChefCommande::query()
+            ->when(!$canListAll, fn($query) => $query->where('user_id', $user->id))
+            ->select('statut', DB::raw('count(*) as total'))
+            ->groupBy('statut')
+            ->pluck('total', 'statut');
+
         return Inertia::render('ChefCommande/Index', [
             'chefCommandes' => ChefCommandeResource::collection($chefCommandes),
+            'stats' => [
+                'total'              => (int) $byStatut->sum(),
+                'attente_validation' => (int) ($byStatut[ChefCommande::STATUS_EN_ATTENTE_VALIDATION] ?? 0),
+                'attente_livraison'  => (int) ($byStatut[ChefCommande::STATUS_EN_ATTENTE_LIVRAISON] ?? 0),
+                'livres'             => (int) (($byStatut[ChefCommande::STATUS_LIVRE_COMPLETEMNT] ?? 0) + ($byStatut[ChefCommande::STATUS_LIVRE_PARTIELLEMENT] ?? 0)),
+                'annulees'           => (int) (($byStatut[ChefCommande::STATUS_ANNULEE] ?? 0) + ($byStatut[ChefCommande::STATUS_REJET] ?? 0)),
+            ],
             'filters' => [
                 'search' => $search,
                 'status' => $status,

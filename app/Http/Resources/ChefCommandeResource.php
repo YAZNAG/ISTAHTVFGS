@@ -20,6 +20,8 @@ class ChefCommandeResource extends JsonResource
             'statut' => $this->statut,
             'articles_count' => $this->articles_count,
             'created_at' => $this->created_at->toDateString(),
+            'demandeur' => $this->whenLoaded('user', fn () => $this->user?->name),
+            'categorie' => $this->whenLoaded('categorie', fn () => $this->categorie?->nom),
         ];
     }
 }

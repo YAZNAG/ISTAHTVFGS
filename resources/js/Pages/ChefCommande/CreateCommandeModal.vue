@@ -1,10 +1,9 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
-import { FolderMinusIcon, XCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { XMarkIcon, MagnifyingGlassIcon, PlusCircleIcon, CubeIcon } from '@heroicons/vue/24/outline';
 import InputError from '@/Components/InputError.vue';
-import Dump from '@/Components/Dump.vue';
 
 const props = defineProps({
   articles: Array,
@@ -14,7 +13,6 @@ const props = defineProps({
 const search = ref('');
 const createCommandeModal = ref(null)
 const dropdownOpen = ref(false)
-
 
 const form = useForm({
   categorie_id: '',
@@ -27,7 +25,6 @@ const articles = computed(() => {
   return props.articles.filter(a => Number(a.categorie_id) === Number(form.categorie_id))
 })
 
-// Filter articles not yet added
 const filteredArticles = computed(() => {
   return articles.value
     .filter(a => !form.articles.find(fa => fa.article_id === a.id))
@@ -35,13 +32,12 @@ const filteredArticles = computed(() => {
 })
 
 function selectArticle(article) {
-  article = {
+  form.articles.push({
     article_id: article.id,
     designation: article.designation,
-    unite_mesure: article.unite_mesure
-  }
-
-  form.articles.push({ ...article, quantite_commandee: 1 })
+    unite_mesure: article.unite_mesure,
+    quantite_commandee: 1,
+  })
   search.value = ''
   dropdownOpen.value = false
 }
@@ -50,207 +46,231 @@ function removeArticle(index) {
   form.articles.splice(index, 1)
 }
 
-function submit(type) {
+function incrementQty(item) {
+  item.quantite_commandee = Number(item.quantite_commandee || 0) + 1
+}
 
-  form.post(route('chef-commandes.store', {type}), {
+function decrementQty(item) {
+  if (Number(item.quantite_commandee) > 1) {
+    item.quantite_commandee = Number(item.quantite_commandee) - 1
+  }
+}
+
+function submit(type) {
+  form.post(route('chef-commandes.store', { type }), {
     onSuccess: () => {
       form.reset();
       dropdownOpen.value = false;
       createCommandeModal.value.close();
     },
   })
-
 }
 
 const articleErrors = computed(() => {
   return Object.entries(form.errors)
-    .filter(([key]) => key.startsWith('articles.')) // only article errors
-    .map(([_, message]) => message) // get just the messages
+    .filter(([key]) => key.startsWith('articles.'))
+    .map(([_, message]) => message)
 })
-
 
 function closeIdle() {
   setTimeout(() => dropdownOpen.value = false, 300);
 }
 
-function onCategorieChange(event)
-{
+function onCategorieChange() {
   form.articles = [];
 }
 </script>
 
 <template>
   <Modal ref="createCommandeModal">
-    <!-- Header -->
-    <div class="mb-4">
-      <h2 class="text-lg font-semibold">Nouveau Commande</h2>
+    <!-- ═══ En-tête ═══ -->
+    <div class="mb-5 border-b border-slate-100 pb-4">
+      <h2 class="text-lg font-bold text-istaht-navy">Nouveau bon de commande</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Sélectionnez une catégorie puis ajoutez les articles à commander.
+      </p>
     </div>
 
-    <!-- Body -->
-    <div>
-      <form @submit.prevent="submit" class="space-y-4">
-        <div v-if="$page.props.auth.role == 'manager'">
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Chef
-          </label>
-          <select
-            v-model="form.user_id"
-            class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+    <form class="space-y-4" @submit.prevent>
+      <!-- Chef (managers uniquement) -->
+      <div v-if="$page.props.auth.role == 'manager'">
+        <label class="mb-1 block text-xs font-bold uppercase text-slate-500">Chef demandeur *</label>
+        <select v-model="form.user_id" class="ui-input w-full">
+          <option value="">Choisissez un chef</option>
+          <option v-for="user in users" :key="user.id" :value="user.id">
+            {{ user.name }}
+          </option>
+        </select>
+        <InputError :message="form.errors.user_id" class="mt-1" />
+      </div>
+
+      <!-- Catégorie -->
+      <div>
+        <label class="mb-1 block text-xs font-bold uppercase text-slate-500">Catégorie *</label>
+        <select v-model="form.categorie_id" class="ui-input w-full" @change="onCategorieChange">
+          <option value="">Sélectionner une catégorie</option>
+          <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
+            {{ categorie.nom }}
+          </option>
+        </select>
+        <InputError :message="form.errors.categorie_id" class="mt-1" />
+      </div>
+
+      <!-- Articles -->
+      <div>
+        <div class="mb-1.5 flex items-center justify-between">
+          <label class="block text-xs font-bold uppercase text-slate-500">Articles commandés *</label>
+          <span
+            v-if="form.articles.length"
+            class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-istaht-blue ring-1 ring-blue-100"
           >
-            <option value="">Choisissez un chef </option>
-            <option v-for="user in users" :key="user.id" :value="user.id">
-              {{ user.name }}
-            </option>
-          </select>
-          <InputError :message="form.errors.user_id" class="mt-2" />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Categorie
-          </label>
-          <select v-model="form.categorie_id" @change="onCategorieChange" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="">Selectionner une categorie</option>
-            <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
-              {{ categorie.nom }}
-            </option>
-          </select>
-          <InputError :message="form.errors.categorie_id" />
+            <CubeIcon class="h-3.5 w-3.5" />
+            {{ form.articles.length }} article(s)
+          </span>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Articles Commandés
-          </label>
+        <p
+          v-if="$page.props.errors.articlesError"
+          v-html="$page.props.errors.articlesError"
+          class="mb-2 rounded-md border border-red-100 bg-red-50 px-3 py-2 text-sm text-istaht-red"
+        />
 
-          <p v-if="$page.props.errors.articlesError" v-html="$page.props.errors.articlesError" class="text-sm text-red-600 mb-3">
-          </p>
-
-          <div class="relative mb-2">
+        <div class="relative mb-2">
+          <div class="relative">
             <input
               :disabled="!form.categorie_id"
               type="text"
               v-model="search"
-              placeholder="Rechercher un article..."
+              :placeholder="form.categorie_id ? 'Rechercher un article à ajouter...' : 'Choisissez d\'abord une catégorie'"
               @focus="dropdownOpen = true"
-              @blur="closeIdle" 
-              class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
+              @blur="closeIdle"
+              class="ui-input w-full pl-9 disabled:cursor-not-allowed disabled:bg-slate-50"
             />
-
-            <div v-if="form.errors.articles" class="text-red-600 text-sm mt-1">
-              {{ form.errors.articles }}
-            </div>
-
-            <ul class="bg-red-300 text-red-900 border-red-500 border-1 rounded p-2 text-sm mt-2" v-if="articleErrors.length">
-              <li v-for="error in articleErrors" :key="error">
-                {{ error }}
-              </li>
-            </ul>
-
-            <!-- Dropdown -->
-            <ul
-              v-if="dropdownOpen && filteredArticles.length"
-              class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 shadow-lg"
-              style="max-height: 200px; overflow-y: auto;"
-            >
-              <li
-                v-for="article in filteredArticles"
-                :key="article.id"
-                @click="selectArticle(article)"
-                class="px-3 py-2 hover:bg-indigo-200 cursor-pointer"
-              >
-                {{ article.designation }}
-              </li>
-            </ul>
+            <MagnifyingGlassIcon class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           </div>
 
-          <!-- Selected Articles Table -->
-          <table class="w-full border border-gray-200 text-sm rounded-lg overflow-hidden">
-            <thead class="bg-gray-50 text-gray-700">
-              <tr>
-                <th class="p-2 text-left">Article</th>
-                <th class="p-2 text-center w-32">Quantité</th>
-                <th class="p-2 w-14"></th>
+          <div v-if="form.errors.articles" class="mt-1 text-sm font-semibold text-istaht-red">
+            {{ form.errors.articles }}
+          </div>
+
+          <ul
+            v-if="articleErrors.length"
+            class="mt-2 rounded-md border border-red-100 bg-red-50 px-3 py-2 text-sm text-istaht-red"
+          >
+            <li v-for="error in articleErrors" :key="error">{{ error }}</li>
+          </ul>
+
+          <!-- Dropdown résultats -->
+          <ul
+            v-if="dropdownOpen && filteredArticles.length"
+            class="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-panel"
+          >
+            <li
+              v-for="article in filteredArticles"
+              :key="article.id"
+              @click="selectArticle(article)"
+              class="flex cursor-pointer items-center justify-between px-3 py-2 text-sm transition hover:bg-blue-50"
+            >
+              <span class="font-semibold text-slate-700">{{ article.designation }}</span>
+              <PlusCircleIcon class="h-4 w-4 text-istaht-blue" />
+            </li>
+          </ul>
+        </div>
+
+        <!-- Tableau articles sélectionnés -->
+        <div class="overflow-hidden rounded-lg border border-slate-200">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-left">
+                <th class="px-3 py-2 text-xs font-bold uppercase text-slate-500">Article</th>
+                <th class="w-40 px-3 py-2 text-center text-xs font-bold uppercase text-slate-500">Quantité</th>
+                <th class="w-12 px-3 py-2"></th>
               </tr>
             </thead>
-            <tbody>
-              <tr v-for="(item, index) in form.articles" :key="item.id" class="border-t">
-                <td class="p-2">{{ item.designation }}</td>
-                <td class="p-2 text-center">
-                  <div class="flex items-center gap-2">
-
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="(item, index) in form.articles" :key="item.article_id" class="hover:bg-slate-50">
+                <td class="px-3 py-2 font-semibold text-slate-700">{{ item.designation }}</td>
+                <td class="px-3 py-2">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+                      @click="decrementQty(item)"
+                    >−</button>
                     <input
-                    type="number"
-                    min="1"
-                    v-model.number="item.quantite_commandee"
-                    class="w-24 text-center border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      type="number"
+                      min="1"
+                      v-model.number="item.quantite_commandee"
+                      class="ui-input w-16 px-1 py-1 text-center"
                     />
-                    <span class="text-xs text-slate-800">{{ item.unite_mesure }}</span>
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+                      @click="incrementQty(item)"
+                    >+</button>
+                    <span class="ml-1 text-xs text-slate-500">{{ item.unite_mesure }}</span>
                   </div>
                 </td>
-                <td class="p-2 text-center">
+                <td class="px-3 py-2 text-center">
                   <button
                     type="button"
                     @click="removeArticle(index)"
-                    class="text-red-700 hover:text-red-700 bg-red-200 hover:bg-red-300 p-1 rounded"
+                    class="rounded-md p-1 text-istaht-red transition hover:bg-red-50"
+                    title="Retirer l'article"
                   >
                     <XMarkIcon class="h-4 w-4" />
                   </button>
                 </td>
               </tr>
               <tr v-if="form.articles.length === 0">
-                <td colspan="3" class="text-center text-gray-400 p-3">
-                  Aucun article ajouté
+                <td colspan="3" class="px-3 py-6 text-center text-sm text-slate-400">
+                  Aucun article ajouté — utilisez la recherche ci-dessus.
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-
-
-        <!-- Motif -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Note <span class="text-xs">(Optionnel)</span>
-          </label>
-          <textarea
-            v-model="form.note"
-            class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            rows="2"
-            placeholder=""
-          ></textarea>
-        </div>
-
-      </form>
-    </div>
-
-    <!-- Footer -->
-    <div>
-      <div class="flex justify-end space-x-3 pt-2">
-        <button
-          type="button"
-          @click="createCommandeModal.close()"
-          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-        >
-          Annuler
-        </button>
-        <button
-          type="button"
-          @click="submit('draft')"
-          :disabled="form.processing"
-          class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-        >
-          Enregistrer
-        </button>
-        <button
-          type="button"
-          @click="submit('submit')"
-          :disabled="form.processing"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
-          Submettre
-        </button>
       </div>
+
+      <!-- Note -->
+      <div>
+        <label class="mb-1 block text-xs font-bold uppercase text-slate-500">
+          Note <span class="font-normal normal-case text-slate-400">(optionnel)</span>
+        </label>
+        <textarea
+          v-model="form.note"
+          class="ui-input w-full"
+          rows="2"
+          placeholder="Précisions éventuelles pour la validation..."
+        ></textarea>
+      </div>
+    </form>
+
+    <!-- ═══ Pied ═══ -->
+    <div class="mt-6 flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-4 sm:flex-row">
+      <button
+        type="button"
+        @click="createCommandeModal.close()"
+        class="ui-button ui-button-ghost"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        @click="submit('draft')"
+        :disabled="form.processing"
+        class="ui-button ui-button-secondary disabled:opacity-50"
+      >
+        {{ form.processing ? 'Enregistrement...' : 'Enregistrer en brouillon' }}
+      </button>
+      <button
+        type="button"
+        @click="submit('submit')"
+        :disabled="form.processing"
+        class="ui-button ui-button-primary disabled:opacity-50"
+      >
+        {{ form.processing ? 'Envoi...' : 'Soumettre pour validation' }}
+      </button>
     </div>
   </Modal>
 </template>
