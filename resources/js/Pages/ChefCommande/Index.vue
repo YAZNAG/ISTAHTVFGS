@@ -262,7 +262,7 @@ const statCards = [
                       class="rounded-md p-1.5 text-slate-500 transition hover:bg-blue-50 hover:text-istaht-blue"
                       title="Voir détails"
                     >
-                      <EyeIcon class="h-4.5 w-4.5" />
+                      <EyeIcon class="h-5 w-5" />
                     </ModalLink>
 
                     <ModalLink
@@ -271,7 +271,7 @@ const statCards = [
                       class="rounded-md p-1.5 text-slate-500 transition hover:bg-amber-50 hover:text-istaht-amber"
                       title="Approuver la commande"
                     >
-                      <QuestionMarkCircleIcon class="h-4.5 w-4.5" />
+                      <QuestionMarkCircleIcon class="h-5 w-5" />
                     </ModalLink>
 
                     <ModalLink
@@ -280,7 +280,7 @@ const statCards = [
                       class="rounded-md p-1.5 text-slate-500 transition hover:bg-green-50 hover:text-istaht-green"
                       title="Modifier"
                     >
-                      <PencilIcon class="h-4.5 w-4.5" />
+                      <PencilIcon class="h-5 w-5" />
                     </ModalLink>
 
                     <button
@@ -289,7 +289,7 @@ const statCards = [
                       title="Soumettre pour validation"
                       @click="opensubmitModal(commande.id)"
                     >
-                      <CheckIcon class="h-4.5 w-4.5" />
+                      <CheckIcon class="h-5 w-5" />
                     </button>
 
                     <button
@@ -298,7 +298,7 @@ const statCards = [
                       title="Annuler la commande"
                       @click="openCancelModal(commande.id)"
                     >
-                      <XMarkIcon class="h-4.5 w-4.5" />
+                      <XMarkIcon class="h-5 w-5" />
                     </button>
 
                     <button
@@ -307,7 +307,7 @@ const statCards = [
                       title="Supprimer le bon de commande"
                       @click="openDeleteModal(commande.id)"
                     >
-                      <TrashIcon class="h-4.5 w-4.5" />
+                      <TrashIcon class="h-5 w-5" />
                     </button>
 
                     <a
@@ -317,7 +317,7 @@ const statCards = [
                       title="Télécharger PDF"
                       target="_blank"
                     >
-                      <DocumentTextIcon class="h-4.5 w-4.5" />
+                      <DocumentTextIcon class="h-5 w-5" />
                     </a>
                   </div>
                 </td>
