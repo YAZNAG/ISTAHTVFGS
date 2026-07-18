@@ -20,9 +20,6 @@ class IndexBonLivraisonResource extends JsonResource
             'fournisseur' => $this->fournisseur->nom,
             'date_livraison' => $this->date_livraison?->toDateString(),
             'statut' => $this->statut,
-            'total_ht' => $this->total_ht,
-            'total_tva' => $this->total_tva,
-            'total_ttc' => $this->total_ttc,
             'items_count' => $this->items_count,
         ];
     }

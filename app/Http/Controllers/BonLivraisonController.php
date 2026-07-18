@@ -224,9 +224,11 @@ class BonLivraisonController extends Controller implements HasMiddleware
 
         $bonLivraison = ExportBonLivraisonResource::make($bonLivraison)->toArray($request);
 
-        // return response()->json($bonLivraison);
         return Pdf::loadView('pdf.bon-livraison', [
-            'livraison' => $bonLivraison
-        ])->download("bon-livraison-{$bonLivraison['reference']}.pdf");
+            'livraison'    => $bonLivraison,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
+        ->setPaper('a4', 'portrait')
+        ->download("bon-livraison-{$bonLivraison['reference']}.pdf");
     }
 }

@@ -23,7 +23,6 @@ class ShowBonLivraisonResource extends JsonResource
             'created_at' => $this->created_at?->toDateString(),
             'annule_at' => $this->annule_at?->toDateString(),
             'reason_annulation' => $this->reason_annulation,
-            'total_ttc' => (float) $this->total_ttc,
 
             // Fournisseur (relation)
             'fournisseur' => [
@@ -42,9 +41,6 @@ class ShowBonLivraisonResource extends JsonResource
                     'designation' => $item->article->designation,
                     'unite_mesure' => $item->article->unite_mesure,
                     'quantite' => (float) $item->quantite,
-                    'prix_unitaire' => (float) $item->prix_unitaire,
-                    'taux_tva' => (float) $item->taux_tva,
-                    'total_ttc' => (float) $item->montant_ttc,
                 ];
             }),
         ];

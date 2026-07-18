@@ -1,119 +1,264 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Bon de Livraison - {{ $livraison['reference'] }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8">
+    <title>Bon de Livraison — {{ $livraison['reference'] }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #111827; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #d1d5db; padding: 6px 8px; font-size: 11px; }
-        th { background-color: #f3f4f6; font-weight: 600; }
+        /* ATTENTION : ne JAMAIS mettre `html` ou `*` dans ce reset — DomPDF applique
+           les marges @page via l'element racine html ; un margin:0 dessus les ecrase
+           et le header fixe disparait. */
+        body, div, p, h1, h2, h3, table, thead, tbody, tfoot, tr, th, td, span, img {
+            box-sizing: border-box; margin: 0; padding: 0;
+        }
+
+        @page {
+            margin-top:    130px;
+            margin-bottom:  52px;
+            margin-left:    28px;
+            margin-right:   28px;
+        }
+
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 10px;
+            color: #1a2233;
+            background: #fff;
+            line-height: 1.5;
+        }
+
+        /* ══ HEADER FIXE — répété sur CHAQUE page ══ */
+        .pdf-header {
+            position: fixed;
+            top:   -130px;
+            left:  0;
+            right: 0;
+            height: 123px;
+        }
+        .pdf-header-img { display: block; width: 100%; height: 116px; }
+        .pdf-header-navy { height: 4px; background: #0c3260; }
+        .pdf-header-gold { height: 3px; background: #b8963e; }
+
+        /* ══ FOOTER FIXE ══ */
+        .pdf-footer {
+            position: fixed;
+            bottom: -52px;
+            left: 0; right: 0;
+            height: 44px;
+            border-top: 2px solid #0c3260;
+            padding-top: 6px;
+            font-size: 8px;
+            color: #64748b;
+            background: #fff;
+            display: table;
+            width: 100%;
+        }
+        .footer-left   { display: table-cell; text-align: left; }
+        .footer-left strong { color: #0c3260; }
+        .footer-center { display: table-cell; text-align: center; color: #b8963e; font-weight: 700; }
+        .footer-right  { display: table-cell; text-align: right; }
+
+        /* ══ TITRE ══ */
+        .doc-title-bar {
+            text-align: center;
+            padding: 10px 0 8px;
+            border-bottom: 2px solid #0c3260;
+            margin-bottom: 14px;
+        }
+        .doc-label { font-size: 7.5px; color: #64748b; text-transform: uppercase; letter-spacing: .8px; }
+        .doc-title { font-size: 14px; font-weight: 800; color: #0c3260; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+        .doc-sub   { font-size: 8.5px; color: #64748b; margin-top: 4px; }
+
+        /* ══ BLOC INFO ══ */
+        .info-grid         { display: table; width: 100%; margin-bottom: 14px; border: 1px solid #dce4ef; }
+        .info-col          { display: table-cell; width: 50%; padding: 9px 12px; vertical-align: top; }
+        .info-col-right    { border-left: 1px solid #dce4ef; }
+        .info-section-title {
+            font-size: 7.5px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .7px; color: #0c3260;
+            border-bottom: 1px solid #dce4ef;
+            padding-bottom: 4px; margin-bottom: 6px;
+        }
+        .info-row { display: table; width: 100%; margin-bottom: 3px; }
+        .info-lbl { display: table-cell; width: 42%; font-size: 8.5px; font-weight: 700; color: #3d4f6a; }
+        .info-val { display: table-cell; font-size: 9px; color: #1a2233; }
+
+        /* ══ SECTION TITLE ══ */
+        .section-title {
+            font-size: 9px; font-weight: 800; color: #0c3260;
+            text-transform: uppercase; letter-spacing: .5px;
+            border-left: 3px solid #b8963e;
+            padding-left: 7px;
+            margin-bottom: 8px; margin-top: 14px;
+        }
+
+        /* ══ TABLEAU ARTICLES ══ */
+        table.articles {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9px;
+            margin-bottom: 6px;
+        }
+        table.articles thead th {
+            background: #0c3260;
+            color: #fff;
+            padding: 5px 8px;
+            font-size: 7.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+            border: 1px solid #071f3e;
+        }
+        table.articles thead th.r { text-align: right; }
+        table.articles thead th.c { text-align: center; }
+        table.articles tbody td {
+            padding: 5px 8px;
+            border: 1px solid #dce4ef;
+            vertical-align: middle;
+        }
+        table.articles tbody tr:nth-child(even) td { background: #f4f7fb; }
+
+        /* ══ ANNULATION ══ */
+        .annule-box {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 9.5px;
+        }
+
+        /* ══ SIGNATURES ══ */
+        .signatures { display: table; width: 100%; margin-top: 36px; }
+        .sig-cell   { display: table-cell; width: 50%; text-align: center; padding: 0 24px; }
+        .sig-label  { font-size: 9.5px; font-weight: 800; color: #0c3260; text-transform: uppercase; }
+        .sig-line   { border-bottom: 1px dashed #0c3260; margin-top: 44px; padding-bottom: 4px; font-size: 7.5px; color: #64748b; }
+
+        .text-right  { text-align: right; }
+        .text-center { text-align: center; }
+        .body-wrap   { padding-bottom: 60px; }
     </style>
 </head>
-<body class="bg-white text-black">
+<body>
 
-    {{-- HEADER --}}
-    <div class="flex justify-between items-start">
-        <div>
-            <img src="{{ $livraison['fournisseur']['logo'] }}" alt="Logo" class="h-24 mb-2">
-
-        </div>
-
-        <div class="text-right">
-            <h2 class="text-lg font-bold">Bon de Livraison</h2>
-            <p class="text-sm mt-2"><strong>Référence:</strong> {{ $livraison['reference'] }}</p>
-            <p class="text-sm"><strong>Date:</strong> {{ $livraison['date_livraison'] }}</p>
-        </div>
-    </div>
-
-    {{-- STATUS --}}
-    {{-- <div class="mb-4">
-        @php
-            $colors = [
-                'cree' => 'bg-blue-100 text-blue-800',
-                'livre' => 'bg-green-100 text-green-800',
-                'annule' => 'bg-red-100 text-red-800',
-            ];
-            $color = $colors[$livraison['statut']] ?? ' text-black';
-        @endphp
-        <span class="px-3 py-1 rounded text-xs font-medium {{ $color }}">
-            {{ ucfirst(str_replace('_', ' ', $livraison['statut'])) }}
-        </span>
-    </div> --}}
-
-    {{-- FOURNISSEUR & DETAILS --}}
-    <div class="grid grid-cols-2 gap-4 mb-6">
-        <div>
-            <h3 class="text-sm font-semibold border-b border-black mb-1">Fournisseur</h3>
-            <p class="text-sm font-semibold">{{ $livraison['fournisseur']['nom'] ?? '-' }}</p>
-            <p class="text-sm">{{ $livraison['fournisseur']['adresse'] ?? '' }}</p>
-            <p class="text-sm text-black">
-                Tél: {{ $livraison['fournisseur']['contact'] ?? '-' }}
-                @if(!empty($livraison['fournisseur']['email']))
-                    - {{ $livraison['fournisseur']['email'] }}
-                @endif
-            </p>
-        </div>
-
-        <div class="text-right">
-            <h3 class="text-sm font-semibold border-b border-black mb-1">Détails</h3>
-            <p class="text-sm"><strong>Réceptionné par:</strong> {{ $livraison['receptionne_par'] ?? '-' }}</p>
-        </div>
-    </div>
-
-    {{-- ANNULÉ --}}
-    @if($livraison['statut'] === 'annule')
-        <div class="border border-red-300 bg-red-50 text-red-700 px-4 py-2 rounded mb-6 text-sm">
-            <strong>Bon de livraison annulé.</strong>
-            @if(!empty($livraison['reason_annulation']))
-                &nbsp;Raison : {{ $livraison['reason_annulation'] }}
-            @endif
-        </div>
+{{-- ════ HEADER IMAGE — position:fixed → répété sur chaque page ════ --}}
+<div class="pdf-header">
+    @if(!empty($pdfHeaderSrc))
+        <img class="pdf-header-img" src="{{ $pdfHeaderSrc }}" alt="ISTAHT Tanger">
     @endif
+    <div class="pdf-header-navy"></div>
+    <div class="pdf-header-gold"></div>
+</div>
 
-    {{-- TABLEAU ARTICLES --}}
-    <table class="mb-6">
-        <thead>
+{{-- ════ FOOTER FIXE ════ --}}
+<div class="pdf-footer">
+    <div class="footer-left"><strong>ISTAHT Tanger</strong> — Gestion des marchés &amp; achats</div>
+    <div class="footer-center">stock.istahttanger.ma</div>
+    <div class="footer-right">Imprimé le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
+</div>
+
+<div class="body-wrap">
+
+{{-- ════ TITRE ════ --}}
+<div class="doc-title-bar">
+    <div class="doc-label">Document officiel — Institut Spécialisé de Technologie Appliquée Hôtelière et Touristique Tanger</div>
+    <div class="doc-title">Bon de Livraison N° {{ $livraison['reference'] }}</div>
+    <div class="doc-sub">Généré le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</div>
+</div>
+
+{{-- ════ ANNULÉ ════ --}}
+@if(($livraison['statut'] ?? null) === 'annule')
+    <div class="annule-box">
+        <strong>Bon de livraison annulé.</strong>
+        @if(!empty($livraison['reason_annulation']))
+            &nbsp;Raison : {{ $livraison['reason_annulation'] }}
+        @endif
+    </div>
+@endif
+
+{{-- ════ BLOC FOURNISSEUR + DÉTAILS ════ --}}
+<div class="info-grid">
+    <div class="info-col">
+        <div class="info-section-title">Fournisseur</div>
+        <div class="info-row">
+            <div class="info-lbl">Raison sociale :</div>
+            <div class="info-val"><strong>{{ $livraison['fournisseur']['nom'] ?? '—' }}</strong></div>
+        </div>
+        @if(!empty($livraison['fournisseur']['adresse']))
+        <div class="info-row">
+            <div class="info-lbl">Adresse :</div>
+            <div class="info-val">{{ $livraison['fournisseur']['adresse'] }}</div>
+        </div>
+        @endif
+        <div class="info-row">
+            <div class="info-lbl">Téléphone :</div>
+            <div class="info-val">{{ $livraison['fournisseur']['contact'] ?? '—' }}</div>
+        </div>
+        @if(!empty($livraison['fournisseur']['email']))
+        <div class="info-row">
+            <div class="info-lbl">Email :</div>
+            <div class="info-val">{{ $livraison['fournisseur']['email'] }}</div>
+        </div>
+        @endif
+    </div>
+    <div class="info-col info-col-right">
+        <div class="info-section-title">Détails de la livraison</div>
+        <div class="info-row">
+            <div class="info-lbl">Référence :</div>
+            <div class="info-val"><strong>{{ $livraison['reference'] }}</strong></div>
+        </div>
+        <div class="info-row">
+            <div class="info-lbl">Date de livraison :</div>
+            <div class="info-val">{{ $livraison['date_livraison'] ?? '—' }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-lbl">Réceptionné par :</div>
+            <div class="info-val">{{ $livraison['receptionne_par'] ?? '—' }}</div>
+        </div>
+    </div>
+</div>
+
+{{-- ════ TABLEAU ARTICLES (sans montants) ════ --}}
+<div class="section-title">Articles livrés</div>
+
+<table class="articles">
+    <thead>
+        <tr>
+            <th style="width:6%"  class="c">N°</th>
+            <th style="width:64%">Désignation</th>
+            <th style="width:14%" class="c">Unité</th>
+            <th style="width:16%" class="r">Quantité livrée</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($livraison['lignes'] as $i => $ligne)
             <tr>
-                <th class="text-left">Désignation</th>
-                <th class="text-left w-20">Unité</th>
-                <th class="text-right w-20">Qté</th>
+                <td class="text-center">{{ $i + 1 }}</td>
+                <td><strong style="color:#0c3260">{{ $ligne['designation'] ?? '—' }}</strong></td>
+                <td class="text-center">{{ $ligne['unite_mesure'] ?? '—' }}</td>
+                <td class="text-right" style="font-weight:700">{{ number_format((float) $ligne['quantite_livree'], 2, ',', ' ') }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @forelse($livraison['lignes'] as $i => $ligne)
-                <tr>
-                    <td class="text-left">{{ $ligne['designation'] ?? '-' }}</td>
-                    <td>{{ $ligne['unite_mesure'] ?? '-' }}</td>
-                    <td class="text-right">{{ $ligne['quantite_livree'] }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="3" class="text-center text-black py-4">Aucun article livré</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+        @empty
+            <tr>
+                <td colspan="4" class="text-center" style="padding:14px;color:#64748b;font-style:italic">
+                    Aucun article livré.
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
 
-    {{-- SIGNATURES --}}
-    {{-- <div class="flex justify-between mt-12">
-        <div class="w-1/2 text-center">
-            <p class="text-sm font-medium">Livré par</p>
-            <div class="border-t border-black mt-10 pt-2 text-sm">
-                {{ $livraison['livreur'] ?? '........................' }}
-            </div>
-        </div>
+{{-- ════ SIGNATURES ════ --}}
+<div class="signatures">
+    <div class="sig-cell">
+        <div class="sig-label">Le Fournisseur</div>
+        <div class="sig-line">Nom &amp; Signature</div>
+    </div>
+    <div class="sig-cell">
+        <div class="sig-label">Le Magasinier</div>
+        <div class="sig-line">Nom &amp; Signature</div>
+    </div>
+</div>
 
-        <div class="w-1/2 text-center">
-            <p class="text-sm font-medium">Réceptionné par</p>
-            <div class="border-t border-black mt-10 pt-2 text-sm">
-                {{ $livraison['receptionne_par'] ?? '........................' }}
-            </div>
-        </div>
-    </div> --}}
-
-    {{-- FOOTER --}}
-
+</div>{{-- /body-wrap --}}
 </body>
 </html>

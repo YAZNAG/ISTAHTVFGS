@@ -40,19 +40,9 @@ class ExportBonLivraisonResource extends JsonResource
                         'designation' => $ligne->article->designation,
                         'unite_mesure' => $ligne->article->unite_mesure,
                         'quantite_livree' => (float) $ligne->quantite,
-                        'prix_unitaire' => (float) $ligne->prix_unitaire,
-                        'tva' => (float) ($ligne->taux_tva ?? 0),
-                        'total_ht' => (float) ($ligne->montant_ht),
-                        'total_ttc' => (float) ($ligne->montant_ttc),
                     ];
                 });
             }),
-
-            'totaux' => [
-                'ht' => floatval($this->total_ht),
-                'tva' => floatval($this->total_tva),
-                'ttc' => floatval($this->total_ttc),
-            ],
         ];
     }
 }
