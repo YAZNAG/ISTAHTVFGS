@@ -338,9 +338,6 @@ function deleteDecompte(decompte) {
                   <th>Numero BL</th>
                   <th>Date</th>
                   <th>Statut</th>
-                  <th class="text-right">HT</th>
-                  <th class="text-right">TVA</th>
-                  <th class="text-right">TTC</th>
                   <th class="text-right">Action</th>
                 </tr>
               </thead>
@@ -349,9 +346,6 @@ function deleteDecompte(decompte) {
                   <td class="font-bold text-istaht-blue">{{ livraison.numero }}</td>
                   <td>{{ livraison.date }}</td>
                   <td><UiBadge tone="warning">{{ livraison.statut }}</UiBadge></td>
-                  <td class="text-right">{{ formatCurrency(livraison.total_ht) }}</td>
-                  <td class="text-right">{{ formatCurrency(livraison.total_tva) }}</td>
-                  <td class="text-right font-bold text-istaht-navy">{{ formatCurrency(livraison.total_ttc) }}</td>
                   <td class="text-right">
                     <Link :href="route('bon-livraisons.show', livraison.id)" class="ui-button ui-button-secondary px-3 py-1.5 text-xs">
                       Voir

@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Modal } from '@inertiaui/modal-vue'
 import { useForm } from '@inertiajs/vue3'
+import { CheckCircleIcon } from '@heroicons/vue/24/outline'
 import Dump from '@/Components/Dump.vue'
 import InputError from '@/Components/InputError.vue'
 
@@ -59,6 +60,23 @@ function removeItem(index) {
   form.items.splice(index, 1)
 }
 
+// Remplit le BL avec TOUS les articles restants du bon de commande (quantite = reste a livrer)
+function completerDepuisBonCommande() {
+  form.items = props.articles
+    .filter(a => Number(a.reste_a_livrer ?? 0) > 0)
+    .map(a => ({
+      article_id: a.id,
+      designation: a.designation,
+      quantite: Number(a.reste_a_livrer),
+      prix_unitaire: a.prix_unitaire || 0,
+      taux_tva: a.taux_tva || 0,
+    }))
+}
+
+const totalResteALivrer = computed(() =>
+  props.articles.reduce((sum, a) => sum + Number(a.reste_a_livrer ?? 0), 0)
+)
+
 function closeIdle() {
   setTimeout(() => dropdownOpen.value = false, 300)
 }
@@ -111,7 +129,22 @@ function submit() {
 
       <!-- Article Selector -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Articles Livrés</label>
+        <div class="mb-2 flex items-center justify-between">
+          <label class="block text-sm font-medium text-gray-700">Articles Livrés</label>
+          <button
+            v-if="totalResteALivrer > 0"
+            type="button"
+            @click="completerDepuisBonCommande"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-green-700"
+            title="Remplir avec tous les articles restants du bon de commande"
+          >
+            <CheckCircleIcon class="h-4 w-4" />
+            Compléter depuis le bon de commande
+          </button>
+        </div>
+        <p v-if="totalResteALivrer > 0" class="mb-2 text-xs text-slate-500">
+          Ce bouton remplit la livraison avec tous les articles du bon de commande, chacun avec sa quantité restante — le bon sera finalisé (livré complètement) après enregistrement.
+        </p>
 
         <div class="relative mb-2">
           <input type="text" v-model="search" placeholder="Rechercher un article..." @focus="dropdownOpen = true"
