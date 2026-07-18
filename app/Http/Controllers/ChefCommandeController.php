@@ -458,17 +458,20 @@ class ChefCommandeController extends Controller implements HasMiddleware
         $chefCommande->load([
             'items.article',
             'items.article.currentBonCommandeArticle',
+            'categorie:id,nom',
+            'user:id,name',
         ]);
 
         $data = [
-            'chefCommande' => $chefCommande,
+            'chefCommande'  => $chefCommande,
+            'pdfHeaderSrc'  => $this->pdfHeaderBase64(),
         ];
 
-        
-        $cleanReference = preg_replace('/[\/\\\\]/', '-', $chefCommande->reference);
-        $fileName = "chef-commande-{$cleanReference}.pdf";
-        
+        $cleanReference = preg_replace('/[\/\\\\]/', '-', $chefCommande->numero);
+        $fileName = "bon-commande-{$cleanReference}.pdf";
+
         return Pdf::loadView('pdf.chef-commande.chef-commande', $data)
+            ->setPaper('a4', 'portrait')
             ->download($fileName);
     }
 }
