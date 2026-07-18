@@ -262,17 +262,54 @@ class ChefCommandeController extends Controller implements HasMiddleware
 
     public function cancel(ChefCommande $chefCommande)
     {
-        
-        if ($chefCommande->statut !== ChefCommande::STATUS_CREE) {
+        $cancellable = [
+            ChefCommande::STATUS_CREE,
+            ChefCommande::STATUS_EN_ATTENTE_VALIDATION,
+            ChefCommande::STATUS_EN_ATTENTE_LIVRAISON,
+        ];
+
+        if (! in_array($chefCommande->statut, $cancellable, true)) {
             return redirect()->back()
-                ->with('error', 'Impossible de modifier ce bon de commande.');
+                ->with('error', 'Impossible d\'annuler ce bon de commande : il est deja livre ou annule.');
+        }
+
+        // Bloquer si une livraison est deja rattachee
+        if ($chefCommande->livraisons()->exists()) {
+            return redirect()->back()
+                ->with('error', 'Impossible d\'annuler : une livraison est deja rattachee a ce bon.');
         }
 
         $chefCommande->update([
-            'statut' => ChefCommande::STATUS_ANNULEE  ,
+            'statut' => ChefCommande::STATUS_ANNULEE,
         ]);
 
-        return redirect()->back()->with('success', 'Commande mise à jour avec succès.');
+        return redirect()->back()->with('success', 'Bon de commande annule avec succes.');
+    }
+
+    public function destroy(ChefCommande $chefCommande)
+    {
+        $deletable = [
+            ChefCommande::STATUS_CREE,
+            ChefCommande::STATUS_EN_ATTENTE_LIVRAISON,
+            ChefCommande::STATUS_ANNULEE,
+            ChefCommande::STATUS_REJET,
+        ];
+
+        if (! in_array($chefCommande->statut, $deletable, true)) {
+            return redirect()->back()
+                ->with('error', 'Impossible de supprimer ce bon de commande : il est deja livre.');
+        }
+
+        if ($chefCommande->livraisons()->exists()) {
+            return redirect()->back()
+                ->with('error', 'Impossible de supprimer : une livraison est deja rattachee a ce bon.');
+        }
+
+        $chefCommande->items()->delete();
+        $chefCommande->delete();
+
+        return redirect()->route('chef-commandes.index')
+            ->with('success', 'Bon de commande supprime avec succes.');
     }
 
 

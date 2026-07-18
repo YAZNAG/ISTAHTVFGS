@@ -11,7 +11,8 @@ import {
   TagIcon,
   CubeIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  TrashIcon
 } from '@heroicons/vue/24/outline'
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -76,6 +77,21 @@ function opensubmitModal(id) {
 function submitChefCommande() {
   return router.patch(route('chef-commandes.submit', chefCommandeIdToSubmit.value));
 }
+
+const showDeleteModal = ref(false)
+const chefCommandeIdToDelete = ref(null)
+
+function openDeleteModal(id) {
+  chefCommandeIdToDelete.value = id
+  showDeleteModal.value = true
+}
+
+function deleteChefCommande() {
+  return router.delete(route('chef-commandes.destroy', chefCommandeIdToDelete.value))
+}
+
+const cancellableStatuts = ['cree', 'en_attente_validation', 'en_attente_livraison']
+const deletableStatuts   = ['en_attente_livraison', 'annulee', 'rejet']
 
 const getStatutColor = (statut) => getChefCommandeStatutInfo(statut).color;
 const getStatutLabel = (statut) => getChefCommandeStatutInfo(statut).label;
@@ -269,30 +285,32 @@ const commandeStatus = [
                       <PencilIcon class="h-5 w-5" />
                     </ModalLink>
 
-                    <template v-if="commande.statut === 'cree'">
-                      <button
-                          
-                          @click="openCancelModal(commande.id)"
-                          class="text-red-600 hover:text-red-800"
-                          title="Annuler la commande"
-                      >
-                          <XMarkIcon class="h-5 w-5" />
-                          <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                              Annuler
-                          </div>
-                      </button>
+                    <button
+                        v-if="cancellableStatuts.includes(commande.statut)"
+                        @click="openCancelModal(commande.id)"
+                        class="text-red-600 hover:text-red-800 p-1"
+                        title="Annuler la commande"
+                    >
+                        <XMarkIcon class="h-5 w-5" />
+                    </button>
 
-                      <button
-                          @click="opensubmitModal(commande.id)"
-                          class="text-green-600 hover:text-green-800"
-                          title="Submitter la commande"
-                      >
-                          <CheckIcon class="h-5 w-5" />
-                          <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                              Submitter
-                          </div>
-                      </button>
-                    </template>
+                    <button
+                        v-if="commande.statut === 'cree'"
+                        @click="opensubmitModal(commande.id)"
+                        class="text-green-600 hover:text-green-800 p-1"
+                        title="Soumettre la commande"
+                    >
+                        <CheckIcon class="h-5 w-5" />
+                    </button>
+
+                    <button
+                        v-if="deletableStatuts.includes(commande.statut)"
+                        @click="openDeleteModal(commande.id)"
+                        class="text-red-700 hover:text-red-900 p-1"
+                        title="Supprimer le bon de commande"
+                    >
+                        <TrashIcon class="h-5 w-5" />
+                    </button>
 
                     <a
                       v-if="can('pdf_chefCommandes')"
@@ -378,6 +396,14 @@ const commandeStatus = [
       message="Êtes-vous sûr de vouloir submettre ce bon de commande ?"
       :onConfirm="submitChefCommande"
       @close="showSubmitModal = false"
+    />
+
+    <ConfirmationModal
+      :show="showDeleteModal"
+      title="Supprimer le bon de commande"
+      message="Êtes-vous sûr de vouloir supprimer définitivement ce bon de commande ? Cette action est irréversible."
+      :onConfirm="deleteChefCommande"
+      @close="showDeleteModal = false"
     />
   </AuthenticatedLayout>
 </template>
