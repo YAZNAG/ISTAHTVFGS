@@ -273,15 +273,30 @@ class ChefCommandeController extends Controller implements HasMiddleware
                 ->with('error', 'Impossible d\'annuler ce bon de commande : il est deja livre ou annule.');
         }
 
-        // Bloquer si une livraison est deja rattachee
-        if ($chefCommande->livraisons()->exists()) {
+        // Bloquer uniquement si une livraison a reellement ete effectuee ou receptionnee
+        // (le BL cree automatiquement a l'approbation reste en "en_attente_livraison")
+        $livraisonEffectuee = $chefCommande->livraisons()
+            ->where(function ($q) {
+                $q->where('statut', '!=', BonLivraison::STATUS_EN_ATTENTE_LIVRAISON)
+                  ->orWhereHas('reception');
+            })
+            ->exists();
+
+        if ($livraisonEffectuee) {
             return redirect()->back()
-                ->with('error', 'Impossible d\'annuler : une livraison est deja rattachee a ce bon.');
+                ->with('error', 'Impossible d\'annuler : une livraison a deja ete effectuee ou receptionnee pour ce bon.');
         }
 
-        $chefCommande->update([
-            'statut' => ChefCommande::STATUS_ANNULEE,
-        ]);
+        DB::transaction(function () use ($chefCommande) {
+            // Supprimer les BL en attente (crees automatiquement a l'approbation)
+            foreach ($chefCommande->livraisons()->get() as $bl) {
+                $bl->items()->delete();
+                $bl->delete();
+            }
+            $chefCommande->update([
+                'statut' => ChefCommande::STATUS_ANNULEE,
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Bon de commande annule avec succes.');
     }
@@ -300,13 +315,26 @@ class ChefCommandeController extends Controller implements HasMiddleware
                 ->with('error', 'Impossible de supprimer ce bon de commande : il est deja livre.');
         }
 
-        if ($chefCommande->livraisons()->exists()) {
+        $livraisonEffectuee = $chefCommande->livraisons()
+            ->where(function ($q) {
+                $q->where('statut', '!=', BonLivraison::STATUS_EN_ATTENTE_LIVRAISON)
+                  ->orWhereHas('reception');
+            })
+            ->exists();
+
+        if ($livraisonEffectuee) {
             return redirect()->back()
-                ->with('error', 'Impossible de supprimer : une livraison est deja rattachee a ce bon.');
+                ->with('error', 'Impossible de supprimer : une livraison a deja ete effectuee ou receptionnee pour ce bon.');
         }
 
-        $chefCommande->items()->delete();
-        $chefCommande->delete();
+        DB::transaction(function () use ($chefCommande) {
+            foreach ($chefCommande->livraisons()->get() as $bl) {
+                $bl->items()->delete();
+                $bl->delete();
+            }
+            $chefCommande->items()->delete();
+            $chefCommande->delete();
+        });
 
         return redirect()->route('chef-commandes.index')
             ->with('success', 'Bon de commande supprime avec succes.');
