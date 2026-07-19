@@ -1,242 +1,203 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Link, router, Head } from '@inertiajs/vue3';
-import { useForm } from '@inertiajs/vue3';
+import { Link, router, Head, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
-import { onClickOutside } from '@vueuse/core';
-import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
+import {
+  MagnifyingGlassIcon, CheckCircleIcon, ArrowLeftIcon, ArrowRightIcon,
+  LockClosedIcon, ClipboardDocumentCheckIcon,
+} from '@heroicons/vue/24/outline';
 import InputError from '@/Components/InputError.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
-const props = defineProps({
-  inventaire: Object,          // header + ALL lines
-});
+const props = defineProps({ inventaire: Object });
 
-/* ---------- form (only ONE line at a time) ---------- */
-const form = useForm({
-  ligne_id       : null,
-  stock_reel     : null,
-  observations   : '',
-});
+const form = useForm({ ligne_id: null, stock_reel: null, observations: '' });
 
-/* ---------- search ---------- */
-const search      = ref('');
-const dropdown    = ref(false);
-const dropdownEl  = ref(null);              // root wrapper
-
-onClickOutside(dropdownEl, () => (dropdown.value = false));
-
-const filtered = computed(() =>
-  props.inventaire.lignes.filter(l =>
-    l.code_article.toLowerCase().includes(search.value.toLowerCase()) ||
-    l.designation.toLowerCase().includes(search.value.toLowerCase())
-  )
-);
-
-/* ---------- current line ---------- */
+const search = ref('');
 const currentIndex = ref(0);
 const current = computed(() => props.inventaire.lignes[currentIndex.value]);
 
-/* ---------- preload current into form ---------- */
 watch(current, l => {
-  form.ligne_id     = l.id;
-  form.stock_reel   = l.stock_reel;
+  if (!l) return;
+  form.ligne_id = l.id;
+  form.stock_reel = l.stock_reel;
   form.observations = l.observations ?? '';
-  search.value      = `${l.code_article} - ${l.designation}`;
 }, { immediate: true });
 
-/* ---------- save & advance ---------- */
+const filtered = computed(() => {
+  const q = search.value.toLowerCase();
+  return props.inventaire.lignes.filter(l =>
+    l.code_article.toLowerCase().includes(q) || l.designation.toLowerCase().includes(q));
+});
+
+const ecartPreview = computed(() => {
+  if (form.stock_reel === null || form.stock_reel === '') return null;
+  return Number(form.stock_reel) - Number(current.value.stock_theorique);
+});
+
+function selectLine(l) {
+  currentIndex.value = props.inventaire.lignes.indexOf(l);
+}
+
 function saveAndNext() {
   form.patch(route('inventaires.ligne.update', form.ligne_id), {
     preserveScroll: true,
     onSuccess: () => {
-      /* mark local array (for progress) */
       const idx = props.inventaire.lignes.findIndex(l => l.id === form.ligne_id);
-      props.inventaire.lignes[idx].stock_reel   = form.stock_reel;
+      props.inventaire.lignes[idx].stock_reel = form.stock_reel;
       props.inventaire.lignes[idx].observations = form.observations;
-      props.inventaire.lignes[idx].ecart        = form.stock_reel - props.inventaire.lignes[idx].stock_theorique;
-
-      /* next article (loop back to 0 when finished) */
+      props.inventaire.lignes[idx].ecart = form.stock_reel - props.inventaire.lignes[idx].stock_theorique;
       currentIndex.value = (currentIndex.value + 1) % props.inventaire.lignes.length;
     },
   });
 }
 
-function skip() {
-  currentIndex.value = (currentIndex.value + 1) % props.inventaire.lignes.length;
-}
+function prev() { currentIndex.value = (currentIndex.value - 1 + props.inventaire.lignes.length) % props.inventaire.lignes.length; }
+function skip() { currentIndex.value = (currentIndex.value + 1) % props.inventaire.lignes.length; }
 
-/* ---------- progress ---------- */
-const total   = computed(() => props.inventaire.lignes.length);
-const filled  = computed(() => props.inventaire.lignes.filter(l => l.stock_reel !== null).length);
-const percent = computed(() => (filled.value / total.value * 100).toFixed(0));
+const total = computed(() => props.inventaire.lignes.length);
+const filled = computed(() => props.inventaire.lignes.filter(l => l.stock_reel !== null).length);
+const percent = computed(() => total.value ? Math.round(filled.value / total.value * 100) : 0);
 
-/* ---------- finalize ---------- */
-function finalize() {
-  if (filled.value < total.value) {
-    alert('Tous les stocks réels doivent être renseignés.');
-    return;
-  }
-
-  router.patch(route('inventaires.finalize', props.inventaire.id));
-}
-
-function toggleDropdown() {
-  search.value = '';
-  dropdown.value = !dropdown.value;
-}
-
-const showConfirmModal = ref(false)
-
-function openConfirmModal(id) {
-  showConfirmModal.value = true
-}
-
+const showConfirmModal = ref(false);
+function finalize() { router.patch(route('inventaires.finalize', props.inventaire.id)); }
 </script>
 
 <template>
   <AuthenticatedLayout>
     <Head :title="'Inventaire ' + inventaire.semaine" />
 
-    <div class="space-y-6">
-      <!-- ====== HEADER ====== -->
-      <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <div class="flex-1">
-            <h1 class="text-3xl font-bold mb-2">Inventaire de la semaine</h1>
-            <p class="text-blue-100 text-lg opacity-90">{{ inventaire.semaine }}</p>
+    <section class="space-y-5">
+
+      <!-- ═══ En-tête + progression ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div class="flex items-center gap-2">
+              <p class="font-mono text-sm font-bold text-istaht-blue">{{ inventaire.semaine }}</p>
+              <span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-istaht-amber ring-1 ring-amber-100">Brouillon</span>
+            </div>
+            <h2 class="mt-2 flex items-center gap-2 text-2xl font-bold text-istaht-navy">
+              <ClipboardDocumentCheckIcon class="h-6 w-6" />
+              Saisie de l'inventaire
+            </h2>
+          </div>
+          <Link :href="route('inventaires.index')" class="ui-button ui-button-ghost">
+            <ArrowLeftIcon class="mr-1.5 h-4 w-4" /> Retour liste
+          </Link>
+        </div>
+
+        <div class="mt-4">
+          <div class="mb-1 flex items-center justify-between text-sm">
+            <span class="font-semibold text-slate-600">Progression</span>
+            <span class="font-bold text-istaht-navy">{{ filled }} / {{ total }} · {{ percent }} %</span>
+          </div>
+          <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div class="h-full rounded-full transition-all" :class="percent === 100 ? 'bg-istaht-green' : 'bg-istaht-blue'" :style="{ width: percent + '%' }" />
           </div>
         </div>
       </div>
 
-      <!-- Progress badge -->
-          <div class="w-full">
-            <div class="flex items-center justify-between text-sm text-slate-800 mb-1">
-              <span>Progression</span>
-              <span class="font-semibold">{{ filled }} / {{ total }}</span>
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+
+        <!-- ═══ Carte de saisie ═══ -->
+        <div class="lg:col-span-2">
+          <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+            <div class="mb-4 flex items-center justify-between">
+              <h3 class="font-bold text-istaht-navy">Article {{ currentIndex + 1 }} / {{ total }}</h3>
+              <div class="flex gap-1">
+                <button type="button" class="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50" title="Précédent" @click="prev"><ArrowLeftIcon class="h-4 w-4" /></button>
+                <button type="button" class="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50" title="Suivant" @click="skip"><ArrowRightIcon class="h-4 w-4" /></button>
+              </div>
             </div>
-            <div class="w-full bg-blue-100 rounded-full h-2.5 shadow-inner">
-              <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" :style="{ width: percent + '%' }" />
+
+            <div v-if="current" class="space-y-4">
+              <div class="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                <p class="font-mono text-sm font-bold text-istaht-blue">{{ current.code_article }}</p>
+                <p class="mt-0.5 text-lg font-bold text-istaht-navy">{{ current.designation }}</p>
+                <p class="text-sm text-slate-500">Unité : {{ current.unite_mesure }}</p>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+                  <p class="text-xs font-bold uppercase text-slate-400">Stock théorique</p>
+                  <p class="mt-1 text-xl font-bold text-istaht-navy">{{ current.stock_theorique }}</p>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Stock réel *</label>
+                  <input v-model.number="form.stock_reel" type="number" step="0.01" class="ui-input w-full" @keyup.enter="saveAndNext" />
+                  <InputError :message="form.errors.stock_reel" />
+                </div>
+                <div class="rounded-lg border p-3" :class="ecartPreview === null ? 'border-slate-100 bg-slate-50' : (ecartPreview > 0 ? 'border-green-100 bg-green-50' : (ecartPreview < 0 ? 'border-red-100 bg-red-50' : 'border-slate-100 bg-slate-50'))">
+                  <p class="text-xs font-bold uppercase text-slate-400">Écart</p>
+                  <p class="mt-1 text-xl font-bold" :class="ecartPreview === null ? 'text-slate-400' : (ecartPreview > 0 ? 'text-istaht-green' : (ecartPreview < 0 ? 'text-istaht-red' : 'text-slate-500'))">
+                    {{ ecartPreview === null ? '—' : (ecartPreview > 0 ? '+' : '') + ecartPreview.toFixed(2) }}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Observations</label>
+                <input v-model="form.observations" type="text" placeholder="Facultatif…" class="ui-input w-full" />
+              </div>
+
+              <div class="flex justify-end gap-2 pt-1">
+                <button type="button" class="ui-button ui-button-ghost" @click="skip">Passer</button>
+                <button type="button" class="ui-button ui-button-primary disabled:opacity-50" :disabled="form.processing || form.stock_reel === null || form.stock_reel === ''" @click="saveAndNext">
+                  <CheckCircleIcon class="mr-1.5 h-4 w-4" /> Enregistrer &amp; suivant
+                </button>
+              </div>
             </div>
-            <div class="text-right text-xs text-slate-800 mt-1">{{ percent }} %</div>
           </div>
 
-      <!-- ====== ARTICLE SELECTOR CARD ====== -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Sélectionner un article</h2>
-
-        <!-- Searchable dropdown -->
-        <div ref="dropdownEl" class="relative max-w-xl">
-          <div class="relative">
-            <input
-              v-model="search"
-              @focus="dropdown = true"
-              type="text"
-              placeholder="Rechercher code ou désignation..."
-              class="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            <ChevronDownIcon
-              @click="toggleDropdown"
-              class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 cursor-pointer"
-            />
+          <div class="mt-4 flex justify-end">
+            <button
+              type="button"
+              class="ui-button ui-button-primary disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="percent < 100"
+              @click="showConfirmModal = true"
+            >
+              <LockClosedIcon class="mr-1.5 h-4 w-4" />
+              Finaliser l'inventaire
+            </button>
           </div>
+        </div>
 
-          <!-- Dropdown list -->
-          <ul
-            v-if="dropdown && filtered.length"
-            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
-          >
+        <!-- ═══ Liste des articles ═══ -->
+        <div class="rounded-lg border border-slate-200 bg-white shadow-soft">
+          <div class="border-b border-slate-100 p-3">
+            <div class="relative">
+              <input v-model="search" type="text" placeholder="Rechercher…" class="ui-input w-full pl-9" />
+              <MagnifyingGlassIcon class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+          </div>
+          <ul class="max-h-[26rem] divide-y divide-slate-100 overflow-y-auto">
             <li
               v-for="l in filtered"
               :key="l.id"
-              @click="currentIndex = props.inventaire.lignes.indexOf(l); dropdown = false"
-              class="px-4 py-2 hover:bg-blue-50 cursor-pointer flex justify-between"
+              class="flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm transition hover:bg-slate-50"
+              :class="current && l.id === current.id ? 'bg-blue-50' : ''"
+              @click="selectLine(l)"
             >
-              <span>{{ l.code_article }}</span>
-              <span class="text-gray-500 text-sm truncate ml-2">{{ l.designation }}</span>
+              <div class="min-w-0">
+                <p class="font-mono text-xs font-bold text-istaht-blue">{{ l.code_article }}</p>
+                <p class="truncate text-slate-700">{{ l.designation }}</p>
+              </div>
+              <CheckCircleIcon v-if="l.stock_reel !== null" class="ml-2 h-5 w-5 shrink-0 text-istaht-green" />
+              <span v-else class="ml-2 h-2 w-2 shrink-0 rounded-full bg-slate-300" />
             </li>
           </ul>
         </div>
-
-        <!-- Current article card -->
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Article</label>
-            <div class="mt-1 text-lg font-semibold text-gray-900">{{ current.code_article }} - {{ current.designation }}</div>
-            <div class="text-sm text-gray-500">Unité : {{ current.unite_mesure }}</div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Stock théorique</label>
-            <div class="mt-1 text-lg font-semibold text-blue-600">{{ current.stock_theorique }}</div>
-          </div>
-
-          <!-- Stock réel -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Stock réel <span class="text-red-500">*</span></label>
-            <input
-              v-model.number="form.stock_reel"
-              type="number"
-              step="0.01"
-              class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <InputError class="mt-2" :message="form.errors.stock_reel" />
-          </div>
-
-          <!-- Observations -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Observations</label>
-            <input
-              v-model="form.observations"
-              type="text"
-              placeholder=""
-              class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="mt-6 flex justify-end gap-3">
-          <button
-            @click="skip"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Passer
-          </button>
-          <button
-            @click="saveAndNext"
-            :disabled="form.processing || form.stock_reel === null"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            Sauvegarder & suivant
-          </button>
-        </div>
       </div>
-
-      <!-- ====== BOTTOM ACTIONS ====== -->
-      <div class="flex justify-end gap-3">
-        <Link :href="route('inventaires.index')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-          Retour
-        </Link>
-
-        <button
-          @click="openConfirmModal"
-          :disabled="percent < 100"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          :class="{ 'opacity-50 cursor-not-allowed': percent < 100 }"
-        >
-          Finaliser
-        </button>
-      </div>
-    </div>
+    </section>
 
     <ConfirmationModal
-        :show="showConfirmModal"
-        type="warning"
-        title="Finaliser l’inventaire"
-        message="Une fois finalisé, vous ne pourrez plus modifier les données. Êtes-vous sûr de vouloir finaliser cet inventaire ?"
-        :onConfirm="finalize"
-        @close="showConfirmModal = false"
+      :show="showConfirmModal"
+      type="warning"
+      title="Finaliser l'inventaire"
+      message="Une fois finalisé, l'inventaire est verrouillé et ne peut plus être modifié. Confirmer ?"
+      :onConfirm="finalize"
+      @close="showConfirmModal = false"
     />
   </AuthenticatedLayout>
 </template>

@@ -1,7 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { MagnifyingGlassIcon, InboxIcon, PencilIcon, UnderlineIcon, LockOpenIcon, DocumentTextIcon } from '@heroicons/vue/24/outline';
+import {
+  MagnifyingGlassIcon, InboxIcon, PencilIcon, LockOpenIcon, DocumentTextIcon,
+  ArrowPathIcon, ClipboardDocumentCheckIcon, PlusIcon, BoltIcon,
+} from '@heroicons/vue/24/outline';
 import { Link, router, Head } from '@inertiajs/vue3';
+import { ModalLink } from '@inertiaui/modal-vue';
 import { ref } from 'vue';
 import CreateInventaireModal from './CreateInventaireModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
@@ -10,280 +14,213 @@ import { usePermission } from '@/Utils/permission';
 const { can } = usePermission();
 
 const props = defineProps({
-  inventaires: Object,        // paginated collection
+  inventaires: Object,
   filters: Object,
 });
 
-const showUnlockModal = ref(false)
-const inventaireIdToUnlock = ref(null)
-
-function openUnlockModal(id) {
-  inventaireIdToUnlock.value = id;
-  showUnlockModal.value = true
-}
-/* ---------- filters ---------- */
 const filters = ref({
   semaine: props.filters.semaine ?? '',
-  statut: props.filters.statut ?? '',   // draft | finalized | ''
+  statut: props.filters.statut ?? '',
 });
 
 function applyFilters() {
-  router.get(route('inventaires.index'), filters.value, { preserveState: true });
+  router.get(route('inventaires.index'), filters.value, { preserveState: true, replace: true });
 }
 function resetFilters() {
   filters.value = { semaine: '', statut: '' };
   router.get(route('inventaires.index'));
 }
 
-const unlock  = () => {
+const showUnlockModal = ref(false);
+const inventaireIdToUnlock = ref(null);
+function openUnlockModal(id) { inventaireIdToUnlock.value = id; showUnlockModal.value = true; }
+function unlock() {
   router.patch(route('inventaires.unlock', inventaireIdToUnlock.value), {
     preserveScroll: true,
-    onSuccess: () => {
-      showUnlockModal.value = false
-      inventaireIdToUnlock.value = null
-    }
-  })
+    onSuccess: () => { showUnlockModal.value = false; inventaireIdToUnlock.value = null; },
+  });
 }
 
-/* ---------- helpers ---------- */
-const statutBadge = (s) =>
-  s === 'finalized'
-    ? 'bg-green-100 text-green-800'
-    : 'bg-amber-100 text-amber-800';
+function progressPercent(p) {
+  if (!p || !p.includes('/')) return 0;
+  const [done, total] = p.split('/').map(Number);
+  return total > 0 ? Math.round((done / total) * 100) : 0;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' });
+}
 </script>
 
 <template>
   <AuthenticatedLayout>
     <Head title="Inventaires hebdomadaires" />
 
-    <div class="space-y-6">
-      <!-- ====== HEADER ====== -->
-      <div
-        class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg"
-      >
-        <div
-          class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6"
-        >
-          <div class="flex-1">
-            <h1 class="text-3xl font-bold mb-2">Inventaires hebdomadaires</h1>
-            <p class="text-blue-100 text-lg opacity-90">
-              Créez, continuez ou téléchargez vos inventaires
+    <section class="space-y-5">
+
+      <!-- ═══ En-tête ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 class="flex items-center gap-2 text-2xl font-bold text-istaht-navy">
+              <ClipboardDocumentCheckIcon class="h-6 w-6" />
+              Inventaires hebdomadaires
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Un inventaire par semaine — seuls les articles à stock théorique positif sont listés automatiquement.
             </p>
           </div>
-
           <ModalLink
-            href="#createInventaireModal"
             v-if="can('create_inventaire')"
+            href="#createInventaireModal"
             as="button"
-            class="bg-white text-blue-700 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow"
+            class="ui-button ui-button-primary"
           >
-            <span class="text-xl">＋</span>
+            <PlusIcon class="mr-1.5 h-4 w-4" />
             Nouvel inventaire
           </ModalLink>
         </div>
       </div>
 
-      <!-- ====== FILTERS ====== -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtrer les inventaires</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-          <!-- Semaine -->
-          <div class="">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Semaine</label>
-            <input
-              v-model="filters.semaine"
-              type="week"
-              placeholder="2026-W26"
-              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
+      <!-- ═══ Filtres ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div>
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Semaine</label>
+            <input v-model="filters.semaine" type="week" class="ui-input w-full" />
           </div>
-
-          <!-- Statut -->
-          <div class="">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-            <select
-              v-model="filters.statut"
-              class="w-full border border-gray-300 rounded-lg p-2"
-            >
+          <div>
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Statut</label>
+            <select v-model="filters.statut" class="ui-input w-full">
               <option value="">Tous</option>
               <option value="draft">Brouillon</option>
               <option value="finalized">Finalisé</option>
             </select>
-        </div>
-
-          <!-- Actions -->
-          <div class="md:col-span-2 flex items-end gap-3">
-            <button
-              @click="resetFilters"
-              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
-            >
-              Réinitialiser
+          </div>
+          <div class="flex items-end gap-2">
+            <button type="button" class="ui-button ui-button-ghost" @click="resetFilters">
+              <ArrowPathIcon class="mr-1.5 h-4 w-4" /> Réinitialiser
             </button>
-            <button
-              @click="applyFilters"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
-            >
-              <MagnifyingGlassIcon class="w-4 h-4" />
-              Appliquer
+            <button type="button" class="ui-button ui-button-primary" @click="applyFilters">
+              <MagnifyingGlassIcon class="mr-1.5 h-4 w-4" /> Filtrer
             </button>
           </div>
         </div>
       </div>
 
-      <!-- ====== TABLE ====== -->
-      <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <!-- ═══ Tableau ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white shadow-soft">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div class="flex items-center gap-2">
+            <ClipboardDocumentCheckIcon class="h-5 w-5 text-istaht-blue" />
+            <h3 class="font-bold text-istaht-navy">Liste des inventaires</h3>
+          </div>
+          <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-istaht-blue ring-1 ring-blue-100">
+            {{ inventaires?.meta?.total ?? 0 }} inventaire(s)
+          </span>
+        </div>
+
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Semaine
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Statut
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Articles
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Créé le
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Progression
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Actions
-                </th>
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50">
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Semaine</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Statut</th>
+                <th class="px-5 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500">Articles</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Progression</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Créé le</th>
+                <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Actions</th>
               </tr>
             </thead>
-
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr
-                v-for="inv in inventaires.data"
-                :key="inv.id"
-                class="hover:bg-gray-50"
-              >
-                <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                  {{ inv.semaine }}
-                </td>
-
-                <td class="px-6 py-4">
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="inv in inventaires.data" :key="inv.id" class="transition hover:bg-slate-50">
+                <td class="whitespace-nowrap px-5 py-3.5 font-mono text-sm font-bold text-istaht-blue">{{ inv.semaine }}</td>
+                <td class="px-5 py-3.5">
                   <span
-                    :class="statutBadge(inv.statut)"
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    class="rounded-full px-2.5 py-1 text-xs font-bold"
+                    :class="inv.statut === 'finalized' ? 'bg-green-50 text-istaht-green ring-1 ring-green-100' : 'bg-amber-50 text-istaht-amber ring-1 ring-amber-100'"
                   >
                     {{ inv.statut === 'finalized' ? 'Finalisé' : 'Brouillon' }}
                   </span>
                 </td>
-
-                <td class="px-6 py-4 text-sm text-gray-700">
-                  {{ inv.articles_count }}
+                <td class="px-5 py-3.5 text-center text-sm text-slate-600">{{ inv.articles_count }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-2">
+                    <div class="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
+                      <div class="h-full rounded-full bg-istaht-green transition-all" :style="{ width: progressPercent(inv.progress) + '%' }" />
+                    </div>
+                    <span class="text-xs font-semibold text-slate-500">{{ inv.progress ?? '—' }}</span>
+                  </div>
                 </td>
-
-                <td class="px-6 py-4 text-sm text-gray-500">
-                  {{ inv.created_at }}
-                </td>
-
-                <td class="px-6 py-4 text-sm text-gray-700">
-                  {{ inv.progress ?? '—' }}
-                </td>
-
-                <td class="px-6 py-4 text-sm font-medium flex items-center gap-3">
-                  <Link
-                    v-if="inv.statut === 'draft' && can('fill_stock_reel')"
-                    :href="route('inventaires.edit', inv.id)"
-                    class="text-green-600 hover:text-green-900 p-1"
-                    title="Voir / continuer"
-                  >
-                    <PencilIcon class="h-5 w-5" />
-                  </Link>
-
-                  <a
-                    v-if="inv.statut === 'finalized' && can('pdf_inventaire')"
-                    :href="route('inventaires.pdf', inv.id)"
-                    class="text-purple-600 hover:text-purple-900"
-                    title="Télécharger le PDF"
-                    target="_blank"
-                  >
-                    <DocumentTextIcon class="h-5 w-5" />
-                  </a>
-
-                  <button
-                    v-if="inv.statut === 'finalized' && can('unlock_inventaire')"
-                    @click="openUnlockModal(inv.id)"
-                    class="text-amber-600 hover:text-amber-900"
-                    title="Déverrouiller"
-                  >
-                    <LockOpenIcon class="h-5 w-5" />
-                  </button>
+                <td class="px-5 py-3.5 text-sm text-slate-500">{{ formatDate(inv.created_at) }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center justify-end gap-1">
+                    <Link
+                      v-if="inv.statut === 'draft' && can('fill_stock_reel')"
+                      :href="route('inventaires.edit', inv.id)"
+                      class="rounded-md p-1.5 text-slate-500 transition hover:bg-green-50 hover:text-istaht-green"
+                      title="Saisir / continuer les stocks réels"
+                    >
+                      <PencilIcon class="h-5 w-5" />
+                    </Link>
+                    <a
+                      v-if="inv.statut === 'finalized' && can('pdf_inventaire')"
+                      :href="route('inventaires.pdf', inv.id)"
+                      target="_blank"
+                      class="rounded-md p-1.5 text-slate-500 transition hover:bg-purple-50 hover:text-purple-600"
+                      title="Télécharger le PDF"
+                    >
+                      <DocumentTextIcon class="h-5 w-5" />
+                    </a>
+                    <button
+                      v-if="inv.statut === 'finalized' && can('unlock_inventaire')"
+                      class="rounded-md p-1.5 text-slate-500 transition hover:bg-amber-50 hover:text-istaht-amber"
+                      title="Déverrouiller"
+                      @click="openUnlockModal(inv.id)"
+                    >
+                      <LockOpenIcon class="h-5 w-5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- EMPTY STATE -->
-        <div v-if="inventaires.data.length === 0" class="text-center py-12">
-          <InboxIcon class="mx-auto h-12 w-12 text-gray-300" />
-          <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun inventaire</h3>
-          <p class="mt-1 text-sm text-gray-500">
-            Créez le premier inventaire hebdomadaire.
-          </p>
-          <div class="mt-4">
-            <ModalLink
-              href="#createInventaireModal"
-              v-if="can('create_inventaire')"
-              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Nouvel inventaire
+        <div v-if="inventaires.data.length === 0" class="py-14 text-center">
+          <InboxIcon class="mx-auto h-12 w-12 text-slate-300" />
+          <h3 class="mt-3 text-sm font-bold text-istaht-navy">Aucun inventaire</h3>
+          <p class="mt-1 text-sm text-slate-500">Créez le premier inventaire hebdomadaire en un clic.</p>
+          <div class="mt-5">
+            <ModalLink v-if="can('create_inventaire')" href="#createInventaireModal" as="button" class="ui-button ui-button-primary">
+              <PlusIcon class="mr-1.5 h-4 w-4" /> Nouvel inventaire
             </ModalLink>
           </div>
         </div>
 
-        <!-- PAGINATION (same markup you already use) -->
-        <div
-          v-if="inventaires.links.length > 1"
-          class="bg-white px-6 py-3 border-t border-gray-200"
-        >
-          <div class="flex justify-between items-center">
-            <div class="text-sm text-gray-700">
-              Affichage de {{ inventaires.from }} à {{ inventaires.to }} sur
-              {{ inventaires.total }} résultats
-            </div>
-            <div class="flex space-x-2">
-              <template v-for="link in inventaires.links" :key="link.label">
-                <Link
-                  v-if="link.url"
-                  :href="link.url"
-                  :class="[
-                    'px-3 py-1 rounded-lg text-sm font-medium',
-                    link.active
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-                  ]"
-                  v-html="link.label"
-                />
-                <span
-                  v-else
-                  :class="[
-                    'px-3 py-1 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed',
-                  ]"
-                  v-html="link.label"
-                />
-              </template>
-            </div>
+        <div v-if="inventaires?.meta?.links && inventaires.meta.last_page > 1" class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 px-5 py-3 sm:flex-row">
+          <p class="text-sm text-slate-500">
+            Affichage de <strong class="text-istaht-navy">{{ inventaires.meta.from }}</strong>
+            à <strong class="text-istaht-navy">{{ inventaires.meta.to }}</strong>
+            sur <strong class="text-istaht-navy">{{ inventaires.meta.total }}</strong> inventaires
+          </p>
+          <div class="flex flex-wrap gap-1">
+            <template v-for="link in inventaires.meta.links" :key="link.label">
+              <Link v-if="link.url" :href="link.url" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', link.active ? 'bg-istaht-navy text-white' : 'text-slate-600 hover:bg-slate-100']" v-html="link.label" />
+              <span v-else class="cursor-not-allowed rounded-md px-3 py-1.5 text-sm font-semibold text-slate-300" v-html="link.label" />
+            </template>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <CreateInventaireModal />
     <ConfirmationModal
       :show="showUnlockModal"
       type="warning"
-      title="Déverrouiller l’inventaire"
-      message="Êtes-vous sûr de vouloir déverrouiller cet inventaire ?"
+      title="Déverrouiller l'inventaire"
+      message="Êtes-vous sûr de vouloir déverrouiller cet inventaire ? Il repassera en brouillon et pourra être modifié."
       :onConfirm="unlock"
       @close="showUnlockModal = false"
     />

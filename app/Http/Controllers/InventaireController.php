@@ -55,12 +55,16 @@ class InventaireController extends Controller implements HasMiddleware
 
     public function store(Request $request)
     {
-        /* ---------- validation ---------- */
+        /* ---------- validation ----------
+         * IMPORTANT : syntaxe TABLEAU obligatoire ici. Le regex contient des `|`
+         * (0[1-9]|[1-4][0-9]|5[0-3]) ; en syntaxe pipe "a|regex:/.../|b" Laravel
+         * decoupe la chaine sur ces `|` et casse le pattern -> preg_match(): No ending delimiter.
+         */
         $request->validate([
-            'semaine' => 'required|regex:/^\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$/|unique:inventaires,semaine',
+            'semaine' => ['required', 'regex:/^\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$/', 'unique:inventaires,semaine'],
         ], [
             'semaine.unique' => 'Un inventaire existe déjà pour cette semaine.',
-            'semaine.regex' => 'La semaine doit avoir le format AAAA-Wss (ex: 2026-W26).',
+            'semaine.regex'  => 'La semaine doit avoir le format AAAA-Wss (ex : 2026-W26).',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -126,7 +130,9 @@ class InventaireController extends Controller implements HasMiddleware
                 ->values();
 
 
-            InventaireLigne::insert($rows->toArray());
+            if ($rows->isNotEmpty()) {
+                InventaireLigne::insert($rows->toArray());
+            }
         });
 
 
@@ -209,10 +215,13 @@ class InventaireController extends Controller implements HasMiddleware
 
     public function generatePdf(Inventaire $inventaire)
     {
-        $inventaire->load('lignes');
+        $inventaire->load(['lignes' => fn ($q) => $q->orderBy('code_article')]);
 
         return Pdf::loadView('pdf.inventaire.inventaire', [
-            'inventaire' => $inventaire
-        ])->download("inventaire-{$inventaire->semaine}.pdf");
+            'inventaire'   => $inventaire,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
+        ->setPaper('a4', 'landscape')
+        ->download("inventaire-{$inventaire->semaine}.pdf");
     }
 }
