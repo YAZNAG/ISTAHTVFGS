@@ -87,8 +87,9 @@ class EntreeStockController extends Controller implements HasMiddleware
 
     function createExport()
     {
-
-        return Inertia::modal('Stock/EntreeStocks/CreateExportModal')->baseRoute('entree-stocks.index');
+        return Inertia::modal('Stock/EntreeStocks/CreateExportModal', [
+            'categories' => \App\Models\Categorie::actives()->orderBy('nom')->get(['id', 'nom']),
+        ])->baseRoute('entree-stocks.index');
     }
 
     public function export(Request $request)
@@ -96,6 +97,7 @@ class EntreeStockController extends Controller implements HasMiddleware
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date',
+            'categorie_id' => 'nullable|exists:categories,id',
         ]);
 
         $startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -112,8 +114,18 @@ class EntreeStockController extends Controller implements HasMiddleware
 
         $articles = ExportEntreeStockRecource::collection($data)->toArray($request);
 
-        return Pdf::loadView('pdf.fiche-entree', 
-                    compact('articles', 'startDate', 'endDate')
-    )->download('fiche-entree.pdf');
+        $categorie = $request->filled('categorie_id')
+            ? \App\Models\Categorie::find($request->categorie_id)?->nom
+            : null;
+
+        return Pdf::loadView('pdf.fiche-entree', [
+            'articles'     => $articles,
+            'startDate'    => $startDate,
+            'endDate'      => $endDate,
+            'categorie'    => $categorie,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
+        ->setPaper('a4', 'landscape')
+        ->download('fiche-entree.pdf');
     }
 }
