@@ -182,21 +182,28 @@ class InventaireController extends Controller implements HasMiddleware
 
     public function finalize(Inventaire $inventaire)
     {
-        // 1. Vérifier que tous les stocks réels sont remplis
-        if ($inventaire->lignes()->whereNull('stock_reel')->exists()) {
-            return back()->with('error', 'Tous les articles doivent avoir un stock réel renseigné.');
+        if ($inventaire->statut === 'finalized') {
+            return back()->with('error', 'Cet inventaire est déjà finalisé.');
         }
 
-        // 2. Verrouiller l’inventaire
-        $inventaire->update([
-            'statut'       => 'finalized',
-            'finalized_at' => now(),
-        ]);
+        DB::transaction(function () use ($inventaire) {
+            // Les articles non saisis sont comptés a 0 (ecart = 0 - stock theorique)
+            $inventaire->lignes()->whereNull('stock_reel')->update([
+                'stock_reel' => 0,
+                'ecart'      => DB::raw('-1 * stock_theorique'),
+                'updated_at' => now(),
+            ]);
 
-        // 4. Rediriger avec message de succès
+            // Verrouillage : plus aucune modification possible apres finalisation
+            $inventaire->update([
+                'statut'       => 'finalized',
+                'finalized_at' => now(),
+            ]);
+        });
+
         return redirect()
             ->route('inventaires.index')
-            ->with('success', "Inventaire {$inventaire->semaine} finalisé avec succès.");
+            ->with('success', "Inventaire {$inventaire->semaine} finalisé avec succès (articles non saisis comptés à 0).");
     }
 
     public function unlock(Inventaire $inventaire)

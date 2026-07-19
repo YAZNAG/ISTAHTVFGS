@@ -158,15 +158,17 @@ function finalize() { router.patch(route('inventaires.finalize', props.inventair
             </div>
           </div>
 
-          <div class="mt-4 flex justify-end">
+          <div class="mt-4 flex flex-col items-end gap-2">
+            <p v-if="filled < total" class="text-xs text-slate-500">
+              {{ total - filled }} article(s) non saisi(s) — ils seront comptés à <strong class="text-istaht-navy">0</strong> à la clôture.
+            </p>
             <button
               type="button"
-              class="ui-button ui-button-primary disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="percent < 100"
+              class="ui-button ui-button-primary"
               @click="showConfirmModal = true"
             >
               <LockClosedIcon class="mr-1.5 h-4 w-4" />
-              Finaliser l'inventaire
+              Clôturer l'inventaire
             </button>
           </div>
         </div>
@@ -202,8 +204,8 @@ function finalize() { router.patch(route('inventaires.finalize', props.inventair
     <ConfirmationModal
       :show="showConfirmModal"
       type="warning"
-      title="Finaliser l'inventaire"
-      message="Une fois finalisé, l'inventaire est verrouillé et ne peut plus être modifié. Confirmer ?"
+      title="Clôturer l'inventaire"
+      :message="`Les articles non saisis (${total - filled}) seront comptés à 0. Une fois clôturé, l'inventaire est verrouillé et ne peut plus être modifié. Confirmer ?`"
       :onConfirm="finalize"
       @close="showConfirmModal = false"
     />
