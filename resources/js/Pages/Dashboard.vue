@@ -9,6 +9,8 @@ import {
   ClipboardDocumentListIcon,
   ExclamationTriangleIcon,
   ShoppingCartIcon,
+  BanknotesIcon,
+  ArchiveBoxIcon,
 } from '@heroicons/vue/24/outline'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import KpiCard from '@/Components/KpiCard.vue'
@@ -419,38 +421,63 @@ function demandeTone(statut) {
     <Head title="Tableau de bord" />
 
     <section class="space-y-6">
-      <div class="erp-hero">
-        <div class="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <!-- ═══ En-tête ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p class="text-sm font-bold uppercase tracking-wide text-cyan-100">Pilotage ERP ISTAHT</p>
-            <h2 class="mt-2 text-3xl font-bold tracking-normal text-white md:text-4xl">Tableau de bord operationnel</h2>
-            <p class="mt-3 max-w-3xl text-sm leading-6 text-cyan-50/90">
-              Vue consolidee des marches, fournisseurs, articles, receptions, stocks et demandes internes.
+            <p class="text-xs font-bold uppercase tracking-wide text-istaht-blue">Pilotage ERP ISTAHT</p>
+            <h2 class="mt-1 text-2xl font-bold text-istaht-navy">Tableau de bord</h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Vue consolidée des marchés, fournisseurs, articles, réceptions, stocks et demandes internes.
             </p>
           </div>
-          <div class="grid grid-cols-2 gap-2 sm:flex">
-            <UiBadge tone="info">Achats</UiBadge>
-            <UiBadge tone="success">Stock</UiBadge>
-            <UiBadge tone="warning">Demandes</UiBadge>
-            <UiBadge tone="neutral">Inventaires</UiBadge>
+          <div class="flex flex-wrap gap-2">
+            <Link href="/achats/marches" class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-istaht-blue ring-1 ring-blue-100 transition hover:bg-blue-100">Achats</Link>
+            <Link href="/stock/articles" class="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-istaht-green ring-1 ring-green-100 transition hover:bg-green-100">Stock</Link>
+            <Link href="/demandes" class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-istaht-amber ring-1 ring-amber-100 transition hover:bg-amber-100">Demandes</Link>
+            <Link href="/inventaires" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 transition hover:bg-slate-200">Inventaires</Link>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard title="Nombre de marches" :value="stats.totalBCs || 0" icon="DocumentTextIcon" color="blue" caption="Tous statuts confondus" />
-        <KpiCard title="Marches actifs" :value="stats.activeMarches || 0" icon="ShoppingCartIcon" color="green" caption="Dans la periode courante" />
-        <KpiCard title="Marches en attente" :value="stats.pendingMarches || 0" icon="ClockIcon" color="orange" caption="Creation ou livraison a suivre" />
-        <KpiCard title="Fournisseurs" :value="stats.activeFournisseurs || 0" icon="BuildingOfficeIcon" color="cyan" caption="Fournisseurs actifs" />
-        <KpiCard title="Marches expires" :value="stats.expiredMarches || 0" icon="ExclamationTriangleIcon" color="red" caption="Date fin depassee" />
-        <KpiCard title="Bientot expires" :value="stats.expiringSoonMarches || 0" icon="ClockIcon" color="orange" caption="Expiration sous 30 jours" />
-        <KpiCard title="Montant engage" :value="engagedAmountFormatted" icon="BanknotesIcon" color="blue" caption="Marches attribues" />
-        <KpiCard title="Montant consomme" :value="consumedAmountFormatted" icon="ArrowTrendingUpIcon" color="green" caption="Receptions validees" />
-        <KpiCard title="Montant restant" :value="remainingAmountFormatted" icon="ScaleIcon" color="cyan" caption="Engage moins consomme" />
-        <KpiCard title="Articles" :value="stats.totalArticles || 0" icon="ArchiveBoxIcon" color="blue" caption="Catalogue disponible" />
-        <KpiCard title="Articles sous seuil" :value="stats.lowStockArticles || 0" icon="ExclamationTriangleIcon" color="orange" caption="Stock faible" />
-        <KpiCard title="Receptions du mois" :value="stats.receptionsThisMonth || 0" icon="ArchiveBoxArrowDownIcon" color="green" caption="Receptionnees ce mois" />
-        <KpiCard title="Valeur du stock" :value="stockValueFormatted" icon="BanknotesIcon" color="cyan" caption="Estimation prix marche courant" />
+      <!-- ═══ KPI — Marchés & fournisseurs ═══ -->
+      <div>
+        <h3 class="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+          <ShoppingCartIcon class="h-4 w-4" /> Marchés &amp; fournisseurs
+        </h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <KpiCard title="Nombre de marchés" :value="stats.totalBCs || 0" icon="DocumentTextIcon" color="blue" caption="Tous statuts confondus" />
+          <KpiCard title="Marchés actifs" :value="stats.activeMarches || 0" icon="ShoppingCartIcon" color="green" caption="Dans la période courante" />
+          <KpiCard title="Marchés en attente" :value="stats.pendingMarches || 0" icon="ClockIcon" color="orange" caption="Création ou livraison à suivre" />
+          <KpiCard title="Fournisseurs actifs" :value="stats.activeFournisseurs || 0" icon="BuildingOfficeIcon" color="cyan" caption="Partenaires en activité" />
+          <KpiCard title="Marchés expirés" :value="stats.expiredMarches || 0" icon="ExclamationTriangleIcon" color="red" caption="Date de fin dépassée" />
+          <KpiCard title="Bientôt expirés" :value="stats.expiringSoonMarches || 0" icon="ClockIcon" color="orange" caption="Expiration sous 30 jours" />
+        </div>
+      </div>
+
+      <!-- ═══ KPI — Montants ═══ -->
+      <div>
+        <h3 class="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+          <BanknotesIcon class="h-4 w-4" /> Montants (MAD)
+        </h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <KpiCard title="Montant engagé" :value="engagedAmountFormatted" icon="BanknotesIcon" color="blue" caption="Marchés attribués" />
+          <KpiCard title="Montant consommé" :value="consumedAmountFormatted" icon="ArrowTrendingUpIcon" color="green" caption="Réceptions validées" />
+          <KpiCard title="Montant restant" :value="remainingAmountFormatted" icon="ScaleIcon" color="cyan" caption="Engagé moins consommé" />
+          <KpiCard title="Valeur du stock" :value="stockValueFormatted" icon="ArchiveBoxIcon" color="purple" caption="Estimation prix courant" />
+        </div>
+      </div>
+
+      <!-- ═══ KPI — Stock & activité ═══ -->
+      <div>
+        <h3 class="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+          <ArchiveBoxIcon class="h-4 w-4" /> Stock &amp; activité
+        </h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <KpiCard title="Articles" :value="stats.totalArticles || 0" icon="ArchiveBoxIcon" color="blue" caption="Catalogue disponible" />
+          <KpiCard title="Articles sous seuil" :value="stats.lowStockArticles || 0" icon="ExclamationTriangleIcon" color="orange" caption="Stock faible" />
+          <KpiCard title="Réceptions du mois" :value="stats.receptionsThisMonth || 0" icon="ArchiveBoxArrowDownIcon" color="green" caption="Réceptionnées ce mois" />
+        </div>
       </div>
 
       <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
