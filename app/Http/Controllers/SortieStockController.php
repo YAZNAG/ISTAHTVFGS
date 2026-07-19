@@ -87,8 +87,9 @@ class SortieStockController extends Controller implements HasMiddleware
 
     function createExport()
     {
-
-        return Inertia::modal('Stock/SortieStocks/CreateExportModal')->baseRoute('sortie-stocks.index');
+        return Inertia::modal('Stock/SortieStocks/CreateExportModal', [
+            'categories' => \App\Models\Categorie::actives()->orderBy('nom')->get(['id', 'nom']),
+        ])->baseRoute('sortie-stocks.index');
     }
 
     public function export(Request $request)
@@ -96,6 +97,7 @@ class SortieStockController extends Controller implements HasMiddleware
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date',
+            'categorie_id' => 'nullable|exists:categories,id',
         ]);
 
         $startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -112,9 +114,18 @@ class SortieStockController extends Controller implements HasMiddleware
 
         $articles = ExportSortieStockRecource::collection($data)->toArray($request);
 
-        return Pdf::loadView('pdf.fiche-sortie', 
-                        compact('articles', 'startDate', 'endDate')
-            )
-            ->download('fiche-sortie.pdf');
+        $categorie = $request->filled('categorie_id')
+            ? \App\Models\Categorie::find($request->categorie_id)?->nom
+            : null;
+
+        return Pdf::loadView('pdf.fiche-sortie', [
+            'articles'     => $articles,
+            'startDate'    => $startDate,
+            'endDate'      => $endDate,
+            'categorie'    => $categorie,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
+        ->setPaper('a4', 'portrait')
+        ->download('fiche-sortie.pdf');
     }
 }

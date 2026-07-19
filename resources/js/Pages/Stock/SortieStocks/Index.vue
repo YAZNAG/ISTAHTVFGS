@@ -1,24 +1,15 @@
-<!-- resources/js/Pages/Stock/Entrees.vue -->
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {
-  EyeIcon,
-  PlusIcon,
-  TrashIcon,
   MagnifyingGlassIcon,
-  CalendarIcon,
-  CubeIcon,
-  TagIcon,
-  ArchiveBoxIcon,
-  CheckIcon,
-  XMarkIcon,
+  ArrowPathIcon,
   InboxIcon,
-  DocumentArrowDownIcon
+  DocumentArrowDownIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/vue/24/outline'
 import { Link, router, Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({
   sorties: Object,
@@ -26,8 +17,8 @@ const props = defineProps({
   categories: { type: Array, default: () => [] },
 });
 
-// Format date helper
 function formatDate(date) {
+  if (!date) return '—'
   return new Date(date).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'short',
@@ -35,7 +26,6 @@ function formatDate(date) {
   })
 }
 
-// Filters
 const filters = ref({
   search: props.filters.search || '',
   start_date: props.filters.start_date || '',
@@ -49,7 +39,7 @@ function resetFilters() {
 }
 
 function applyFilters() {
-  router.get(route('sortie-stocks.index'), filters.value)
+  router.get(route('sortie-stocks.index'), filters.value, { preserveState: true })
 }
 </script>
 
@@ -57,151 +47,135 @@ function applyFilters() {
   <AuthenticatedLayout>
     <Head title="Sorties Stock" />
 
-    <div class="space-y-6">
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <div class="flex-1">
-            <h1 class="text-3xl font-bold mb-2">Sorties Stock</h1>
-            <p class="text-blue-100 text-lg opacity-90">Suivi des Sorties d'articles en stock</p>
-          </div>
+    <section class="space-y-5">
 
-           <ModalLink
-              as="button"
-              :href="route('sortie-stocks.export.create')"
-              class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 transition-all duration-200 font-semibold border border-blue-400"
+      <!-- ═══ En-tête ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 class="flex items-center gap-2 text-2xl font-bold text-istaht-navy">
+              <ArrowUpTrayIcon class="h-6 w-6" />
+              Sorties stock
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Suivi des sorties d'articles du stock issues des bons de sortie.
+            </p>
+          </div>
+          <ModalLink
+            as="button"
+            :href="route('sortie-stocks.export.create')"
+            class="ui-button ui-button-primary"
           >
-              <DocumentArrowDownIcon class="h-5 w-5" />
-              Exporter
+            <DocumentArrowDownIcon class="mr-1.5 h-4 w-4" />
+            Exporter la fiche
           </ModalLink>
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtrer les Sorties</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <!-- ═══ Filtres ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Recherche</label>
             <div class="relative">
               <input
                 v-model="filters.search"
                 type="text"
                 placeholder="Référence ou désignation..."
-                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                class="ui-input w-full pl-9"
+                @keyup.enter="applyFilters"
               />
-              <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Categorie</label>
-            <select
-              v-model="filters.categorie_id"
-              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Toutes les categories</option>
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Catégorie</label>
+            <select v-model="filters.categorie_id" class="ui-input w-full">
+              <option value="">Toutes les catégories</option>
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Date début</label>
-            <input
-              v-model="filters.start_date"
-              type="date"
-              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Date début</label>
+            <input v-model="filters.start_date" type="date" class="ui-input w-full" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
-            <input
-              v-model="filters.end_date"
-              type="date"
-              class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Date fin</label>
+            <input v-model="filters.end_date" type="date" class="ui-input w-full" />
           </div>
         </div>
 
-        <div class="mt-5 flex flex-col sm:flex-row justify-end gap-3">
-          <button
-            @click="resetFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
-          >
+        <div class="mt-4 flex flex-col justify-end gap-2 sm:flex-row">
+          <button type="button" class="ui-button ui-button-ghost" @click="resetFilters">
+            <ArrowPathIcon class="mr-1.5 h-4 w-4" />
             Réinitialiser
           </button>
-
-          <button
-            @click="applyFilters"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
-          >
-            <MagnifyingGlassIcon class="w-4 h-4" />
-            Appliquer
+          <button type="button" class="ui-button ui-button-primary" @click="applyFilters">
+            <MagnifyingGlassIcon class="mr-1.5 h-4 w-4" />
+            Rechercher
           </button>
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <!-- ═══ Tableau ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white shadow-soft">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div class="flex items-center gap-2">
+            <ArrowUpTrayIcon class="h-5 w-5 text-istaht-red" />
+            <h3 class="font-bold text-istaht-navy">Historique des sorties</h3>
+          </div>
+          <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-istaht-red ring-1 ring-red-100">
+            {{ sorties?.meta?.total ?? 0 }} sortie(s)
+          </span>
+        </div>
+
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Sortie</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Réf. Article</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock Initial</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité Sortie</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Réf. BS</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock Actuel</th>
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50">
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Date sortie</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Réf. article</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Désignation</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Unité</th>
+                <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Stock initial</th>
+                <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Qté sortie</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Réf. bon sortie</th>
+                <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Stock actuel</th>
               </tr>
             </thead>
 
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="sortie in sorties.data" :key="sortie.id" class="hover:bg-gray-50">
-                <!-- Date -->
-                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                  {{ sortie.date_sortie }}
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="sortie in sorties.data" :key="`${sortie.code_article}-${sortie.date_sortie}-${sortie.reference_bon_sortie}`" class="transition hover:bg-slate-50">
+                <td class="whitespace-nowrap px-5 py-3.5 text-sm text-slate-600">
+                  {{ formatDate(sortie.date_sortie) }}
                 </td>
-
-                <!-- Article Reference -->
-                <td class="px-6 py-4 text-sm font-mono text-gray-900">
-                  {{ sortie.code_article || 'N/A' }}
+                <td class="whitespace-nowrap px-5 py-3.5 font-mono text-sm font-bold text-istaht-blue">
+                  {{ sortie.code_article || '—' }}
                 </td>
-
-                <!-- Article Designation -->
-                <td class="px-6 py-4 text-sm text-gray-900">
+                <td class="px-5 py-3.5 text-sm font-semibold text-slate-700">
                   <div class="max-w-xs truncate" :title="sortie.designation_article">
-                    {{ sortie.designation_article || 'N/A' }}
+                    {{ sortie.designation_article || '—' }}
                   </div>
                 </td>
-
-                <!-- Unit -->
-                <td class="px-6 py-4 text-sm text-gray-600">
-                  {{ sortie.unite_mesure || '-' }}
+                <td class="whitespace-nowrap px-5 py-3.5 text-sm text-slate-600">
+                  {{ sortie.unite_mesure || '—' }}
                 </td>
-
-                <!-- Initial Stock -->
-                <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                <td class="whitespace-nowrap px-5 py-3.5 text-right text-sm text-slate-600">
                   {{ sortie.stock_initial }}
                 </td>
-
-                <!-- Quantity Entered -->
-                <td class="px-6 py-4 text-sm text-blue-600 font-semibold">
-                  {{ sortie.quantite_sortie }}
+                <td class="whitespace-nowrap px-5 py-3.5 text-right">
+                  <span class="rounded-full bg-red-50 px-2.5 py-1 text-xs font-bold text-istaht-red ring-1 ring-red-100">
+                    −{{ sortie.quantite_sortie }}
+                  </span>
                 </td>
-
-                <!-- Reception Note Ref -->
-                <td class="px-6 py-4 text-sm font-mono text-gray-900">
-                    {{ sortie.reference_bon_sortie }}
+                <td class="whitespace-nowrap px-5 py-3.5 font-mono text-sm text-slate-600">
+                  {{ sortie.reference_bon_sortie || '—' }}
                 </td>
-
-                <!-- Current Stock -->
-                <td class="px-6 py-4 text-sm text-gray-900 font-bold">
-                  <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md">
+                <td class="whitespace-nowrap px-5 py-3.5 text-right">
+                  <span class="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-bold text-istaht-navy ring-1 ring-blue-100">
                     {{ sortie.stock_actuel }}
                   </span>
                 </td>
@@ -210,47 +184,43 @@ function applyFilters() {
           </table>
         </div>
 
-        <!-- Empty State -->
-        <div v-if="sorties.data.length === 0" class="text-center py-12">
-          <div class="text-gray-500">
-            <InboxIcon class="mx-auto h-12 w-12" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune sortie enregistrée</h3>
-            <p class="mt-1 text-sm text-gray-500">Commencez par enregistrer votre première sortie en stock.</p>
-           
-          </div>
+        <!-- Vide -->
+        <div v-if="sorties.data.length === 0" class="py-14 text-center">
+          <InboxIcon class="mx-auto h-12 w-12 text-slate-300" />
+          <h3 class="mt-3 text-sm font-bold text-istaht-navy">Aucune sortie enregistrée</h3>
+          <p class="mt-1 text-sm text-slate-500">Les sorties de stock apparaissent automatiquement après validation des bons de sortie.</p>
         </div>
 
         <!-- Pagination -->
-        <div v-if="sorties.links && sorties.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
-          <div class="flex justify-between items-center">
-            <div class="text-sm text-gray-700">
-              Affichage de {{ sorties.from }} à {{ sorties.to }} sur {{ sorties.total }} résultats
-            </div>
-            <div class="flex space-x-2">
-              <template v-for="link in sorties.links" :key="link.label">
-                <Link
-                  v-if="link.url"
-                  :href="link.url"
-                  :class="[
-                    'px-3 py-1 rounded-lg text-sm font-medium',
-                    link.active 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  ]"
-                  v-html="link.label"
-                />
-                <span
-                  v-else
-                  :class="[
-                    'px-3 py-1 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed'
-                  ]"
-                  v-html="link.label"
-                />
-              </template>
-            </div>
+        <div
+          v-if="sorties?.meta?.links && sorties.meta.last_page > 1"
+          class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 px-5 py-3 sm:flex-row"
+        >
+          <p class="text-sm text-slate-500">
+            Affichage de <strong class="text-istaht-navy">{{ sorties.meta.from }}</strong>
+            à <strong class="text-istaht-navy">{{ sorties.meta.to }}</strong>
+            sur <strong class="text-istaht-navy">{{ sorties.meta.total }}</strong> sorties
+          </p>
+          <div class="flex flex-wrap gap-1">
+            <template v-for="link in sorties.meta.links" :key="link.label">
+              <Link
+                v-if="link.url"
+                :href="link.url"
+                :class="[
+                  'rounded-md px-3 py-1.5 text-sm font-semibold transition',
+                  link.active ? 'bg-istaht-navy text-white' : 'text-slate-600 hover:bg-slate-100'
+                ]"
+                v-html="link.label"
+              />
+              <span
+                v-else
+                class="cursor-not-allowed rounded-md px-3 py-1.5 text-sm font-semibold text-slate-300"
+                v-html="link.label"
+              />
+            </template>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </AuthenticatedLayout>
 </template>

@@ -19,7 +19,7 @@ class IndexSortieStockResource extends JsonResource
             'code_article' => $this->article->reference,
             'designation_article' => $this->article->designation,
             'unite_mesure' => $this->article->unite_mesure,
-            'stock_initial' => $this->quantite_actuelle - $this->quantite_sortie,
+            'stock_initial' => $this->quantite_actuelle + $this->quantite_sortie,
             'quantite_sortie' => $this->quantite_sortie,
             'reference_bon_sortie' => $this->referenceable?->numero ?? '---',
             'stock_actuel' => $this->quantite_actuelle,
