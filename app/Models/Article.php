@@ -91,7 +91,8 @@ class Article extends Model
 
     public function scopeLowStock($query)
     {
-        return $query->whereColumn('quantite_stock', '<=', 'seuil_minimal');
+        // Stock faible : stock <= 80% du seuil minimal (-20%)
+        return $query->whereRaw('quantite_stock <= seuil_minimal * 0.8');
     }
 
     public function getEstEnRuptureAttribute()
@@ -101,9 +102,9 @@ class Article extends Model
 
     /**
      * Statut de stock unifié (seul endroit qui calcule cette règle dans l'app).
-     * Stock faible : stock <= seuil_minimal * 0.8
-     * Stock normal : stock > seuil_minimal
-     * Zone intermédiaire (seuil*0.8 < stock <= seuil) traitée comme "faible".
+     * Rupture      : stock <= 0
+     * Stock faible : stock <= seuil_minimal * 0.8  (-20% du seuil minimal)
+     * Stock normal : au-dessus (etre strictement > seuil_minimal suffit)
      */
     public static function computeStockStatus(float $stock, float $seuilMinimal): array
     {
@@ -112,10 +113,6 @@ class Article extends Model
         }
 
         if ($seuilMinimal > 0 && $stock <= $seuilMinimal * 0.8) {
-            return ['label' => 'Stock faible', 'type' => 'warning'];
-        }
-
-        if ($seuilMinimal > 0 && $stock <= $seuilMinimal) {
             return ['label' => 'Stock faible', 'type' => 'warning'];
         }
 

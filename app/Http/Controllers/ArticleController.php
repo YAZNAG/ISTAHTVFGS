@@ -59,7 +59,7 @@ class ArticleController extends Controller implements HasMiddleware
                     COUNT(*) as total,
                     SUM(CASE WHEN est_actif = 1 THEN 1 ELSE 0 END) as active,
                     SUM(CASE WHEN est_actif = 0 THEN 1 ELSE 0 END) as inactive,
-                    SUM(CASE WHEN quantite_stock > 0 AND quantite_stock <= seuil_minimal THEN 1 ELSE 0 END) as lowStock,
+                    SUM(CASE WHEN quantite_stock > 0 AND quantite_stock <= seuil_minimal * 0.8 THEN 1 ELSE 0 END) as lowStock,
                     SUM(CASE WHEN quantite_stock <= 0 THEN 1 ELSE 0 END) as rupture
                 ")->first();
                 return [
@@ -246,12 +246,12 @@ class ArticleController extends Controller implements HasMiddleware
 
                 if ($request->stock === 'faible') {
                     $query->where('quantite_stock', '>', 0)
-                        ->whereColumn('quantite_stock', '<=', 'seuil_minimal');
+                        ->whereRaw('quantite_stock <= seuil_minimal * 0.8');
                 }
 
                 if ($request->stock === 'normal') {
                     $query->where(function ($query) {
-                        $query->whereColumn('quantite_stock', '>', 'seuil_minimal')
+                        $query->whereRaw('quantite_stock > seuil_minimal * 0.8')
                             ->orWhereNull('seuil_minimal')
                             ->orWhere('seuil_minimal', '<=', 0);
                     })->where('quantite_stock', '>', 0);

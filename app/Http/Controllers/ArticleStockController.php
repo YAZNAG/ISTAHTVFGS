@@ -52,7 +52,7 @@ class ArticleStockController extends Controller implements HasMiddleware
                 $row = Article::withNonExists()->selectRaw("
                     COUNT(*) as total,
                     COALESCE(SUM(quantite_stock), 0) as stockTotal,
-                    SUM(CASE WHEN quantite_stock > 0 AND quantite_stock <= seuil_minimal THEN 1 ELSE 0 END) as lowStock,
+                    SUM(CASE WHEN quantite_stock > 0 AND quantite_stock <= seuil_minimal * 0.8 THEN 1 ELSE 0 END) as lowStock,
                     SUM(CASE WHEN quantite_stock <= 0 THEN 1 ELSE 0 END) as rupture
                 ")->first();
                 return [

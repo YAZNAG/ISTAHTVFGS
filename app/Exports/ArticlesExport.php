@@ -74,11 +74,11 @@ class ArticlesExport implements FromCollection, WithHeadings, WithMapping, Shoul
 
                 if ($stock === 'faible') {
                     $query->where('quantite_stock', '>', 0)
-                        ->whereColumn('quantite_stock', '<=', 'seuil_minimal');
+                        ->whereRaw('quantite_stock <= seuil_minimal * 0.8');
                 }
 
                 if ($stock === 'normal') {
-                    $query->whereColumn('quantite_stock', '>', 'seuil_minimal')
+                    $query->whereRaw('quantite_stock > seuil_minimal * 0.8')
                         ->where('quantite_stock', '>', 0);
                 }
             });
