@@ -18,12 +18,11 @@ class IndexReceptionResource extends JsonResource
             'id' => $this->id,
             'numero' => $this->numero,
             'bon_livraison_id' => $this->bonLivraison->id,
+            'bon_livraison_numero' => $this->bonLivraison->numero,
+            'date_reception' => $this->created_at?->toDateString(),
             'fournisseur' => $this->bonLivraison->fournisseur->nom,
             'date_livraison' => $this->bonLivraison->date_livraison?->toDateString(),
             'statut' => $this->bonLivraison->statut,
-            'total_ht' => $this->bonLivraison->total_ht,
-            'total_tva' => $this->bonLivraison->total_tva,
-            'total_ttc' => $this->bonLivraison->total_ttc,
             'items_count' => $this->bonLivraison->items_count ?? 0,
         ];
     }

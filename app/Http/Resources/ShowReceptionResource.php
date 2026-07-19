@@ -22,7 +22,8 @@ class ShowReceptionResource extends JsonResource
             'date_livraison' => $bonLivraison->date_livraison?->toDateString(),
             'receptionne_par' => $bonLivraison->responsable->name,
             'created_at' => $this->created_at?->toDateString(),
-            'total_ttc' => (float) $bonLivraison->total_ttc,
+            'bon_livraison_numero' => $bonLivraison->numero,
+            'bon_livraison_id' => $bonLivraison->id,
 
             // Fournisseur (relation)
             'fournisseur' => [
@@ -41,9 +42,6 @@ class ShowReceptionResource extends JsonResource
                     'designation' => $item->article->designation,
                     'unite_mesure' => $item->article->unite_mesure,
                     'quantite' => (float) $item->quantite,
-                    'prix_unitaire' => (float) $item->prix_unitaire,
-                    'taux_tva' => (float) $item->taux_tva,
-                    'total_ttc' => (float) $item->montant_ttc,
                 ];
             }),
             

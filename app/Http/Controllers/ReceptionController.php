@@ -36,8 +36,9 @@ class ReceptionController extends Controller implements HasMiddleware
         $search = $request->search;
 
         $receptions = Reception::with([
+                // total_ht/tva/ttc sont des accesseurs calcules, PAS des colonnes SQL — ne jamais les mettre dans un select()
                 'bonLivraison' => fn ($q) => $q
-                    ->select(['id', 'numero', 'date_livraison', 'statut', 'total_ht', 'total_tva', 'total_ttc', 'fournisseur_id'])
+                    ->select(['id', 'numero', 'date_livraison', 'statut', 'fournisseur_id'])
                     ->withCount('items'),
                 'bonLivraison.fournisseur:id,nom',
             ])
@@ -143,9 +144,11 @@ class ReceptionController extends Controller implements HasMiddleware
 
         $fileName = "bon-reception-{$reception->numero}.pdf";
 
-        // return view('pdf.bon-reception', compact('reception'));
-
-        return Pdf::loadView('pdf.bon-reception', compact('reception'))
-            ->download($fileName);
+        return Pdf::loadView('pdf.bon-reception', [
+            'reception'    => $reception,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
+        ->setPaper('a4', 'portrait')
+        ->download($fileName);
 }
 }
