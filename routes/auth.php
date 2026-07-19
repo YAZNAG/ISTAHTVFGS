@@ -12,10 +12,11 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    // Auto-inscription desactivee : cette application n'autorise pas la creation
+    // de compte publique. On garde le nom de route "register" pour ne casser aucun
+    // lien existant, mais il redirige vers la page de connexion.
+    Route::get('register', fn () => redirect()->route('login'))->name('register');
+    Route::post('register', fn () => redirect()->route('login'));
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
