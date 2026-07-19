@@ -7,7 +7,8 @@ import {
     MagnifyingGlassIcon,
     PencilIcon,
     TrashIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    InboxArrowDownIcon
 } from '@heroicons/vue/24/outline';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -142,8 +143,16 @@ function formatDate(date) {
                             <td class="px-6 py-4 text-sm font-medium">
                                 <div class="flex space-x-2">
                                     <ModalLink
+                                        v-if="can('create_demandes')"
+                                        :href="route('demandes.create', { demandable_type: 'pedagogique', demandable_id: fiche.id })"
+                                        class="text-istaht-green hover:text-green-800 p-1"
+                                        title="Créer une demande pédagogique à partir de cette fiche">
+                                        <InboxArrowDownIcon class="h-5 w-5" />
+                                    </ModalLink>
+
+                                    <ModalLink
                                         v-if="can('show_ficheTechniques')"
-                                        :href="route('fiches-techniques.show', fiche.id)" 
+                                        :href="route('fiches-techniques.show', fiche.id)"
                                         class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
                                         <EyeIcon class="h-5 w-5" />
                                     </ModalLink>

@@ -95,17 +95,28 @@ class DemandeController extends Controller implements HasMiddleware
     public function create(Request $request) {
         $this->authorize('create', Demande::class);
 
-        
-        $fichesCollectives = FicheTechnique::collectivite()->with('ingredients.article', 'plat')->get();
+        // Collectivite : la demande se base sur un MENU collectivite (agregation de ses fiches)
+        $menusCollectifs = \App\Models\MenuCollectivite::with('fiches.ingredients.article')
+            ->latest('date')
+            ->get()
+            ->map(fn ($menu) => [
+                'id'       => $menu->id,
+                'nom'      => 'Menu du ' . optional($menu->date)->format('d/m/Y') . ' — ' . ($menu->responsable ?? '—'),
+                'articles' => $menu->articlesAgreges()->map(fn ($a) => [
+                    'id'            => $a['article_id'],
+                    'designation'   => $a['designation'],
+                    'quantite'      => $a['quantite'],
+                    'prix_unitaire' => $a['prix_unitaire'],
+                    'unite_mesure'  => $a['unite_mesure'],
+                ]),
+            ]);
 
+        // Pedagogique : la demande se base sur une FICHE technique pedagogique
         $fichesPedagogiques = FicheTechnique::pedagogique()->with('ingredients.article', 'plat')->get();
 
-        // $restaurants = Restaurant::with(['items', 'items.article'])->get();
-        
         $data = [
-            'fichesCollectives' => FicheTechniqueDemandeResource::collection($fichesCollectives),
+            'menusCollectifs'    => $menusCollectifs,
             'fichesPedagogiques' => FicheTechniqueDemandeResource::collection($fichesPedagogiques),
-            // 'restaurants' => RestaurantDemandeResource::collection($restaurants),
 
             'types' => FicheType::toSelect(),
             'preselect' => [
@@ -136,10 +147,18 @@ class DemandeController extends Controller implements HasMiddleware
         // ]);
 
         DB::transaction(function () use ($request) {
-            
+
             $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
 
-            $model = $request->demandable_type == FicheType::RESTAURANT->value ? Restaurant::class : FicheTechnique::class;
+            // Router le type de demande vers le bon modele demandable :
+            //   collectivite -> MenuCollectivite (agregation des fiches du menu)
+            //   pedagogique  -> FicheTechnique
+            //   restaurant   -> Restaurant
+            $model = match ($request->demandable_type) {
+                FicheType::COLLECTIVITE->value => \App\Models\MenuCollectivite::class,
+                FicheType::RESTAURANT->value   => Restaurant::class,
+                default                        => FicheTechnique::class,
+            };
             $demandable = $model::findOrFail($request->demandable_id);
 
             $demande = Demande::create([
@@ -152,10 +171,18 @@ class DemandeController extends Controller implements HasMiddleware
                 'type' => $request->demandable_type,
             ]);
 
+            // Demande de COLLECTIVITE : articles agreges du menu
+            if ($demandable instanceof \App\Models\MenuCollectivite) {
+                foreach ($demandable->articlesAgreges() as $ligne) {
+                    $demande->articles()->create([
+                        'article_id'        => $ligne['article_id'],
+                        'quantite_demandee' => $ligne['quantite'],
+                    ]);
+                }
+            }
 
-            
+            // Demande PEDAGOGIQUE : ingredients de la fiche + fiche technique signee
             if ($demandable instanceof FicheTechnique) {
-                // existing behaviour
                 foreach ($demandable->ingredients as $ing) {
                     $demande->articles()->create([
                         'article_id'        => $ing['article_id'],
@@ -163,19 +190,21 @@ class DemandeController extends Controller implements HasMiddleware
                     ]);
                 }
 
-                $demande->addMediaFromRequest('fiche_technique')->toMediaCollection('fiches_techniques');
+                if ($request->hasFile('fiche_technique')) {
+                    $demande->addMediaFromRequest('fiche_technique')->toMediaCollection('fiches_techniques');
+                }
             }
 
             if ($demandable instanceof Restaurant) {
                 foreach ($demandable->items as $item) {
                     $demande->articles()->create([
-                        'article_id'        => $item->article_id, 
-                        'quantite_demandee' => $item->quantite, 
+                        'article_id'        => $item->article_id,
+                        'quantite_demandee' => $item->quantite,
                     ]);
                 }
             }
 
-            
+
         });
 
         return redirect()->back()->with('success', 'Demande ajoutée avec succès.');

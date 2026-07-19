@@ -1,8 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { usePermission } from '@/Utils/permission';
-import { DocumentArrowDownIcon, DocumentTextIcon, FunnelIcon, PencilIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import { DocumentArrowDownIcon, DocumentTextIcon, FunnelIcon, PencilIcon, PlusIcon, ClipboardDocumentListIcon, InboxArrowDownIcon } from '@heroicons/vue/24/outline';
 import { Link, router } from '@inertiajs/vue3';
+import { ModalLink } from '@inertiaui/modal-vue';
 import { ref } from 'vue';
 
 const { can } = usePermission();
@@ -137,6 +138,14 @@ function openDeleteModal(id) {
                     <EyeIcon class="h-5 w-5" />
                   </ModalLink>
 -->
+                  <ModalLink
+                    v-if="can('create_demandes')"
+                    :href="route('demandes.create', { demandable_type: 'collectivite', demandable_id: menu.id })"
+                    class="text-istaht-green hover:text-green-800 p-1"
+                    title="Créer une demande de collectivité à partir de ce menu">
+                    <InboxArrowDownIcon class="h-5 w-5" />
+                  </ModalLink>
+
                   <Link :href="route('menus.edit', menu.id)" class="text-blue-600 hover:text-blue-900 p-1"
                     v-if="can('edit_menus')"
                     title="Modifier">

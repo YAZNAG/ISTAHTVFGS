@@ -37,4 +37,26 @@ class MenuCollectivite extends Model
     {
         return $this->hasMany(FicheTechnique::class, 'menu_collectivite_id');
     }
+
+    /**
+     * Articles agreges de toutes les fiches du menu (somme des quantites par article).
+     * Sert de base a la creation d'une demande de collectivite.
+     */
+    public function articlesAgreges()
+    {
+        return $this->fiches
+            ->flatMap(fn ($fiche) => $fiche->ingredients)
+            ->groupBy('article_id')
+            ->map(function ($lignes) {
+                $first = $lignes->first();
+                return [
+                    'article_id'    => $first->article_id,
+                    'designation'   => $first->article?->designation,
+                    'unite_mesure'  => $first->article?->unite_mesure,
+                    'quantite'      => (float) $lignes->sum('quantite'),
+                    'prix_unitaire' => (float) ($first->prix_unitaire ?? 0),
+                ];
+            })
+            ->values();
+    }
 }

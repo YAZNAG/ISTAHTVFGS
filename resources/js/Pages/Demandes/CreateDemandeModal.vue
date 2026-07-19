@@ -7,9 +7,9 @@ import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
   demandeurs: Array,
-  fichesCollectives: Array,   // with articles
-  fichesPedagogiques: Array,  // with articles
-  restaurants: Array,  // with articles
+  menusCollectifs: { type: Array, default: () => [] },   // collectivite -> menus (articles agreges)
+  fichesPedagogiques: { type: Array, default: () => [] },// pedagogique -> fiches
+  restaurants: { type: Array, default: () => [] },
   types: Object,
   preselect: { type: Object, default: () => ({}) },
 })
@@ -18,13 +18,17 @@ const createDemandeModal = ref(null)
 
 const selectedFiche = ref(null)
 
+// Collectivite = menus collectifs ; Pedagogique = fiches pedagogiques
 const fiches = computed(() => {
-  if (form.demandable_type === 'collectivite') return props.fichesCollectives
+  if (form.demandable_type === 'collectivite') return props.menusCollectifs
   if (form.demandable_type === 'pedagogique') return props.fichesPedagogiques
   if (form.demandable_type === 'restaurant') return props.restaurants
 
   return []
 })
+
+// La fiche technique signee n'est requise que pour une demande pedagogique
+const requiresFicheFile = computed(() => form.demandable_type === 'pedagogique')
 
 const form = useForm({
   demandeur: '',
@@ -58,7 +62,7 @@ watch(() => form.demandable_id, (ficheId) => {
     prix_unitaire: a.prix_unitaire ?? 0,
     unite_mesure: a.unite_mesure
   }))
-});
+}, { immediate: true });
 
 watch(() => form.demandable_type, () => {
   form.demandable_id = null
@@ -112,30 +116,33 @@ function submit() {
         <p v-if="isContextual" class="text-xs text-gray-500 mt-1">Demande créée depuis le contexte sélectionné.</p>
       </div>
 
-      <!-- Fiche -->
+      <!-- Cible : Menu (collectivite) / Fiche (pedagogique) / Restaurant -->
       <div v-if="form.demandable_type">
-        <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche' }}</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          {{ form.demandable_type === 'collectivite' ? 'Menu collectivité' : (form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche pédagogique') }}
+        </label>
         <select
           v-model="form.demandable_id"
           :disabled="isContextual"
           class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
         >
-          <option disabled value="">Sélectionnez une {{ form.demandable_type === 'restaurant' ? 'Restaurant' : 'Fiche' }}</option>
+          <option disabled value="">
+            Sélectionnez {{ form.demandable_type === 'collectivite' ? 'un menu' : (form.demandable_type === 'restaurant' ? 'un restaurant' : 'une fiche') }}
+          </option>
           <option v-for="fiche in fiches" :key="fiche.id" :value="fiche.id">
-            {{ fiche.nom }} - {{ fiche.id }}
+            {{ fiche.nom }}
           </option>
         </select>
         <InputError :message="form.errors.demandable_id" />
       </div>
 
-      <!-- Fiche Technique -->
-      <div v-if="form.demandable_type !== 'restaurant'">
+      <!-- Fiche Technique signee (uniquement pour une demande pedagogique) -->
+      <div v-if="requiresFicheFile">
         <label class="block text-sm font-medium text-gray-700 mb-1">
-          Fiche Technique
+          Fiche Technique signée <span class="text-red-500">*</span>
         </label>
         <input
           type="file"
-          required
           @change="handleFileUpload"
           class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
