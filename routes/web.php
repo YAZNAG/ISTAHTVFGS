@@ -266,6 +266,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/bon-receptions/{reception}', [ReceptionController::class, 'show'])->name('bon-receptions.show');
     Route::delete('/bon-receptions/{reception}', [ReceptionController::class, 'destroy'])->name('bon-receptions.destroy');
     Route::get('/bon-receptions/{reception}/pdf', [ReceptionController::class, 'export'])->name('bon-receptions.pdf');
+    Route::get('/bon-receptions/{reception}/document', [ReceptionController::class, 'downloadDocument'])->name('bon-receptions.document');
 
     #### Bon Sortie ####
     Route::get('/bon-sorties', [BonSortieController::class, 'index'])->name('bon-sorties.index');
@@ -349,6 +350,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/inventaires/ligne/{ligne}', [InventaireController::class, 'updateLingne'])->name('inventaires.ligne.update');
     
     #### Decompte
+    Route::get('/achats/decomptes', [DecompteController::class, 'index'])->name('decomptes.index');
     Route::get('/marches/{bonCommande}/decompte/create', [DecompteController::class, 'create'])->name('decompte.create');
     Route::post('/marches/{bonCommande}/decompte', [DecompteController::class, 'store'])->name('decompte.store');
     Route::get('/marches/{decompte}/download', [DecompteController::class, 'download'])->name('decompte.download-pdf');

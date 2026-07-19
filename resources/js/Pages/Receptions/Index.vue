@@ -13,6 +13,7 @@ import {
   CubeIcon,
   TrashIcon,
   TruckIcon,
+  PaperClipIcon,
 } from '@heroicons/vue/24/outline'
 import ConfirmationModal from '@/Components/ConfirmationModal.vue'
 import { usePermission } from '@/Utils/permission'
@@ -133,6 +134,7 @@ function formatDate(date) {
                 <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Fournisseur</th>
                 <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Date réception</th>
                 <th class="px-5 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500">Articles</th>
+                <th class="px-5 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500">Document signé</th>
                 <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Actions</th>
               </tr>
             </thead>
@@ -162,6 +164,18 @@ function formatDate(date) {
                     <CubeIcon class="h-3.5 w-3.5" />
                     {{ bon.items_count }}
                   </span>
+                </td>
+                <td class="whitespace-nowrap px-5 py-3.5 text-center">
+                  <a
+                    v-if="bon.has_document"
+                    :href="route('bon-receptions.document', bon.id)"
+                    class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200 transition hover:bg-amber-100"
+                    title="Télécharger le bon de livraison signé"
+                  >
+                    <PaperClipIcon class="h-3.5 w-3.5" />
+                    BL signé
+                  </a>
+                  <span v-else class="text-xs text-slate-300">—</span>
                 </td>
                 <td class="whitespace-nowrap px-5 py-3.5">
                   <div class="flex items-center justify-end gap-1">

@@ -22,7 +22,7 @@ class ReceptionController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:list_bonReceptions', only: ['index']),
-            new Middleware('permission:show_bonReceptions', only: ['show']),
+            new Middleware('permission:show_bonReceptions', only: ['show', 'downloadDocument']),
             new Middleware('permission:create_bonReceptions', only: ['create', 'store']),
             new Middleware('permission:destroy_bonReceptions', only: ['destroy']),
             new Middleware('permission:pdf_bonReceptions', only: ['export']),
@@ -133,6 +133,17 @@ class ReceptionController extends Controller implements HasMiddleware
         });
 
         return redirect()->back()->with('success', 'Bon de reception supprimé avec succès');
+    }
+
+    public function downloadDocument(Reception $reception)
+    {
+        $media = $reception->getFirstMedia('bon');
+
+        if (! $media) {
+            abort(404, 'Aucun document joint a ce bon de reception.');
+        }
+
+        return response()->download($media->getPath(), $media->file_name);
     }
 
     public function export(Reception $reception)
