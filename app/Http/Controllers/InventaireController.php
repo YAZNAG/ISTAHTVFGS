@@ -35,7 +35,8 @@ class InventaireController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        $invenrtaires = Inventaire::withCount([
+        $invenrtaires = Inventaire::with('categorie:id,nom')
+            ->withCount([
                 'lignes as articles_count',
                 'lignes as filled_count' => fn ($q) => $q->whereNotNull('stock_reel'),
             ])
@@ -45,11 +46,13 @@ class InventaireController extends Controller implements HasMiddleware
             ->when($request->statut, function ($query) use ($request) {
                 return $query->where('statut', $request->statut);
             })
+            ->latest()
             ->paginate(10);
 
         return Inertia::render('Inventaire/Index', [
             'inventaires' => InventaireIndexResource::collection($invenrtaires),
             'filters' => $request->all('semaine', 'statut'),
+            'categories' => \App\Models\Categorie::actives()->orderBy('nom')->get(['id', 'nom']),
         ]);
     }
 
@@ -61,11 +64,24 @@ class InventaireController extends Controller implements HasMiddleware
          * decoupe la chaine sur ces `|` et casse le pattern -> preg_match(): No ending delimiter.
          */
         $request->validate([
-            'semaine' => ['required', 'regex:/^\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$/', 'unique:inventaires,semaine'],
+            'semaine'      => ['required', 'regex:/^\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$/'],
+            'categorie_id' => ['nullable', 'exists:categories,id'],
         ], [
-            'semaine.unique' => 'Un inventaire existe déjà pour cette semaine.',
-            'semaine.regex'  => 'La semaine doit avoir le format AAAA-Wss (ex : 2026-W26).',
+            'semaine.regex' => 'La semaine doit avoir le format AAAA-Wss (ex : 2026-W26).',
         ]);
+
+        // Unicite par semaine + categorie (une categorie donnee OU "toutes categories" = null)
+        $existe = Inventaire::where('semaine', $request->semaine)
+            ->where('categorie_id', $request->categorie_id)   // null = toutes categories
+            ->exists();
+
+        if ($existe) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'semaine' => $request->categorie_id
+                    ? 'Un inventaire existe déjà pour cette semaine et cette catégorie.'
+                    : 'Un inventaire « toutes catégories » existe déjà pour cette semaine.',
+            ]);
+        }
 
         DB::transaction(function () use ($request) {
             [$isoYear, $isoWeek] = explode('-W', $request->semaine);
@@ -76,13 +92,15 @@ class InventaireController extends Controller implements HasMiddleware
             /* ---------- header ---------- */
             $inventaire = Inventaire::create([
                 'semaine'      => $request->semaine,
+                'categorie_id' => $request->categorie_id,
                 'mois'         => $debut->format('Y-m'),
                 'statut'       => 'draft',
                 'finalized_at' => null,
             ]);
 
-            /* ---------- 3-query eager load ---------- */
-            $articles = Article::with([
+            /* ---------- 3-query eager load (filtre categorie eventuel) ---------- */
+            $articles = Article::when($request->categorie_id, fn ($q) => $q->where('categorie_id', $request->categorie_id))
+                ->with([
                 /* opening stock : last movement BEFORE the week */
                 'mouvementsStock' => fn($q) => $q->where('date_mouvement', '<', $debut)
                     ->latest('date_mouvement')
@@ -222,7 +240,7 @@ class InventaireController extends Controller implements HasMiddleware
 
     public function generatePdf(Inventaire $inventaire)
     {
-        $inventaire->load(['lignes' => fn ($q) => $q->orderBy('code_article')]);
+        $inventaire->load(['categorie:id,nom', 'lignes' => fn ($q) => $q->orderBy('code_article')]);
 
         return Pdf::loadView('pdf.inventaire.inventaire', [
             'inventaire'   => $inventaire,

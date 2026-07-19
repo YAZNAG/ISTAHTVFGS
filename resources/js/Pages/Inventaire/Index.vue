@@ -16,6 +16,7 @@ const { can } = usePermission();
 const props = defineProps({
   inventaires: Object,
   filters: Object,
+  categories: { type: Array, default: () => [] },
 });
 
 const filters = ref({
@@ -126,6 +127,7 @@ function formatDate(d) {
             <thead>
               <tr class="border-b border-slate-100 bg-slate-50">
                 <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Semaine</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Catégorie</th>
                 <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Statut</th>
                 <th class="px-5 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500">Articles</th>
                 <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Progression</th>
@@ -136,6 +138,14 @@ function formatDate(d) {
             <tbody class="divide-y divide-slate-100">
               <tr v-for="inv in inventaires.data" :key="inv.id" class="transition hover:bg-slate-50">
                 <td class="whitespace-nowrap px-5 py-3.5 font-mono text-sm font-bold text-istaht-blue">{{ inv.semaine }}</td>
+                <td class="px-5 py-3.5">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-xs font-bold"
+                    :class="inv.categorie ? 'bg-blue-50 text-istaht-blue ring-1 ring-blue-100' : 'bg-slate-100 text-slate-500'"
+                  >
+                    {{ inv.categorie || 'Toutes catégories' }}
+                  </span>
+                </td>
                 <td class="px-5 py-3.5">
                   <span
                     class="rounded-full px-2.5 py-1 text-xs font-bold"
@@ -215,7 +225,7 @@ function formatDate(d) {
       </div>
     </section>
 
-    <CreateInventaireModal />
+    <CreateInventaireModal :categories="categories" />
     <ConfirmationModal
       :show="showUnlockModal"
       type="warning"

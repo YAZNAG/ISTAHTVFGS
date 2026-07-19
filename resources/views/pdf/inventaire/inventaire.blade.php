@@ -70,6 +70,7 @@
 
 <div class="badges">
     <span class="badge badge-week">Semaine : {{ $inventaire->semaine }}</span>
+    <span class="badge badge-state">Catégorie : {{ $inventaire->categorie->nom ?? 'Toutes' }}</span>
     <span class="badge badge-state">{{ $inventaire->statut === 'finalized' ? 'Finalisé' : 'Brouillon' }}</span>
     <span class="badge badge-count">{{ $inventaire->lignes->count() }} article(s)</span>
 </div>

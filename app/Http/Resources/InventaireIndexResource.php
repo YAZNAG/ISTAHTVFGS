@@ -21,6 +21,7 @@ class InventaireIndexResource extends JsonResource
             'id' => $this->id,
             'mois' => $this->mois,
             'semaine' => $this->semaine,
+            'categorie' => $this->categorie?->nom,
             'statut' => $this->statut,
             'finalized_at' => $this->finalized_at,
             'progress' => $filledLignes . '/' . $totalLines,

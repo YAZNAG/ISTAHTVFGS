@@ -2,7 +2,11 @@
 import { ref, computed } from 'vue'
 import { Modal } from '@inertiaui/modal-vue'
 import { useForm } from '@inertiajs/vue3'
-import { CalendarDaysIcon, ClipboardDocumentCheckIcon } from '@heroicons/vue/24/outline'
+import { CalendarDaysIcon, ClipboardDocumentCheckIcon, TagIcon } from '@heroicons/vue/24/outline'
+
+const props = defineProps({
+  categories: { type: Array, default: () => [] },
+})
 
 const createInventaireModal = ref(null)
 
@@ -20,7 +24,7 @@ function currentIsoWeek() {
   return `${now.getFullYear()}-W${String(week).padStart(2, '0')}`
 }
 
-const form = useForm({ semaine: currentIsoWeek() })
+const form = useForm({ semaine: currentIsoWeek(), categorie_id: '' })
 
 // Aperçu lisible : lundi → dimanche de la semaine ISO sélectionnée
 const weekRange = computed(() => {
@@ -68,6 +72,20 @@ function submit() {
     </div>
 
     <form @submit.prevent="submit" class="space-y-4">
+      <!-- Catégorie -->
+      <div>
+        <label class="mb-1 block text-xs font-bold uppercase text-slate-500">Catégorie</label>
+        <div class="relative">
+          <select v-model="form.categorie_id" class="ui-input w-full pl-9">
+            <option value="">Toutes les catégories</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.nom }}</option>
+          </select>
+          <TagIcon class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        </div>
+        <div v-if="form.errors.categorie_id" class="mt-1 text-sm font-semibold text-istaht-red">{{ form.errors.categorie_id }}</div>
+      </div>
+
+      <!-- Semaine -->
       <div>
         <label class="mb-1 block text-xs font-bold uppercase text-slate-500">Semaine à inventorier *</label>
         <div class="relative">

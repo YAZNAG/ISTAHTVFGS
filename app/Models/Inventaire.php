@@ -10,6 +10,7 @@ class Inventaire extends Model
     protected $fillable = [
         'mois',
         'semaine',
+        'categorie_id',
         'statut',
         'finalized_at',
     ];
@@ -21,5 +22,10 @@ class Inventaire extends Model
     public function lignes(): HasMany
     {
         return $this->hasMany(InventaireLigne::class);
+    }
+
+    public function categorie()
+    {
+        return $this->belongsTo(Categorie::class, 'categorie_id');
     }
 }
