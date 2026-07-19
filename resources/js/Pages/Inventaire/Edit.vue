@@ -11,11 +11,16 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({ inventaire: Object });
 
+// Copie LOCALE reactive des lignes : les props Vue 3 sont en lecture seule,
+// muter props.inventaire.lignes[i] echoue silencieusement (progression jamais a 100%,
+// bouton Finaliser bloque). On mute cette copie a la place.
+const lignes = ref((props.inventaire.lignes ?? []).map(l => ({ ...l })));
+
 const form = useForm({ ligne_id: null, stock_reel: null, observations: '' });
 
 const search = ref('');
 const currentIndex = ref(0);
-const current = computed(() => props.inventaire.lignes[currentIndex.value]);
+const current = computed(() => lignes.value[currentIndex.value]);
 
 watch(current, l => {
   if (!l) return;
@@ -26,37 +31,40 @@ watch(current, l => {
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase();
-  return props.inventaire.lignes.filter(l =>
-    l.code_article.toLowerCase().includes(q) || l.designation.toLowerCase().includes(q));
+  return lignes.value.filter(l =>
+    (l.code_article ?? '').toLowerCase().includes(q) || (l.designation ?? '').toLowerCase().includes(q));
 });
 
 const ecartPreview = computed(() => {
-  if (form.stock_reel === null || form.stock_reel === '') return null;
+  if (form.stock_reel === null || form.stock_reel === '' || !current.value) return null;
   return Number(form.stock_reel) - Number(current.value.stock_theorique);
 });
 
 function selectLine(l) {
-  currentIndex.value = props.inventaire.lignes.indexOf(l);
+  const idx = lignes.value.findIndex(x => x.id === l.id);
+  if (idx !== -1) currentIndex.value = idx;
 }
 
 function saveAndNext() {
   form.patch(route('inventaires.ligne.update', form.ligne_id), {
     preserveScroll: true,
     onSuccess: () => {
-      const idx = props.inventaire.lignes.findIndex(l => l.id === form.ligne_id);
-      props.inventaire.lignes[idx].stock_reel = form.stock_reel;
-      props.inventaire.lignes[idx].observations = form.observations;
-      props.inventaire.lignes[idx].ecart = form.stock_reel - props.inventaire.lignes[idx].stock_theorique;
-      currentIndex.value = (currentIndex.value + 1) % props.inventaire.lignes.length;
+      const idx = lignes.value.findIndex(l => l.id === form.ligne_id);
+      if (idx !== -1) {
+        lignes.value[idx].stock_reel = form.stock_reel;
+        lignes.value[idx].observations = form.observations;
+        lignes.value[idx].ecart = Number(form.stock_reel) - Number(lignes.value[idx].stock_theorique);
+      }
+      currentIndex.value = (currentIndex.value + 1) % lignes.value.length;
     },
   });
 }
 
-function prev() { currentIndex.value = (currentIndex.value - 1 + props.inventaire.lignes.length) % props.inventaire.lignes.length; }
-function skip() { currentIndex.value = (currentIndex.value + 1) % props.inventaire.lignes.length; }
+function prev() { currentIndex.value = (currentIndex.value - 1 + lignes.value.length) % lignes.value.length; }
+function skip() { currentIndex.value = (currentIndex.value + 1) % lignes.value.length; }
 
-const total = computed(() => props.inventaire.lignes.length);
-const filled = computed(() => props.inventaire.lignes.filter(l => l.stock_reel !== null).length);
+const total = computed(() => lignes.value.length);
+const filled = computed(() => lignes.value.filter(l => l.stock_reel !== null && l.stock_reel !== '').length);
 const percent = computed(() => total.value ? Math.round(filled.value / total.value * 100) : 0);
 
 const showConfirmModal = ref(false);
