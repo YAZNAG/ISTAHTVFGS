@@ -2,171 +2,83 @@
 import { ref } from 'vue'
 import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
+import { ShieldCheckIcon } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
-  permission_groups: Array,
-})
+const props = defineProps({ permission_groups: Array })
 
 const createRoleModal = ref(null)
 
-const form = useForm({
-  name: '',
-  permissions: [],
-})
+const form = useForm({ name: '', permissions: [] })
 
 function submit() {
   form.post(route('roles.store'), {
-    onSuccess: () => {
-      form.reset()
-      createRoleModal.value.close()
-    },
+    onSuccess: () => { form.reset(); createRoleModal.value.close() },
   })
 }
 
-// Helper function to get permission IDs for a group
-function getGroupPermissionIds(group) {
-  return group.permissions.map(p => p.id)
-}
+const groupIds = (group) => group.permissions.map(p => p.id)
+const isAllSelected = (group) => { const ids = groupIds(group); return ids.length > 0 && ids.every(id => form.permissions.includes(id)) }
+const isSomeSelected = (group) => { const ids = groupIds(group); return ids.some(id => form.permissions.includes(id)) && !isAllSelected(group) }
 
-// Check if all permissions in a group are selected
-function isAllSelected(group) {
-  const ids = getGroupPermissionIds(group)
-  return ids.length > 0 && ids.every(id => form.permissions.includes(id))
-}
-
-// Check if some (but not all) permissions in a group are selected
-function isSomeSelected(group) {
-  const ids = getGroupPermissionIds(group)
-  const hasSelected = ids.some(id => form.permissions.includes(id))
-  return hasSelected && !isAllSelected(group)
-}
-
-// Toggle all permissions for a group
 function toggleAllPermissions(group) {
-  const groupIds = getGroupPermissionIds(group)
-  const currentlySelected = form.permissions.filter(id => groupIds.includes(id))
-  
-  if (currentlySelected.length === groupIds.length) {
-    // All are selected, so remove them all
-    form.permissions = form.permissions.filter(id => !groupIds.includes(id))
+  const ids = groupIds(group)
+  if (ids.every(id => form.permissions.includes(id))) {
+    form.permissions = form.permissions.filter(id => !ids.includes(id))
   } else {
-    // Not all selected, so add all (avoiding duplicates)
-    const newPermissions = [...form.permissions]
-    groupIds.forEach(id => {
-      if (!newPermissions.includes(id)) {
-        newPermissions.push(id)
-      }
-    })
-    form.permissions = newPermissions
+    const set = new Set([...form.permissions, ...ids])
+    form.permissions = [...set]
   }
 }
 </script>
 
 <template>
-  <Modal ref="createRoleModal">
-    <!-- Header -->
-    <div class="mb-4">
-      <h2 class="text-lg font-semibold">Nouveau Rôle</h2>
+  <Modal ref="createRoleModal" class="w-full max-w-2xl">
+    <div class="mb-5 border-b border-slate-100 pb-4">
+      <h2 class="flex items-center gap-2 text-lg font-bold text-istaht-navy">
+        <ShieldCheckIcon class="h-5 w-5" />
+        Nouveau rôle
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">Nommez le rôle et cochez les permissions à lui accorder.</p>
     </div>
 
-    <!-- Body -->
     <form @submit.prevent="submit" class="space-y-4">
-      <!-- Role Name -->
       <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-          Nom du rôle
-        </label>
-        <input 
-          id="name" 
-          v-model="form.name" 
-          type="text" 
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500  sm:text-sm"
-          :class="{ 'border-red-500': form.errors.name }"
-          placeholder="Entrez le nom du rôle"
-          required
-        >
-        <div v-if="form.errors.name" class="mt-1 text-sm text-red-600">
-          {{ form.errors.name }}
-        </div>
+        <label class="mb-1 block text-xs font-bold uppercase text-slate-500">Nom du rôle *</label>
+        <input v-model="form.name" type="text" class="ui-input w-full" :class="{ 'border-red-500': form.errors.name }" placeholder="Ex : Magasinier" required />
+        <div v-if="form.errors.name" class="mt-1 text-sm font-semibold text-istaht-red">{{ form.errors.name }}</div>
       </div>
 
-      <!-- Permissions Cards -->
       <div>
-        <h3 class="block text-sm font-medium text-gray-700 mb-3">
-          Permissions
-        </h3>
+        <div class="mb-2 flex items-center justify-between">
+          <label class="text-xs font-bold uppercase text-slate-500">Permissions</label>
+          <span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-istaht-blue ring-1 ring-blue-100">{{ form.permissions.length }} sélectionnée(s)</span>
+        </div>
 
-        <div class="space-y-4 max-h-96 overflow-y-auto">
-          <div 
-            v-for="group in permission_groups" 
-            :key="group.display_name"
-            class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
-          >
-            <!-- Group Title with Select All -->
-            <h4 class="font-semibold text-gray-900 mb-3 flex items-center justify-between">
-              <span>
-                <span class="text-blue-600 mr-2">▸</span>
-                {{ group.display_name }}
-              </span>
-              <label class="flex items-center text-sm font-normal cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  :checked="isAllSelected(group)"
-                  :indeterminate="isSomeSelected(group)"
-                  @change="toggleAllPermissions(group)"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
-                >
-                <span class="text-gray-600 hover:text-gray-900">Tout sélectionner</span>
+        <div class="max-h-96 space-y-3 overflow-y-auto pr-1">
+          <div v-for="group in permission_groups" :key="group.display_name" class="rounded-lg border border-slate-200 p-4">
+            <div class="mb-3 flex items-center justify-between border-b border-slate-100 pb-2">
+              <span class="text-sm font-bold text-istaht-navy">{{ group.display_name }}</span>
+              <label class="flex cursor-pointer select-none items-center gap-2 text-xs font-semibold text-slate-500 hover:text-istaht-blue">
+                <input type="checkbox" :checked="isAllSelected(group)" :indeterminate="isSomeSelected(group)" @change="toggleAllPermissions(group)" class="h-4 w-4 rounded border-slate-300 text-istaht-blue" />
+                Tout sélectionner
               </label>
-            </h4>
-            
-            <!-- Permissions Checkboxes -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-6">
-              <div 
-                v-for="permission in group.permissions" 
-                :key="permission.id"
-                class="flex items-center"
-              >
-                <input 
-                  type="checkbox" 
-                  v-model="form.permissions" 
-                  :value="permission.id"
-                  :id="'permission-' + permission.id"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600"
-                >
-                <label 
-                  :for="'permission-' + permission.id"
-                  class="ml-2 text-sm text-gray-700 hover:text-gray-900 cursor-pointer"
-                >
-                  {{ permission.display_name }}
-                </label>
-              </div>
+            </div>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <label v-for="permission in group.permissions" :key="permission.id" class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-700 transition hover:bg-slate-50">
+                <input type="checkbox" v-model="form.permissions" :value="permission.id" class="h-4 w-4 rounded border-slate-300 text-istaht-blue" />
+                {{ permission.display_name }}
+              </label>
             </div>
           </div>
         </div>
-        
-        <div v-if="form.errors.permissions" class="mt-2 text-sm text-red-600">
-          {{ form.errors.permissions }}
-        </div>
+        <div v-if="form.errors.permissions" class="mt-2 text-sm font-semibold text-istaht-red">{{ form.errors.permissions }}</div>
       </div>
     </form>
 
-    <!-- Footer -->
-    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-4">
-      <button
-        type="button"
-        @click="createRoleModal.close()"
-        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-      >
-        Annuler
-      </button>
-      <button
-        type="button"
-        @click="submit"
-        :disabled="form.processing"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        Enregistrer
+    <div class="mt-6 flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-4 sm:flex-row">
+      <button type="button" @click="createRoleModal.close()" class="ui-button ui-button-ghost">Annuler</button>
+      <button type="button" @click="submit" :disabled="form.processing" class="ui-button ui-button-primary disabled:opacity-50">
+        {{ form.processing ? 'Enregistrement…' : 'Créer le rôle' }}
       </button>
     </div>
   </Modal>
