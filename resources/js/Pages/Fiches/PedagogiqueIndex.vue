@@ -1,16 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {
-    EyeIcon,
-    PlusIcon,
-    ClipboardDocumentListIcon,
-    MagnifyingGlassIcon,
-    PencilIcon,
-    TrashIcon,
-    DocumentTextIcon,
-    InboxArrowDownIcon
+    EyeIcon, PlusIcon, ClipboardDocumentListIcon, MagnifyingGlassIcon,
+    PencilIcon, TrashIcon, DocumentTextIcon, InboxArrowDownIcon, ArrowPathIcon, AcademicCapIcon,
 } from '@heroicons/vue/24/outline';
-import { Link, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
@@ -19,216 +13,161 @@ import { usePermission } from '@/Utils/permission';
 const { can } = usePermission();
 
 const props = defineProps({
-    fiches: Object, // paginated fiches techniques
+    fiches: Object,
     filters: Object,
 });
 
-const filters = ref({
-    search: props.filters.search || '',
-});
+const filters = ref({ search: props.filters.search || '' });
 
 function resetFilters() {
     filters.value = { search: '' };
     router.get(route('fiches-techniques.pedagogique'));
 }
-
 function applyFilters() {
-    router.get(route('fiches-techniques.pedagogique'), filters.value);
+    router.get(route('fiches-techniques.pedagogique'), filters.value, { preserveState: true, replace: true });
 }
 
 const showDeleteModal = ref(false);
 const ficheToDelete = ref(null);
-
-function openDeleteModal(id) {
-    ficheToDelete.value = id;
-    showDeleteModal.value = true;
-}
-
+function openDeleteModal(id) { ficheToDelete.value = id; showDeleteModal.value = true; }
 function deleteFiche() {
     router.delete(route('fiches-techniques.destroy', ficheToDelete.value), {
-        onFinish: () => {
-            ficheToDelete.value = null;
-        }
+        onSuccess: () => (showDeleteModal.value = false),
     });
-
-    ficheToDelete.value = null;
 }
 
 function formatDate(date) {
+    if (!date) return '—';
     return new Date(date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 </script>
 
 <template>
     <AuthenticatedLayout>
-
         <Head title="Fiches Techniques Pédagogiques" />
 
-        <div class="space-y-6">
+        <section class="space-y-5">
 
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                    <div class="flex-1">
-                        <h1 class="text-3xl md:text-4xl font-bold mb-2">Fiches Techniques Pédagogique</h1>
-                        <p class="text-blue-100 text-lg opacity-90">Liste et gestion des fiches techniques de type
-                            Pédagogique</p>
+            <!-- ═══ En-tête ═══ -->
+            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h2 class="flex items-center gap-2 text-2xl font-bold text-istaht-navy">
+                            <AcademicCapIcon class="h-6 w-6" />
+                            Fiches techniques pédagogiques
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-500">
+                            Recettes de formation — chaque fiche peut générer une demande pédagogique.
+                        </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                        <ModalLink :href="route('fiches-techniques.create')"
-                            v-if="can('create_ficheTechniques')"
-                            class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl">
-                            <PlusIcon class="h-5 w-5" />
-                            Nouvelle Fiche
-                        </ModalLink>
-                    </div>
+                    <ModalLink v-if="can('create_ficheTechniques')" :href="route('fiches-techniques.create')" class="ui-button ui-button-primary">
+                        <PlusIcon class="mr-1.5 h-4 w-4" /> Nouvelle fiche
+                    </ModalLink>
                 </div>
             </div>
 
-            <!-- Search Filter -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Rechercher une fiche</h3>
-
-                <div class="flex justify-between">
-                    <div class="w-1/3">
-                        <!-- Search -->
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nom ou plat, ou autre...</label>
-                        <div class="relative w-full">
-                            <input v-model="filters.search" type="text" placeholder="Tapez le nom ou le plat..."
-                                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-blue-500 focus:border-blue-500" />
-                            <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <!-- ═══ Filtres ═══ -->
+            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+                <div class="flex flex-col gap-4 md:flex-row md:items-end">
+                    <div class="flex-1">
+                        <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Recherche</label>
+                        <div class="relative">
+                            <input v-model="filters.search" type="text" placeholder="Plat, catégorie ou responsable…" class="ui-input w-full pl-9" @keyup.enter="applyFilters" />
+                            <MagnifyingGlassIcon class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         </div>
                     </div>
-
-                    <div class="mt-5 flex flex-col sm:flex-row justify-end gap-3">
-                        <button @click="resetFilters"
-                            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">
-                            Réinitialiser
-                        </button>
-
-                        <button @click="applyFilters"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2">
-                            <MagnifyingGlassIcon class="w-4 h-4" />
-                            Rechercher
-                        </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="ui-button ui-button-ghost" @click="resetFilters"><ArrowPathIcon class="mr-1.5 h-4 w-4" /> Réinitialiser</button>
+                        <button type="button" class="ui-button ui-button-primary" @click="applyFilters"><MagnifyingGlassIcon class="mr-1.5 h-4 w-4" /> Rechercher</button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Table -->
-        <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Module</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plat</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Formatteur</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Effectif</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé le</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                        </tr>
-                    </thead>
+            <!-- ═══ Tableau ═══ -->
+            <div class="rounded-lg border border-slate-200 bg-white shadow-soft">
+                <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                    <div class="flex items-center gap-2">
+                        <ClipboardDocumentListIcon class="h-5 w-5 text-istaht-blue" />
+                        <h3 class="font-bold text-istaht-navy">Liste des fiches</h3>
+                    </div>
+                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-istaht-blue ring-1 ring-blue-100">{{ fiches?.meta?.total ?? 0 }} fiche(s)</span>
+                </div>
 
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="fiche in fiches.data" :key="fiche.id" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ fiche.id }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.nom }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.plat }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.responsable }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ fiche.effectif }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(fiche.created_at) }}</td>
-                            <td class="px-6 py-4 text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <ModalLink
-                                        v-if="can('create_demandes')"
-                                        :href="route('demandes.create', { demandable_type: 'pedagogique', demandable_id: fiche.id })"
-                                        class="text-istaht-green hover:text-green-800 p-1"
-                                        title="Créer une demande pédagogique à partir de cette fiche">
-                                        <InboxArrowDownIcon class="h-5 w-5" />
-                                    </ModalLink>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="border-b border-slate-100 bg-slate-50">
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">#</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Plat</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Catégorie</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Formateur</th>
+                                <th class="px-5 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500">Effectif</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Créé le</th>
+                                <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr v-for="fiche in fiches.data" :key="fiche.id" class="transition hover:bg-slate-50">
+                                <td class="px-5 py-3.5 font-mono text-sm font-bold text-istaht-blue">#{{ fiche.id }}</td>
+                                <td class="px-5 py-3.5 text-sm font-semibold text-slate-700">{{ fiche.plat }}</td>
+                                <td class="px-5 py-3.5 text-sm text-slate-600">{{ fiche.repas }}</td>
+                                <td class="px-5 py-3.5 text-sm text-slate-600">{{ fiche.responsable }}</td>
+                                <td class="px-5 py-3.5 text-center">
+                                    <span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-istaht-blue ring-1 ring-blue-100">{{ fiche.effectif }}</span>
+                                </td>
+                                <td class="px-5 py-3.5 text-sm text-slate-500">{{ formatDate(fiche.created_at) }}</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <ModalLink v-if="can('create_demandes')" :href="route('demandes.create', { demandable_type: 'pedagogique', demandable_id: fiche.id })"
+                                            class="rounded-md p-1.5 text-slate-500 transition hover:bg-green-50 hover:text-istaht-green" title="Créer une demande pédagogique">
+                                            <InboxArrowDownIcon class="h-5 w-5" />
+                                        </ModalLink>
+                                        <ModalLink v-if="can('show_ficheTechniques')" :href="route('fiches-techniques.show', fiche.id)"
+                                            class="rounded-md p-1.5 text-slate-500 transition hover:bg-blue-50 hover:text-istaht-blue" title="Voir détails">
+                                            <EyeIcon class="h-5 w-5" />
+                                        </ModalLink>
+                                        <ModalLink v-if="can('edit_ficheTechniques')" :href="route('fiches-techniques.edit', fiche.id)"
+                                            class="rounded-md p-1.5 text-slate-500 transition hover:bg-blue-50 hover:text-istaht-blue" title="Modifier">
+                                            <PencilIcon class="h-5 w-5" />
+                                        </ModalLink>
+                                        <a v-if="can('pdf_ficheTechniques')" :href="route('fiches-techniques.export', fiche.id)" target="_blank"
+                                            class="rounded-md p-1.5 text-slate-500 transition hover:bg-purple-50 hover:text-purple-600" title="Télécharger PDF">
+                                            <DocumentTextIcon class="h-5 w-5" />
+                                        </a>
+                                        <button v-if="can('delete_ficheTechniques')" class="rounded-md p-1.5 text-slate-500 transition hover:bg-red-50 hover:text-istaht-red" title="Supprimer" @click="openDeleteModal(fiche.id)">
+                                            <TrashIcon class="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                                    <ModalLink
-                                        v-if="can('show_ficheTechniques')"
-                                        :href="route('fiches-techniques.show', fiche.id)"
-                                        class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
-                                        <EyeIcon class="h-5 w-5" />
-                                    </ModalLink>
-
-                                    <ModalLink 
-                                        v-if="can('edit_ficheTechniques')"
-                                        :href="route('fiches-techniques.edit', fiche.id)" 
-                                        class="text-blue-600 hover:text-blue-900 p-1" title="Modifier">
-                                        <PencilIcon class="h-5 w-5" />
-                                    </ModalLink>
-
-                                    <a
-                                        v-if="can('pdf_ficheTechniques')"
-                                        :href="route('fiches-techniques.export', fiche.id)"
-                                        target="_blank"
-                                        class="text-purple-600 hover:text-purple-900 p-1"
-                                        title="Télécharger PDF"
-                                    >
-                                        <DocumentTextIcon class="h-4 w-4" />
-                                    </a>
-
-                                    <button @click="openDeleteModal(fiche.id)"
-                                        v-if="can('delete_ficheTechniques')"
-                                        class="text-red-600 hover:text-red-900 p-1" title="Supprimer">
-                                        <TrashIcon class="h-5 w-5" />
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Empty Message -->
-            <div v-if="fiches.data.length === 0" class="text-center py-12">
-                <div class="text-gray-500">
-                    <ClipboardDocumentListIcon class="mx-auto h-12 w-12" />
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune fiche trouvée</h3>
-                    <p class="mt-1 text-sm text-gray-500">Commencez par créer votre première fiche technique
-                        pédagogique.</p>
-                    <div class="mt-6">
-                        <ModalLink :href="route('fiches-techniques.create')"
-                            v-if="can('create_ficheTechniques')"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            <PlusIcon class="h-4 w-4 mr-2" />
-                            Nouvelle fiche
+                <div v-if="fiches.data.length === 0" class="py-14 text-center">
+                    <ClipboardDocumentListIcon class="mx-auto h-12 w-12 text-slate-300" />
+                    <h3 class="mt-3 text-sm font-bold text-istaht-navy">Aucune fiche trouvée</h3>
+                    <p class="mt-1 text-sm text-slate-500">Créez votre première fiche technique pédagogique.</p>
+                    <div class="mt-5">
+                        <ModalLink v-if="can('create_ficheTechniques')" :href="route('fiches-techniques.create')" class="ui-button ui-button-primary">
+                            <PlusIcon class="mr-1.5 h-4 w-4" /> Nouvelle fiche
                         </ModalLink>
                     </div>
                 </div>
-            </div>
 
-            <!-- Pagination -->
-            <div v-if="fiches.links && fiches.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
-                <div class="flex justify-between items-center">
-                    <div class="text-sm text-gray-700">
-                        Affichage de {{ fiches.from }} à {{ fiches.to }} sur {{ fiches.total }} résultats
-                    </div>
-                    <div class="flex space-x-2">
-                        <template v-for="link in fiches.links" :key="link.label">
-                            <Link v-if="link.url" :href="link.url" :class="[
-                                'px-3 py-1 rounded-lg text-sm font-medium',
-                                link.active
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            ]" v-html="link.label" />
-                            <span v-else
-                                class="px-3 py-1 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
-                                v-html="link.label" />
+                <div v-if="fiches?.meta?.links && fiches.meta.last_page > 1" class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 px-5 py-3 sm:flex-row">
+                    <p class="text-sm text-slate-500">Affichage de <strong class="text-istaht-navy">{{ fiches.meta.from }}</strong> à <strong class="text-istaht-navy">{{ fiches.meta.to }}</strong> sur <strong class="text-istaht-navy">{{ fiches.meta.total }}</strong> fiches</p>
+                    <div class="flex flex-wrap gap-1">
+                        <template v-for="link in fiches.meta.links" :key="link.label">
+                            <Link v-if="link.url" :href="link.url" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', link.active ? 'bg-istaht-navy text-white' : 'text-slate-600 hover:bg-slate-100']" v-html="link.label" />
+                            <span v-else class="cursor-not-allowed rounded-md px-3 py-1.5 text-sm font-semibold text-slate-300" v-html="link.label" />
                         </template>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <ConfirmationModal :show="showDeleteModal" title="Supprimer la fiche"
-            message="Êtes-vous sûr de vouloir supprimer cette fiche ?" :onConfirm="deleteFiche"
-            @close="showDeleteModal = false" />
+            message="Êtes-vous sûr de vouloir supprimer cette fiche ?" :onConfirm="deleteFiche" @close="showDeleteModal = false" />
     </AuthenticatedLayout>
 </template>

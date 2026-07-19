@@ -44,20 +44,22 @@ class FicheTechniqueController extends Controller implements HasMiddleware
         $user = $request->user();
 
         $fiches = FicheTechnique::pedagogique()
+        ->with(['plat:id,nom', 'repas:id,nom'])
         ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('nom', 'like', "%{$search}%")
-                    ->orWhere('plat', 'like', "%{$search}%")
-                    ->orWhere('responsable', 'like', "%{$search}%");
+                    $q->where('responsable', 'like', "%{$search}%")
+                    ->orWhereHas('plat', fn ($p) => $p->where('nom', 'like', "%{$search}%"))
+                    ->orWhereHas('repas', fn ($r) => $r->where('nom', 'like', "%{$search}%"));
                 });
             })
         ->when(!$user->isAdmin(), fn($query) => $query->where('created_by', $user->id))
+        ->latest()
         ->paginate(10)
         ->withQueryString();
 
 
         return Inertia::render('Fiches/PedagogiqueIndex', [
-            'fiches' => $fiches,
+            'fiches' => IndexCollectiviteResource::collection($fiches),
             'filters' => request()->all('search', 'trashed'),
         ]);
     }
@@ -68,14 +70,16 @@ class FicheTechniqueController extends Controller implements HasMiddleware
         $user = $request->user();
 
         $fiches = FicheTechnique::collectivite()
+        ->with(['plat:id,nom', 'repas:id,nom'])
         ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('nom', 'like', "%{$search}%")
-                    ->orWhere('plat', 'like', "%{$search}%")
-                    ->orWhere('responsable', 'like', "%{$search}%");
+                    $q->where('responsable', 'like', "%{$search}%")
+                    ->orWhereHas('plat', fn ($p) => $p->where('nom', 'like', "%{$search}%"))
+                    ->orWhereHas('repas', fn ($r) => $r->where('nom', 'like', "%{$search}%"));
                 });
             })
         ->when(!$user->isAdmin(), fn($query) => $query->where('created_by', $user->id))
+        ->latest()
         ->paginate(10)
         ->withQueryString();
 
@@ -303,15 +307,18 @@ class FicheTechniqueController extends Controller implements HasMiddleware
 
     public function export(FicheTechnique $fiche)
     {
-        $fiche->load(['ingredients', 'ingredients.article', 'user']);
+        $fiche->load(['ingredients', 'ingredients.article', 'plat', 'repas', 'etapes', 'user']);
         $totalTtc = $fiche->ingredients->sum('total_ttc');
 
         $template = $fiche->type == FicheType::PEDAGOGIQUE ? 'fiche-pedagogique' : 'fiche-collective';
 
         return Pdf::loadView('pdf.' . $template, [
-            'fiche' => $fiche,
-            'totalTtc' => $totalTtc,
-            'total_effectif' => round($totalTtc / $fiche->effectif, 2)
-        ])->download($template . '-' . $fiche->nom . '.pdf');
+            'fiche'          => $fiche,
+            'totalTtc'       => $totalTtc,
+            'total_effectif' => round($totalTtc / max((int) $fiche->effectif, 1), 2),
+            'pdfHeaderSrc'   => $this->pdfHeaderBase64(),
+        ])
+        ->setPaper('a4', 'portrait')
+        ->download($template . '-' . ($fiche->plat->nom ?? $fiche->id) . '.pdf');
     }
 }

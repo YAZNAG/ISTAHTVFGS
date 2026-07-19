@@ -233,7 +233,12 @@ class MenuCollectiviteController extends Controller implements HasMiddleware
             });
 
         $fileName = "menu-collectivite-{$menu->date->format('Y-m-d')}.pdf";
-        return Pdf::loadView('pdf.menu-collectivite', compact('repas', 'menu', 'data'))
+        return Pdf::loadView('pdf.menu-collectivite', [
+            'repas'        => $repas,
+            'menu'         => $menu,
+            'data'         => $data,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
             ->setPaper('a4', 'landscape')
             ->download($fileName);
     }
@@ -263,6 +268,7 @@ class MenuCollectiviteController extends Controller implements HasMiddleware
             'menus' => ExportMenuCollectiviteResource::collection($menus)->toArray($request),
             'startDate' => Carbon::parse($request->start_date),
             'endDate' => Carbon::parse($request->end_date),
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
         ])
             ->setPaper('a4', 'landscape')
             ->download($fileName);

@@ -1,16 +1,13 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3'
-import { Modal } from '@inertiaui/modal-vue'
-import InputLabel from '@/Components/InputLabel.vue'
-import InputError from '@/Components/InputError.vue'
-import PrimaryButton from '@/Components/PrimaryButton.vue'
+import { Head, useForm, Link } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import InputError from '@/Components/InputError.vue'
+import { ArrowLeftIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
   fiches: Array,
-});
-
+})
 
 const form = useForm({
   date: '',
@@ -21,381 +18,181 @@ const form = useForm({
   menus: {
     petit_dejeuner: { entree: '', plat: '', dessert: '', plat_special: '' },
     dejeuner:       { entree: '', plat: '', dessert: '', plat_special: '' },
-    diner:          { entree: '', plat: '', dessert: '', plat_special: '' }
-  }
+    diner:          { entree: '', plat: '', dessert: '', plat_special: '' },
+  },
 })
 
-const entreeFiches = computed(() => {
-  return props.fiches.filter(fiche => fiche.repas == "hors d'oeuvres")
-})
+const meals = [
+  { key: 'petit_dejeuner', label: 'Petit-déjeuner', effectifKey: 'effectif_petit_dejeuner' },
+  { key: 'dejeuner',       label: 'Déjeuner',       effectifKey: 'effectif_dejeuner' },
+  { key: 'diner',          label: 'Dîner',          effectifKey: 'effectif_diner' },
+]
 
-const platPrincipaleFiches = computed(() => {
-  return props.fiches.filter(fiche => fiche.repas == "plats")
-})
+const fichesBy = (repas) => props.fiches.filter(f => f.repas === repas)
+const categories = computed(() => [
+  { key: 'entree',       label: 'Entrée',       required: true,  fiches: fichesBy("hors d'oeuvres") },
+  { key: 'plat',         label: 'Plat',         required: true,  fiches: fichesBy('plats') },
+  { key: 'dessert',      label: 'Dessert',      required: true,  fiches: fichesBy('desserts') },
+  { key: 'plat_special', label: 'Plat spécial', required: false, fiches: fichesBy('plats spéciaux') },
+])
 
-const dessertFiches = computed(() => {
-  return props.fiches.filter(fiche => fiche.repas == "desserts")
-})
+const activeMeal = ref('petit_dejeuner')
 
-const platSpecialFiches = computed(() => {
-  return props.fiches.filter(fiche => fiche.repas == "plats spéciaux")
-})
-
-function submit() {
-  form.post(route('menus.store'), {
-    onSuccess: () => form.reset()
-  })
+function mealComplete(mealKey) {
+  const m = form.menus[mealKey]
+  return m.entree && m.plat && m.dessert
 }
 
 const allSelectedIds = computed(() => {
   const ids = []
-  Object.values(form.menus).forEach(meal =>
-    Object.values(meal).forEach(v => v && ids.push(v))
-  )
+  Object.values(form.menus).forEach(meal => Object.values(meal).forEach(v => v && ids.push(v)))
   return ids
 })
 
 const duplicates = computed(() => {
-  const seen = new Set()
-  const dups = new Set()
-  allSelectedIds.value.forEach(id => {
-    if (seen.has(id)) dups.add(id)
-    seen.add(id)
-  })
-  return [...dups]          // array of duplicated IDs
+  const seen = new Set(), dups = new Set()
+  allSelectedIds.value.forEach(id => (seen.has(id) ? dups.add(id) : seen.add(id)))
+  return [...dups]
 })
-
 const hasDuplicate = computed(() => duplicates.value.length > 0)
+const isDuplicate = (id) => duplicates.value.includes(id)
 
-/* ------- helper to highlight a <select> that contains a duplicate ------- */
-function isDuplicate(id) {
-  return duplicates.value.includes(id)
+const selectedFiches = computed(() => props.fiches.filter(f => allSelectedIds.value.includes(f.id)))
+
+function submit() {
+  form.post(route('menus.store'), { onSuccess: () => form.reset() })
 }
 </script>
+
 <template>
   <AuthenticatedLayout>
     <Head title="Créer un menu collectivité" />
-    <!-- Page header -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Créer un menu collectivité</h1>
-      <p class="text-sm text-gray-600 mt-1">Remplissez le formulaire ci-dessous puis enregistrez.</p>
-    </div>
-    
-    <!-- Form -->
-    <form @submit.prevent="submit" class="space-y-6">
-    <div class="flex flex-col lg:flex-row gap-4">
-      <div class="space-y-6">
-        <!-- Section 1 : infos générales -->
-        <div class="bg-white">
-          <h2 class="text-lg font-semibold mb-4">Informations générales</h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shadow rounded-lg p-6">
-            <!-- Date -->
-            <div>
-              <InputLabel for="date" value="Date du menu" />
-              <input
-                id="date"
-                v-model="form.date"
-                type="date"
-                required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <InputError :message="form.errors.date" />
-            </div>
+    <form @submit.prevent="submit" class="space-y-5">
 
-            <!-- Responsable -->
-            <div>
-              <InputLabel for="responsable" value="Responsable" />
-              <input
-                id="responsable"
-                v-model="form.responsable"
-                type="text"
-                required
-                placeholder="Nom du chef / responsable"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <InputError :message="form.errors.responsable" />
-            </div>
-
-            <!-- Effectif petit-dejeuner -->
-            <div>
-              <InputLabel for="effectif_petit_dejeuner" value="Effectif petit-déjeuner" />
-              <input
-                id="effectif_petit_dejeuner"
-                v-model.number="form.effectif_petit_dejeuner"
-                type="number"
-                min="1"
-                required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <InputError :message="form.errors.effectif_petit_dejeuner" />
-            </div>
-
-            <!-- Effectif dejeuner -->
-            <div>
-              <InputLabel for="effectif_dejeuner" value="Effectif déjeuner" />
-              <input
-                id="effectif_dejeuner"
-                v-model.number="form.effectif_dejeuner"
-                type="number"
-                min="1"
-                required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <InputError :message="form.errors.effectif_dejeuner" />
-            </div>
-
-            <!-- Effectif diner -->
-            <div>
-              <InputLabel for="effectif_diner" value="Effectif dîner" />
-              <input
-                id="effectif_diner"
-                v-model.number="form.effectif_diner"
-                type="number"
-                min="1"
-                required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <InputError :message="form.errors.effectif_diner" />
-            </div>
+      <!-- ═══ En-tête ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-istaht-navy">Créer un menu collectivité</h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Renseignez les informations générales, puis composez chaque service (un effectif par repas).
+            </p>
           </div>
-        </div>
-
-        <!-- Section 2 : choix des plats par catégorie / service -->
-        <div class="bg-white">
-          <h2 class="text-lg font-semibold mb-4">Composition des menus</h2>
-          <div v-if="hasDuplicate" class="rounded-md bg-red-50 p-4 text-sm text-red-800 mb-2">
-            ⚠️  Une même fiche technique ne peut pas être sélectionnée plusieurs fois 
-            <span class="font-semibold">{{ duplicates.join(', ') }}</span>
-          </div>
-
-          <div v-if="form.hasErrors" class="rounded-md bg-red-50 p-4 text-sm text-red-800 mb-2">
-            <p v-for="(msgs, key) in form.errors" :key="key" class="mb-2">⚠️  {{ msgs }}</p>
-          </div>
-          
-          <!-- Petit-déjeuner -->
-          <div class="mb-6 shadow rounded-lg p-6">
-            <h3 class="text-base font-bold mb-2">Petit-déjeuner</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <InputLabel for="entree-petit_dejeuner" value="Entrée" />
-                <select 
-                  id="entree-petit_dejeuner"
-                  v-model="form.menus.petit_dejeuner.entree"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.petit_dejeuner.entree) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in entreeFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="plat-petit_dejeuner" value="Plat" />
-                <select 
-                  id="plat-petit_dejeuner"
-                  v-model="form.menus.petit_dejeuner.plat"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.petit_dejeuner.plat) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in platPrincipaleFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="dessert-petit_dejeuner" value="Dessert" />
-                <select 
-                  id="dessert-petit_dejeuner"
-                  v-model="form.menus.petit_dejeuner.dessert"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.petit_dejeuner.dessert) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in dessertFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="sp-petit_dejeuner" value="Plat spécial" />
-                <select 
-                  id="sp-petit_dejeuner"
-                  v-model="form.menus.petit_dejeuner.plat_special"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.petit_dejeuner.plat_special) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in platSpecialFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Déjeuner -->
-          <div class="mb-6 shadow rounded-lg p-6">
-            <h3 class="text-base font-bold mb-2">Déjeuner</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <InputLabel for="entree-dejeuner" value="Entrée" />
-                <select 
-                  id="entree-dejeuner"
-                  v-model="form.menus.dejeuner.entree"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.dejeuner.entree) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in entreeFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="plat-dejeuner" value="Plat" />
-                <select 
-                  id="plat-dejeuner"
-                  v-model="form.menus.dejeuner.plat"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.dejeuner.plat) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in platPrincipaleFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="dessert-dejeuner" value="Dessert" />
-                <select 
-                  id="dessert-dejeuner"
-                  v-model="form.menus.dejeuner.dessert"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.dejeuner.dessert) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in dessertFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="sp-dejeuner" value="Plat spécial" />
-                <select 
-                  id="sp-dejeuner"
-                  v-model="form.menus.dejeuner.plat_special"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.dejeuner.plat_special) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in platSpecialFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Dîner -->
-          <div class="mb-6 shadow rounded-lg p-6">
-            <h3 class="text-base font-bold mb-2">Dîner</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <InputLabel for="entree-diner" value="Entrée" />
-                <select
-                  id="entree-diner"
-                  v-model="form.menus.diner.entree"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.diner.entree) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in entreeFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="plat-diner" value="Plat" />
-                <select 
-                  id="plat-diner"
-                  v-model="form.menus.diner.plat"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.diner.plat) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in platPrincipaleFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="dessert-diner" value="Dessert" />
-                <select 
-                  id="dessert-diner"
-                  v-model="form.menus.diner.dessert"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.diner.dessert) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in dessertFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-
-              <div>
-                <InputLabel for="sp-diner" value="Plat spécial" />
-                <select 
-                  id="sp-diner"
-                  v-model="form.menus.diner.plat_special"
-                  :class="[
-                    'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
-                    isDuplicate(form.menus.diner.plat_special) ? 'border-red-500' : ''
-                  ]">
-                  <option value="">Sélectionnez...</option>
-                  <option v-for="fiche in platSpecialFiches" :key="fiche.id" :value="fiche.id">{{ fiche.plat }} - {{ fiche.id }}</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-
+          <Link :href="route('menus.index')" class="ui-button ui-button-ghost">
+            <ArrowLeftIcon class="mr-1.5 h-4 w-4" />
+            Retour liste
+          </Link>
         </div>
       </div>
 
-      <div>
-        <h2 class="text-lg font-semibold mb-4">Resume</h2>
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <th class="px-2 py-3 text-left font-medium text-gray-500 uppercase">#</th>
-            <th class="px-2 py-3 text-left font-medium text-gray-500 uppercase">Repas</th>
-            <th class="px-2 py-3 text-left font-medium text-gray-500 uppercase">Plat</th>
-            <th class="px-2 py-3 text-center font-medium text-gray-500 uppercase">Effectif</th>
-            <th class="px-2 py-3 text-center font-medium text-gray-500 uppercase">Crée le</th>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="fiche in fiches.filter(f => allSelectedIds.includes(f.id))" :key="fiche.id">
-              <td class="px-2 py-4">{{ fiche.id }}</td>
-              <td class="px-2 py-4">{{ fiche.repas }}</td>
-              <td class="px-2 py-4">{{ fiche.plat }}</td>
-              <td class="px-2 py-4 text-center">{{ fiche.effectif }}</td>
-              <td class="px-2 py-4">{{ fiche.created_at }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- ═══ Informations générales ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <h3 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">Informations générales</h3>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Date du menu *</label>
+            <input v-model="form.date" type="date" required class="ui-input w-full" />
+            <InputError :message="form.errors.date" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Responsable *</label>
+            <input v-model="form.responsable" type="text" required placeholder="Nom du chef / responsable" class="ui-input w-full" />
+            <InputError :message="form.errors.responsable" />
+          </div>
+        </div>
       </div>
-    </div>
-      <!-- Actions -->
-      <div class="flex items-center justify-end gap-3">
-        <button
-          type="button"
-          variant="outline"
-          @click="close"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
+
+      <!-- ═══ Erreurs / doublons ═══ -->
+      <div v-if="hasDuplicate" class="flex items-start gap-2 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-istaht-red">
+        <ExclamationTriangleIcon class="mt-0.5 h-4 w-4 shrink-0" />
+        <span>Une même fiche technique ne peut pas être sélectionnée plusieurs fois (id : <strong>{{ duplicates.join(', ') }}</strong>).</span>
+      </div>
+      <div v-if="form.hasErrors" class="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-istaht-red">
+        <p v-for="(msg, key) in form.errors" :key="key">{{ msg }}</p>
+      </div>
+
+      <!-- ═══ Composition par service (onglets) ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white shadow-soft">
+        <div class="flex gap-2 overflow-x-auto border-b border-slate-100 px-4 py-3">
+          <button
+            v-for="meal in meals"
+            :key="meal.key"
+            type="button"
+            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-bold transition"
+            :class="activeMeal === meal.key ? 'bg-istaht-navy text-white' : 'text-slate-600 hover:bg-slate-100'"
+            @click="activeMeal = meal.key"
+          >
+            {{ meal.label }}
+            <CheckCircleIcon v-if="mealComplete(meal.key)" class="h-4 w-4" :class="activeMeal === meal.key ? 'text-white' : 'text-istaht-green'" />
+          </button>
+        </div>
+
+        <div v-for="meal in meals" v-show="activeMeal === meal.key" :key="meal.key" class="p-5">
+          <!-- Effectif du service -->
+          <div class="mb-4 max-w-xs">
+            <label class="mb-1 block text-xs font-bold uppercase text-slate-400">Effectif — {{ meal.label }} *</label>
+            <input v-model.number="form[meal.effectifKey]" type="number" min="1" required class="ui-input w-full" />
+            <InputError :message="form.errors[meal.effectifKey]" />
+          </div>
+
+          <!-- Catégories -->
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div v-for="cat in categories" :key="cat.key">
+              <label class="mb-1 block text-xs font-bold uppercase text-slate-400">
+                {{ cat.label }} <span v-if="cat.required" class="text-istaht-red">*</span>
+              </label>
+              <select
+                v-model="form.menus[meal.key][cat.key]"
+                class="ui-input w-full"
+                :class="isDuplicate(form.menus[meal.key][cat.key]) ? 'border-red-500 ring-1 ring-red-500' : ''"
+              >
+                <option value="">Sélectionnez…</option>
+                <option v-for="fiche in cat.fiches" :key="fiche.id" :value="fiche.id">
+                  {{ fiche.plat }} — #{{ fiche.id }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Résumé ═══ -->
+      <div class="rounded-lg border border-slate-200 bg-white shadow-soft">
+        <div class="border-b border-slate-100 px-5 py-4">
+          <h3 class="font-bold text-istaht-navy">Récapitulatif des plats sélectionnés</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50">
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">#</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Catégorie</th>
+                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Plat</th>
+                <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">Effectif fiche</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="fiche in selectedFiches" :key="fiche.id" class="hover:bg-slate-50">
+                <td class="px-5 py-3 font-mono text-sm text-istaht-blue">#{{ fiche.id }}</td>
+                <td class="px-5 py-3 text-sm text-slate-600">{{ fiche.repas }}</td>
+                <td class="px-5 py-3 text-sm font-semibold text-slate-700">{{ fiche.plat }}</td>
+                <td class="px-5 py-3 text-right text-sm text-slate-600">{{ fiche.effectif }}</td>
+              </tr>
+              <tr v-if="selectedFiches.length === 0">
+                <td colspan="4" class="px-5 py-6 text-center text-sm text-slate-400">Aucun plat sélectionné pour le moment.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ Actions ═══ -->
+      <div class="flex items-center justify-end gap-2">
+        <Link :href="route('menus.index')" class="ui-button ui-button-ghost">Annuler</Link>
+        <button type="submit" class="ui-button ui-button-primary disabled:opacity-50" :disabled="form.processing || hasDuplicate">
+          {{ form.processing ? 'Enregistrement…' : 'Enregistrer le menu' }}
         </button>
-        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" :disabled="form.processing || hasDuplicate">Enregistrer le menu</button>
       </div>
     </form>
   </AuthenticatedLayout>
