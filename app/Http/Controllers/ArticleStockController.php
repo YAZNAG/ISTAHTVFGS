@@ -69,12 +69,20 @@ class ArticleStockController extends Controller implements HasMiddleware
     {
         $query = Article::withNonExists()
             ->with(['categorie:id,nom'])
-            ->select(['id', 'reference', 'designation', 'quantite_stock', 'seuil_minimal', 'unite_mesure', 'categorie_id']);
+            ->select(['id', 'reference', 'designation', 'quantite_stock', 'seuil_minimal', 'unite_mesure', 'categorie_id'])
+            ->when($request->filled('categorie'), fn ($q) => $q->where('categorie_id', $request->categorie))
+            ->orderBy('designation');
 
-        $now = now()->toDateTimeString();
+        $categorie = $request->filled('categorie')
+            ? Categorie::find($request->categorie)?->nom
+            : null;
+
         return Pdf::loadView('pdf.articles-stock', [
-            'rows' => $query->get(),
-            'now' => $now,
-        ])->download("stock-articles-$now.pdf");
+            'rows'         => $query->get(),
+            'categorie'    => $categorie,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
+        ])
+        ->setPaper('a4', 'portrait')
+        ->download('stock-articles-' . now()->format('Y-m-d') . '.pdf');
     }
 }

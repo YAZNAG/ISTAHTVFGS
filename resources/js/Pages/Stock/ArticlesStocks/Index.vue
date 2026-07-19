@@ -73,22 +73,24 @@ function stockInfo(article) {
     <Head title="Gestion du Stock" />
 
     <section class="space-y-6">
-      <div class="erp-hero">
-        <div class="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p class="text-sm font-bold uppercase tracking-wide text-cyan-100">Stock articles</p>
-            <h2 class="mt-2 text-3xl font-bold tracking-normal text-white md:text-4xl">Niveaux de stock</h2>
-            <p class="mt-3 max-w-3xl text-sm leading-6 text-cyan-50/90">
-              Consultation rapide des stocks, seuils critiques, categories et export PDF pour suivi administratif.
+            <h2 class="flex items-center gap-2 text-2xl font-bold text-istaht-navy">
+              <ArchiveBoxIcon class="h-6 w-6" />
+              Niveaux de stock
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Consultation rapide des stocks, seuils critiques et export PDF pour suivi administratif.
             </p>
           </div>
 
           <a
-            :href="route('articles-stocks.export')"
+            :href="route('articles-stocks.export', filters.categorie ? { categorie: filters.categorie } : {})"
             target="_blank"
-            class="ui-button ui-button-secondary px-5 py-2.5 text-sm"
+            class="ui-button ui-button-primary"
           >
-            <DocumentArrowDownIcon class="h-5 w-5" />
+            <DocumentArrowDownIcon class="mr-1.5 h-4 w-4" />
             Export PDF
           </a>
         </div>
