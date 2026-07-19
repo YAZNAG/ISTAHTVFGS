@@ -124,11 +124,12 @@ class CardexController extends Controller implements HasMiddleware
         $fileName = "cardex-{$article->reference}-{$year}.pdf";
 
         return Pdf::loadView('pdf.cardex', [
-            'article' => $article,
-            'year' => $year,
-            'cardex' => $cardex,
-            'monthTotals' => $monthTotals,
-            'pages' => $pages,
+            'article'      => $article,
+            'year'         => $year,
+            'cardex'       => $cardex,
+            'monthTotals'  => $monthTotals,
+            'pages'        => $pages,
+            'pdfHeaderSrc' => $this->pdfHeaderBase64(),
         ])
             ->setPaper('a4', 'landscape')
             ->download($fileName);
