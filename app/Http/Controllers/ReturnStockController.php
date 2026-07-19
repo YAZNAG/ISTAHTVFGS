@@ -37,8 +37,7 @@ class ReturnStockController extends Controller implements HasMiddleware
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('id', $search)
-                    ->orWhere('numero', 'like', '%' . $search . '%')
+                $q->where('numero', 'like', '%' . $search . '%')
                     ->orWhere('motif', 'like', '%' . $search . '%');
 
                 $q->orWhereHas('returner', function ($q) use ($search) {
